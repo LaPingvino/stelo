@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/fs"
 	"log"
 
 	"github.com/LaPingvino/stelo"
@@ -16,7 +17,7 @@ import (
 // level as its file has it), P plays the edited level from its start, F2
 // goes back to editing. The mouse (right button erases) or a finger paints;
 // the arrow keys scroll; Ctrl+Z undoes; Ctrl+S saves (the web also downloads
-// the level file).
+// the level file); a level file dropped on the window opens in the editor.
 
 // editState keeps the editor between plays: one document per level.
 type editState struct {
@@ -126,4 +127,19 @@ func (a *app) saveEdited() {
 	name, text := e.Doc.L.Name, e.Doc.Text()
 	store.SaveLevel(name, text)
 	store.Download(name, text)
+}
+
+// openDropped opens a level file dropped on the window (desktop or browser)
+// in the editor, replacing any edits of a level with the same name.
+func (a *app) openDropped(files fs.FS) {
+	l, err := editor.FindLevel(files)
+	if err != nil {
+		log.Printf("editor: %v", err)
+		return
+	}
+	if a.edit.docs == nil {
+		a.edit.docs = map[string]*editor.Doc{}
+	}
+	a.edit.docs[l.Name] = editor.New(l)
+	a.openEditor(l.Name)
 }

@@ -46,6 +46,9 @@ func (a *app) load(i int) {
 }
 
 func (a *app) Update() error {
+	if files := ebiten.DroppedFiles(); files != nil { // a level file dropped on the window
+		a.openDropped(files)
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF2) && a.game != nil { // the editor, on this room
 		if a.edit.on {
 			a.edit.on = false // back to the game as it was

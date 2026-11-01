@@ -2,6 +2,7 @@ package editor
 
 import (
 	"testing"
+	"testing/fstest"
 
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/level"
@@ -89,5 +90,21 @@ func TestResize(t *testing.T) {
 	d.Undo()
 	if d.Text() != orig {
 		t.Error("undo didn't restore the size and the instances")
+	}
+}
+
+// A dropped folder: the level file is found among other files; a broken one
+// is reported.
+func TestFindLevel(t *testing.T) {
+	data, _ := stelo.Files.ReadFile("levels/nivelo3.txt")
+	l, err := FindLevel(fstest.MapFS{
+		"notes.md":         {Data: []byte("hello")},
+		"mine/nivelo3.txt": {Data: data},
+	})
+	if err != nil || l.Name != "nivelo3" {
+		t.Fatalf("%v %v", l, err)
+	}
+	if _, err := FindLevel(fstest.MapFS{"x.txt": {Data: []byte("not a level")}}); err == nil {
+		t.Error("a broken file wasn't reported")
 	}
 }

@@ -4,7 +4,11 @@
 package editor
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"slices"
+	"strings"
 
 	"github.com/LaPingvino/stelo/internal/level"
 )
@@ -143,3 +147,33 @@ func (d *Doc) Undo() bool {
 
 // Text is the level file (docs/LEVEL-FORMAT.md).
 func (d *Doc) Text() string { return level.Format(d.L) }
+
+// FindLevel reads the first *.txt in files that is a level file (files
+// dropped on the window).
+func FindLevel(files fs.FS) (*level.Level, error) {
+	var found *level.Level
+	var lastErr error
+	_ = fs.WalkDir(files, ".", func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || found != nil || !strings.HasSuffix(strings.ToLower(p), ".txt") {
+			return nil
+		}
+		data, err := fs.ReadFile(files, p)
+		if err != nil {
+			lastErr = err
+			return nil
+		}
+		if l, err := level.Parse(string(data)); err == nil {
+			found = l
+		} else {
+			lastErr = fmt.Errorf("%s: %w", p, err)
+		}
+		return nil
+	})
+	if found == nil {
+		if lastErr == nil {
+			lastErr = errors.New("no level file (*.txt)")
+		}
+		return nil, lastErr
+	}
+	return found, nil
+}

@@ -3,6 +3,10 @@
 package store
 
 import (
+	"archive/zip"
+	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/LaPingvino/stelo/internal/game"
@@ -31,5 +35,20 @@ func TestLevelRoundTrip(t *testing.T) {
 	SaveLevel("nivelo1", "stelo-level 1\nname nivelo1\n")
 	if got, ok := LoadLevel("nivelo1"); !ok || got != "stelo-level 1\nname nivelo1\n" {
 		t.Errorf("loaded %q %v", got, ok)
+	}
+}
+
+func TestSavePackUnzips(t *testing.T) {
+	dir := t.TempDir()
+	Dir = func() string { return dir }
+	var buf bytes.Buffer
+	z := zip.NewWriter(&buf)
+	w, _ := z.Create("Mia pako/pack.txt")
+	w.Write([]byte("name=Mia pako\n"))
+	z.Close()
+	SavePack("Mia pako", buf.Bytes())
+	data, err := os.ReadFile(filepath.Join(dir, "packs", "Mia pako", "pack.txt"))
+	if err != nil || string(data) != "name=Mia pako\n" {
+		t.Errorf("%q %v", data, err)
 	}
 }

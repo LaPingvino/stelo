@@ -5,7 +5,10 @@
 package pack
 
 import (
+	"archive/zip"
+	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"path"
 	"sort"
@@ -95,4 +98,51 @@ func Original(fsys fs.FS) (*Pack, error) {
 		p.Levels = append(p.Levels, l)
 	}
 	return p, nil
+}
+
+// Zip writes the pack as a zip: a folder named after the pack holding
+// pack.txt and its levels as 01.txt, 02.txt, … (play order kept by name).
+// Unzipped, it is a pack folder (Load).
+func (p *Pack) Zip() ([]byte, error) {
+	var buf bytes.Buffer
+	z := zip.NewWriter(&buf)
+	dir := folderName(p.Name)
+	put := func(name, text string) error {
+		w, err := z.Create(dir + "/" + name)
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(w, text)
+		return err
+	}
+	info := "name=" + p.Name + "\n"
+	if p.Author != "" {
+		info += "author=" + p.Author + "\n"
+	}
+	if err := put("pack.txt", info); err != nil {
+		return nil, err
+	}
+	for i, l := range p.Levels {
+		if err := put(fmt.Sprintf("%02d.txt", i+1), level.Format(l)); err != nil {
+			return nil, err
+		}
+	}
+	if err := z.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// folderName makes a pack name usable as a folder name.
+func folderName(name string) string {
+	f := strings.Map(func(r rune) rune {
+		if r == '/' || r == '\\' || r == ':' || r < ' ' {
+			return '_'
+		}
+		return r
+	}, strings.TrimSpace(name))
+	if f == "" || f == "." || f == ".." {
+		return "pack"
+	}
+	return f
 }

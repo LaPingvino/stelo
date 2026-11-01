@@ -3,6 +3,7 @@ package main
 import (
 	"io/fs"
 	"log"
+	"sort"
 
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/editor"
@@ -19,7 +20,8 @@ import (
 // goes back to editing. The mouse (right button erases) or a finger paints;
 // the arrow keys scroll; Ctrl+Z undoes; Ctrl+S saves (the web also downloads
 // the level file); a level file dropped on the window opens in the editor, a
-// dropped pack folder plays.
+// dropped pack folder plays; Ctrl+Shift+S saves the levels edited this session
+// as a pack.
 
 // editState keeps the editor between plays: one document per level.
 type editState struct {
@@ -125,6 +127,8 @@ func (a *app) updateEditor() {
 	switch {
 	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyZ):
 		e.Undo()
+	case ctrl && ebiten.IsKeyPressed(ebiten.KeyShift) && inpututil.IsKeyJustPressed(ebiten.KeyS):
+		a.savePack()
 	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyS):
 		a.saveEdited()
 	case inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft):
@@ -204,4 +208,28 @@ func (a *app) playPack(p *pack.Pack) {
 	a.game = g
 	a.edit.on = false
 	ebiten.SetWindowTitle("Stelo — " + p.Name)
+}
+
+// savePack saves every level edited this session as a pack (levels in name
+// order): a zip download on the web, a pack folder in the config directory
+// on the desktop.
+func (a *app) savePack() {
+	names := make([]string, 0, len(a.edit.docs))
+	for n := range a.edit.docs {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	p := &pack.Pack{Name: "Mia Stelo-pako"}
+	for _, n := range names {
+		p.Levels = append(p.Levels, a.edit.docs[n].L)
+	}
+	if len(p.Levels) == 0 {
+		return
+	}
+	data, err := p.Zip()
+	if err != nil {
+		log.Printf("pack: %v", err)
+		return
+	}
+	store.SavePack(p.Name, data)
 }

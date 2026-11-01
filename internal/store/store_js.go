@@ -99,3 +99,20 @@ func OpenFile(got func(name, text string)) bool {
 	in.Call("click")
 	return true
 }
+
+// SavePack offers a pack's zip to the browser as a file (<name>.zip).
+func SavePack(name string, zipData []byte) {
+	defer func() { recover() }()
+	arr := js.Global().Get("Uint8Array").New(len(zipData))
+	js.CopyBytesToJS(arr, zipData)
+	doc := js.Global().Get("document")
+	blob := js.Global().Get("Blob").New([]any{arr}, map[string]any{"type": "application/zip"})
+	url := js.Global().Get("URL").Call("createObjectURL", blob)
+	a := doc.Call("createElement", "a")
+	a.Set("href", url)
+	a.Set("download", name+".zip")
+	doc.Get("body").Call("appendChild", a)
+	a.Call("click")
+	a.Call("remove")
+	js.Global().Get("URL").Call("revokeObjectURL", url)
+}

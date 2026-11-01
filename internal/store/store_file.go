@@ -3,8 +3,12 @@
 package store
 
 import (
+	"archive/zip"
+	"bytes"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Dir is where the desktop game keeps its files (overridable for tests).
@@ -64,3 +68,35 @@ func Download(name, text string) bool { return false }
 
 // OpenFile is the web's file picker; the desktop takes dropped files instead.
 func OpenFile(got func(name, text string)) bool { return false }
+
+// SavePack unpacks a pack's zip into the config directory's packs folder
+// (<config>/stelo/packs/<pack>/), where it can be played from.
+func SavePack(name string, zipData []byte) {
+	d := Dir()
+	if d == "" {
+		return
+	}
+	zr, err := zip.NewReader(bytes.NewReader(zipData), int64(len(zipData)))
+	if err != nil {
+		return
+	}
+	for _, f := range zr.File {
+		if strings.Contains(f.Name, "..") {
+			continue
+		}
+		p := filepath.Join(d, "packs", filepath.FromSlash(f.Name))
+		if os.MkdirAll(filepath.Dir(p), 0o755) != nil {
+			return
+		}
+		r, err := f.Open()
+		if err != nil {
+			return
+		}
+		data, err := io.ReadAll(r)
+		r.Close()
+		if err != nil {
+			return
+		}
+		_ = os.WriteFile(p, data, 0o644)
+	}
+}

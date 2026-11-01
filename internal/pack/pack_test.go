@@ -1,10 +1,13 @@
 package pack
 
 import (
+	"archive/zip"
+	"bytes"
 	"testing"
 	"testing/fstest"
 
 	"github.com/LaPingvino/stelo"
+	"github.com/LaPingvino/stelo/internal/level"
 )
 
 func TestLoad(t *testing.T) {
@@ -34,5 +37,34 @@ func TestLoad(t *testing.T) {
 	o, err := Original(stelo.Files)
 	if err != nil || len(o.Levels) != 5 || o.Levels[4].Name != "nivelo5" {
 		t.Errorf("original pack: %v", err)
+	}
+}
+
+// A pack written as a zip reads back as the same pack (unzipped: a folder).
+func TestZipRoundTrip(t *testing.T) {
+	o, err := Original(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o.Name, o.Author = "Mia/pako", "Joop"
+	data, err := o.Zip()
+	if err != nil {
+		t.Fatal(err)
+	}
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := Load(zr, "Mia_pako")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.Name != "Mia/pako" || p.Author != "Joop" || len(p.Levels) != 5 {
+		t.Fatalf("%q by %q, %d levels", p.Name, p.Author, len(p.Levels))
+	}
+	for i := range p.Levels {
+		if level.Format(p.Levels[i]) != level.Format(o.Levels[i]) {
+			t.Errorf("level %d changed", i+1)
+		}
 	}
 }

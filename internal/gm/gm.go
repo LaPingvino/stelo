@@ -74,6 +74,8 @@ type Instance struct {
 	ImageSpeed float64
 	// Vars holds the object's own variables (used, timelineaktiva, …).
 	Vars map[string]float64
+	// VarsStr holds string variables (tekstilo's teksto).
+	VarsStr map[string]string
 	// Timeline is the running timeline (nil: none) and TimelinePos its
 	// position (timeline_index, timeline_position; speed 1).
 	Timeline    *Timeline
@@ -90,7 +92,7 @@ type Timeline struct {
 // is placed.
 func NewInstance(obj *Object, x, y float64) *Instance {
 	in := &Instance{Obj: obj, X: x, Y: y, XPrevious: x, YPrevious: y, XStart: x, YStart: y, GravityDirection: 270,
-		Sprite: obj.Sprite, ImageSpeed: 1, Vars: map[string]float64{}}
+		Sprite: obj.Sprite, ImageSpeed: 1, Vars: map[string]float64{}, VarsStr: map[string]string{}}
 	for i := range in.Alarm {
 		in.Alarm[i] = -1
 	}

@@ -8,6 +8,7 @@ import (
 	"image/draw"
 	"io/fs"
 	"sort"
+	"strings"
 
 	"github.com/LaPingvino/stelo/internal/gm"
 	"github.com/LaPingvino/stelo/internal/level"
@@ -24,8 +25,9 @@ type World struct {
 	Room         *gm.Room
 	ViewX, ViewY int
 	follow       *gm.Instance
-	// Font is the HUD font (HUDFont); nil = no score text.
-	Font font.Face
+	// Font is the HUD font (HUDFont); nil = no score text. TextFont is the
+	// text labels' font (TextFont).
+	Font, TextFont font.Face
 }
 
 // Object returns the engine object for an original object (sprite box,
@@ -66,6 +68,11 @@ func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 	w := &World{Assets: a, Level: l, Room: &gm.Room{Name: l.Name, W: l.W, H: l.H, G: &gm.Globals{Lives: 3, Vars: map[string]float64{}}}}
 	for _, in := range l.Instances {
 		inst := w.Room.Create(a.Object(in.Object), float64(in.X), float64(in.Y))
+		// Instance creation code: the only kind the originals use sets a
+		// label's text (teksto='…';).
+		if t, ok := strings.CutPrefix(in.Code, "teksto='"); ok {
+			inst.VarsStr["teksto"] = strings.TrimSuffix(t, "';")
+		}
 		if l.View != nil && l.View.Follow == in.Object && w.follow == nil {
 			w.follow = inst
 		}
@@ -136,6 +143,7 @@ func (w *World) Draw(dst *image.RGBA) {
 			draw.Draw(dst, r, img, image.Point{}, draw.Over)
 		}
 	}
+	w.drawTexts(dst)
 	if g := w.Room.G; g != nil {
 		w.drawHUD(dst, g.Score, g.Lives)
 	}

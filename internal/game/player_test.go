@@ -225,3 +225,47 @@ func TestBonusMonstersFall(t *testing.T) {
 		t.Errorf("b_monster did not fall: y %v → %v", y0, bs[0].Y)
 	}
 }
+
+// Every room loads and runs 10 seconds with no keys held.
+func TestEveryRoomRuns(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, room := range RoomOrder {
+		g, err := NewGame(stelo.Files, a, room)
+		if err != nil {
+			t.Fatalf("%s: %v", room, err)
+		}
+		for range 300 {
+			if err := g.Step(held{}); err != nil {
+				t.Fatalf("%s: %v", room, err)
+			}
+		}
+	}
+}
+
+// danklisto: the credits scroll as the view follows the b_monster zig-zagging
+// down the 960 px room; the life controller (HUD) is gone.
+func TestCreditsScroll(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "danklisto")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.G.Vars["life_controller_gone"] != 1 {
+		t.Error("danklisto's creation code destroys the life controller")
+	}
+	y0 := g.World.ViewY
+	// The b_monster zig-zags down floor by floor (~500 px a floor at 4 px a
+	// step); the view starts moving once it is within 128 px of the bottom.
+	for range 1200 {
+		g.Step(held{})
+	}
+	if g.World.ViewY <= y0 {
+		t.Errorf("view did not scroll down: %d → %d", y0, g.World.ViewY)
+	}
+}

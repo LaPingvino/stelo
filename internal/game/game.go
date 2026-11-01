@@ -15,12 +15,13 @@ var RoomOrder = []string{"klarigo", "nivelo1", "nivelo2", "nivelo3", "nivelo4", 
 // them: score, lives, and the level saved while the bonus level is played
 // (the original makes that room persistent and returns to global.ludnivelo).
 type Game struct {
-	FS     fs.FS
-	Assets *Assets
-	G      *gm.Globals
-	World  *World
-	saved  *World // the persistent level left for the bonus level
-	Font   font.Face
+	FS       fs.FS
+	Assets   *Assets
+	G        *gm.Globals
+	World    *World
+	saved    *World // the persistent level left for the bonus level
+	Font     font.Face
+	TextFont font.Face
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
@@ -28,6 +29,9 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 	g := &Game{FS: fsys, Assets: a, G: &gm.Globals{Lives: 3, Vars: map[string]float64{}}}
 	if f, err := HUDFont(fsys); err == nil {
 		g.Font = f
+	}
+	if f, err := TextFont(fsys); err == nil {
+		g.TextFont = f
 	}
 	return g, g.enter(room)
 }
@@ -38,9 +42,27 @@ func (g *Game) enter(room string) error {
 		return err
 	}
 	w.Room.G = g.G
-	w.Font = g.Font
+	w.Font, w.TextFont = g.Font, g.TextFont
 	g.World = w
+	// The persistent life controller exists from the room that places it
+	// (nivelo1) until it is destroyed.
+	if len(w.Room.All("life_controller")) > 0 {
+		g.G.Vars["life_controller_alive"] = 1
+	}
+	if code := roomCode[room]; code != nil {
+		code(g)
+	}
 	return nil
+}
+
+// roomCode is the rooms' creation code, ported (levels/*.txt "code" lines).
+var roomCode = map[string]func(g *Game){
+	// danklisto: with (life_controller) {instance_destroy();}
+	// sound_stop_all(); sound_loop(LaEspero);
+	"danklisto": func(g *Game) {
+		g.G.Vars["life_controller_gone"] = 1
+		g.G.Play("@music:LaEspero")
+	},
 }
 
 // Step runs one step and then any room change it asked for.

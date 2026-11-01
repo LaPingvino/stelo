@@ -59,4 +59,5 @@ ours to choose, Joop 2026-11-01):
 | ladder | the ladder |
 | block | floor with grass where nothing is above it, the wall elsewhere |
 
-Not covered (original art kept): the flattened monster, the life icon, the title, the backgrounds.
+Derived from the set (no art was made for them): the flattened monster (the villain squashed into the bottom 8 px)
+and the life icon (the protagonist at 10×10). Not covered (original art kept): the title, the backgrounds.

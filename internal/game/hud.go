@@ -92,6 +92,9 @@ func (w *World) drawHUD(dst *image.RGBA, score, lives int) {
 	// draw_life_images: one sprite_life per life, side by side.
 	if sp := w.Assets.Sprites["sprite_life"]; sp != nil && len(sp.Frames) > 0 {
 		img := sp.Frames[0]
+		if w.Skin != nil && len(w.Skin.Sprites["sprite_life"]) > 0 { // the skin's icon
+			img = w.Skin.Sprites["sprite_life"][0]
+		}
 		sw := img.Bounds().Dx()
 		for i := range max(lives, 0) {
 			x, y := int(p.X)-w.ViewX+i*sw, int(p.Y)-10-w.ViewY

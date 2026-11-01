@@ -20,7 +20,7 @@ type Skin struct {
 // LoadNovaSkin builds the skin from Joop's commissioned 32×32 set
 // (art/nova/). The roles, ours to choose (docs/DESIGN.md "New art"):
 // the protagonist star is the player (its left sheet facing left; climbing
-// shows its first frame), the orange villain the walking monster and the
+// shows its first frame; the life icon it, shrunk), the orange villain the walking monster and the
 // bonus level's (mirrored to face left), the green villain the flyer (it
 // can't be stomped, so it looks meaner), the orb on a pole a star coin, the
 // heart and diamond themselves, the checkpoint unused (first frame) and
@@ -86,6 +86,25 @@ func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 	s.Sprites["sprite_level"] = got["arrow"]
 	s.Sprites["sprite_ladder"] = got["ladder"]
 	s.Sprites["sprite_block"] = got["wall"]
+	// No art was made for these two; derived from the set: the flattened
+	// monster is the villain squashed into the bottom 8 px (where the
+	// original's sprite_monsterflat sits, box rows 27–31), the life icon the
+	// protagonist shrunk to 10×10 (sprite_life's size).
+	s.Sprites["sprite_monsterflat"] = []*image.RGBA{scale(got["villain"][0], 32, 8, 0, 24, 32, 32)}
+	s.Sprites["sprite_life"] = []*image.RGBA{scale(got["protagonist"][0], 10, 10, 0, 0, 10, 10)}
 	s.BlockTop = got["floor"]
 	return s, nil
+}
+
+// scale draws src (nearest neighbour) into the w×h area at (x, y) of a new
+// outW×outH image.
+func scale(src *image.RGBA, w, h, x, y, outW, outH int) *image.RGBA {
+	b := src.Bounds()
+	out := image.NewRGBA(image.Rect(0, 0, outW, outH))
+	for yy := 0; yy < h; yy++ {
+		for xx := 0; xx < w; xx++ {
+			out.Set(x+xx, y+yy, src.At(b.Min.X+xx*b.Dx()/w, b.Min.Y+yy*b.Dy()/h))
+		}
+	}
+	return out
 }

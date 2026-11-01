@@ -22,8 +22,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      # The game packages' tests need no display; cmd/stelo (Ebitengine on
-      # desktop) is only built for the web here, which needs no X11.
+      # The sound package builds Ebitengine's audio (oto), which needs the ALSA
+      # headers; the game packages' tests need no display, and cmd/stelo is only
+      # built for the web here, which needs no X11.
+      - run: sudo apt-get update && sudo apt-get install -y libasound2-dev
       - run: go test . ./internal/... ./cmd/convert ./cmd/render
       - name: Build the WebAssembly game
         run: |

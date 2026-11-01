@@ -30,7 +30,7 @@ rooms/*.json, sprites, sounds).
 6. [x] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD. Done: coins, hearts, fire, checkpoints, monsters/flyers/monster_dead, stomp, lives/score (gm.Globals). Room changes done (Game: @next, named, @bonus keeps the level, @saved returns; no more lives → finlisto). HUD done. Next: item 7.
 7. [~] All levels, the diamond → bonus level and back, nivelo5 waves. Done: bonus level and back (tick 10), spawners + waves, b_monster. Next: play-check every level start to end (scripted), danklisto (credits scroll following a b_monster).
 8. [x] Title, rules screen, credits, highscores (local storage on web), cheat codes. Done: title + rules (klarigilo), credits (tick 13). Cheat codes, highscore screen and its storage done.
-9. [ ] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG.
+9. [~] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG. WAV effects done; MIDI waits for a soundfont (Joop: sudo pacman -S soundfont-fluid).
 10. [ ] Level editor (in-game mode + its own page) and packs.
 11. [ ] New art skin (switchable), roles chosen by trying them.
 12. [ ] Mobile: fill a phone screen (landscape; fractional scale when whole steps leave it tiny), no page
@@ -45,6 +45,8 @@ rooms/*.json, sprites, sounds).
   with"): queue item 12.
 
 ## Questions for Joop
+
+- Install a soundfont for rendering the 2006 MIDI music: `sudo pacman -S soundfont-fluid` (FluidR3, MIT); fluidsynth is already there.
 
 - 2026-11-01: run the original GML (an embedded GML interpreter + the 76 built-ins the two games use) instead of
   hand-porting the objects? Asked in chat; the engine core (item 4) is needed either way.
@@ -78,3 +80,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 15 (item 8) — the nine cheat codes in the character's step (keyboard_string from typed characters, last 1024 kept; string_count is case-sensitive; each match clears the string): sekvosio, vivuplilonge, netusxumin, mibedauxras, esperanto, fekalfajro (fires become blocks), miamasGrandanFraton, pasispasinteco (score −1 + highscore clear flag, table pending), pliajpoentoj (bonus level). Test covers lives, score, case sensitivity, fire→block, invulnerability, next room.
 - 2026-11-01 tick 16 (item 8) — highscore screen (plejbonaj_listo): finavenko, name prompt (score > 10th) until Enter or 'Ho ve…' until a key, the table (draw_highscore box 69,69–544,384; ASSUMPTIONS marked: layout, '<nobody>' 0 for an empty table), a key → game_restart keeping the table; pasispasinteco clears it. Liberation Sans Bold 20 for Arial Rounded MT Bold. Test: game over with 1230 → name 'Joop' → table top → restart at the title. Plus Joop's request: true Esperanto letters on screen (eo.go, test).
 - 2026-11-01 tick 17 (item 8) — internal/store keeps the highscore table: localStorage on the web (guarded: storage can be refused), a JSON file in the user config dir on the desktop; cmd/stelo loads it and saves on every change (new entry, pasispasinteco). Test: round trip in a temp dir. Item 8 done; NEXT item 9 (sounds).
+- 2026-11-01 tick 18 (item 9) — internal/sound: the four WAV effects (getmushroom, killcharacter, killmonster, finishlevel) decoded at 44.1 kHz and played through Ebitengine audio on action_sound; music names left silent. restart keeps the sound hook. Pages CI installs libasound2-dev (oto). Test: all effects decode. NEXT: music once a soundfont is installed.

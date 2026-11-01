@@ -8,6 +8,7 @@ import (
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/game"
 	"github.com/LaPingvino/stelo/internal/gm"
+	"github.com/LaPingvino/stelo/internal/sound"
 	"github.com/LaPingvino/stelo/internal/store"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -18,6 +19,7 @@ var order = game.RoomOrder
 
 type app struct {
 	assets *game.Assets
+	sound  *sound.Player
 	game   *game.Game
 	room   int
 	frame  *image.RGBA
@@ -31,6 +33,10 @@ func (a *app) load(i int) {
 		log.Printf("level %s: %v", order[a.room], err)
 		return
 	}
+	if a.sound == nil {
+		a.sound = sound.NewPlayer(stelo.Files)
+	}
+	g.G.Sound = a.sound.Play
 	g.Highscores = store.LoadHighscores()
 	g.SaveHighscores = store.SaveHighscores
 	a.game = g

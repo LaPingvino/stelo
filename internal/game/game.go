@@ -207,12 +207,12 @@ func characterRooms(a *Assets, o *gm.Object) {
 // restart is game_restart(): a new game from the first room, the highscore
 // table kept.
 func (g *Game) restart() {
-	hs, save := g.Highscores, g.SaveHighscores
+	hs, save, snd := g.Highscores, g.SaveHighscores, g.G.Sound
 	ng, err := NewGame(g.FS, g.Assets, RoomOrder[0])
 	if err != nil {
 		return
 	}
-	ng.Highscores, ng.SaveHighscores = hs, save
+	ng.Highscores, ng.SaveHighscores, ng.G.Sound = hs, save, snd
 	*g = *ng
 }
 

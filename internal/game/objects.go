@@ -51,7 +51,8 @@ func characterEvents(a *Assets, o *gm.Object) {
 			setSprite(self, "sprite_climbing")
 		}
 		// The grid snap "if sprite_index == sprite_ladder" never runs: the
-		// player never has that sprite (STELO-RULES §3). Cheat codes: item 8.
+		// player never has that sprite (STELO-RULES §3).
+		runCheats(r, self, a)
 	}
 	o.Events.Collision = map[string]gm.CollisionHandler{
 		// Collision with block: move to contact in the direction of motion, max 12; vspeed 0.

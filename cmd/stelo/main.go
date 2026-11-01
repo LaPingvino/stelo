@@ -87,6 +87,10 @@ type keys struct{}
 func (keys) Held(k gm.Key) bool    { return ebiten.IsKeyPressed(ebitenKey(k)) }
 func (keys) Pressed(k gm.Key) bool { return inpututil.IsKeyJustPressed(ebitenKey(k)) }
 
+// Typed is what was typed since the last frame (keyboard_string; the cheat
+// codes).
+func (keys) Typed() []rune { return ebiten.AppendInputChars(nil) }
+
 // AnyPressed is keyboard_wait's "any key".
 func (keys) AnyPressed() bool { return len(inpututil.AppendJustPressedKeys(nil)) > 0 }
 

@@ -82,6 +82,10 @@ var roomCode = map[string]func(g *Game){
 // step (any key).
 type AnyKey interface{ AnyPressed() bool }
 
+// Typer is the part of the input keyboard_string needs: the characters typed
+// since the last step.
+type Typer interface{ Typed() []rune }
+
 // Waiting reports a keyboard_wait in progress: the title picture (Title) or
 // the rules screen. The game draws but doesn't step while waiting.
 func (g *Game) Waiting() bool { return g.Title || g.waitRoom }
@@ -103,6 +107,9 @@ func (g *Game) Step(in gm.Input) error {
 			return g.change()
 		}
 		return nil
+	}
+	if t, ok := in.(Typer); ok {
+		g.G.Type(t.Typed())
 	}
 	g.World.Step(in)
 	if g.G.NoMoreLives { // life_controller: "no more lives" → finlisto

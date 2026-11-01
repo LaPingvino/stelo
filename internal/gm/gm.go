@@ -129,6 +129,17 @@ type Globals struct {
 	Vars        map[string]float64
 	// Sound plays a sound by name (action_sound); nil = silent.
 	Sound func(name string)
+	// KeyboardString is keyboard_string: the characters typed (Game Maker
+	// keeps the last 1024).
+	KeyboardString string
+}
+
+// Type appends typed characters to keyboard_string.
+func (g *Globals) Type(chars []rune) {
+	g.KeyboardString += string(chars)
+	if r := []rune(g.KeyboardString); len(r) > 1024 {
+		g.KeyboardString = string(r[len(r)-1024:])
+	}
 }
 
 // AddLives is action_set_life(n, relative).

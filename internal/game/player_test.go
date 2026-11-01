@@ -303,3 +303,52 @@ func TestTitleAndRules(t *testing.T) {
 		t.Fatalf("after a second key: in %s, waiting %v", g.World.Level.Name, g.Waiting())
 	}
 }
+
+type typing struct {
+	held
+	chars []rune
+}
+
+func (t typing) Typed() []rune { return t.chars }
+
+// The cheat codes, typed during play (character.gml step event).
+func TestCheatCodes(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	typeIn := func(s string) {
+		g.Step(typing{chars: []rune(s)})
+	}
+	lives := g.G.Lives
+	typeIn("xxvivuplilonge")
+	if g.G.Lives != lives+1 || g.G.KeyboardString != "" {
+		t.Errorf("vivuplilonge: lives %d (was %d), keyboard_string %q", g.G.Lives, lives, g.G.KeyboardString)
+	}
+	typeIn("miamasGrandanFraton")
+	if g.G.Score != 500 {
+		t.Errorf("miamasGrandanFraton: score %d", g.G.Score)
+	}
+	typeIn("miamasgrandanfraton") // case-sensitive: no effect
+	if g.G.Score != 500 {
+		t.Errorf("lower-case code worked: score %d", g.G.Score)
+	}
+	g.G.KeyboardString = ""
+	fires := len(g.World.Room.All("death"))
+	typeIn("fekalfajro")
+	if len(g.World.Room.All("death")) != 0 || fires == 0 {
+		t.Errorf("fekalfajro: %d fires left (were %d)", len(g.World.Room.All("death")), fires)
+	}
+	typeIn("netusxumin")
+	if g.World.Room.All("character")[0].Vars["netusxu"] != 1 {
+		t.Error("netusxumin: not invulnerable")
+	}
+	typeIn("sekvosio")
+	if g.World.Level.Name != "nivelo2" {
+		t.Errorf("sekvosio: in %s", g.World.Level.Name)
+	}
+}

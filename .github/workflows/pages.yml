@@ -22,7 +22,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./...
+      # The game packages' tests need no display; cmd/stelo (Ebitengine on
+      # desktop) is only built for the web here, which needs no X11.
+      - run: go test . ./internal/... ./cmd/convert ./cmd/render
       - name: Build the WebAssembly game
         run: |
           mkdir -p site

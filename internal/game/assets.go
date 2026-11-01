@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/LaPingvino/stelo/internal/gm"
 	"image"
 	"image/draw"
 	"image/png"
@@ -33,6 +34,7 @@ type Assets struct {
 	Sprites     map[string]*Sprite
 	Backgrounds map[string]*image.RGBA
 	Objects     map[string]*ObjectDef
+	gmObjects   map[string]*gm.Object
 }
 
 type project struct {

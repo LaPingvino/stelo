@@ -28,6 +28,10 @@ type Object struct {
 	Mask bool
 	// Events are the object's event handlers.
 	Events Events
+	// Sprite, Visible and Depth are the object's drawing defaults.
+	Sprite  string
+	Visible bool
+	Depth   int
 	// Parent: the object's parent. [engine] A child without its own handler for
 	// an event runs its parent's; "collision with P" and with(P) also cover
 	// P's children.
@@ -64,12 +68,19 @@ type Instance struct {
 	GravityDirection     float64 // degrees, 270 = down
 	Alarm                [12]int // -1 = off
 	Destroyed            bool
+	// Sprite is sprite_index (starts as the object's); ImageIndex the frame.
+	Sprite     string
+	ImageIndex float64
+	ImageSpeed float64
+	// Vars holds the object's own variables (used, timelineaktiva, …).
+	Vars map[string]float64
 }
 
 // NewInstance places an instance; its start and previous position are where it
 // is placed.
 func NewInstance(obj *Object, x, y float64) *Instance {
-	in := &Instance{Obj: obj, X: x, Y: y, XPrevious: x, YPrevious: y, XStart: x, YStart: y, GravityDirection: 270}
+	in := &Instance{Obj: obj, X: x, Y: y, XPrevious: x, YPrevious: y, XStart: x, YStart: y, GravityDirection: 270,
+		Sprite: obj.Sprite, ImageSpeed: 1, Vars: map[string]float64{}}
 	for i := range in.Alarm {
 		in.Alarm[i] = -1
 	}
@@ -85,9 +96,18 @@ func (in *Instance) BoxAt(x, y float64) Box {
 
 // Room holds the instances.
 type Room struct {
+	Name      string
 	W, H      int
 	Instances []*Instance
+	// Goto asks the game to change rooms after this step (room_goto); "" = stay.
+	Goto string
+	// Sleep is action_sleep: steps during which the game is frozen (nothing
+	// moves, nothing is drawn anew).
+	Sleep int
 }
+
+// SleepMS is action_sleep(ms) at the room's speed (steps per second).
+func (r *Room) SleepMS(ms, speed int) { r.Sleep += ms * speed / 1000 }
 
 func (r *Room) live() []*Instance {
 	out := r.Instances[:0:0]

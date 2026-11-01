@@ -12,12 +12,13 @@ import (
 
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/game"
+	"github.com/LaPingvino/stelo/internal/gm"
 )
 
 func main() {
 	name := flag.String("level", "nivelo1", "level name")
 	out := flag.String("out", "frame.png", "output PNG")
-	steps := flag.Int("steps", 0, "view updates to run first")
+	steps := flag.Int("steps", 0, "steps to run first (no keys pressed)")
 	flag.Parse()
 	a, err := game.LoadAssets(stelo.Files)
 	if err != nil {
@@ -28,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 	for range *steps {
-		w.UpdateView()
+		w.Step(noKeys{})
 	}
 	img := image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH))
 	w.Draw(img)
@@ -41,3 +42,8 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
+type noKeys struct{}
+
+func (noKeys) Held(gm.Key) bool    { return false }
+func (noKeys) Pressed(gm.Key) bool { return false }

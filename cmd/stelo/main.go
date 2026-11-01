@@ -7,6 +7,7 @@ import (
 
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/game"
+	"github.com/LaPingvino/stelo/internal/gm"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -42,7 +43,7 @@ func (a *app) Update() error {
 		a.load(a.room - 1)
 	}
 	if a.world != nil {
-		a.world.UpdateView()
+		a.world.Step(keys{})
 	}
 	return nil
 }
@@ -70,4 +71,31 @@ func main() {
 	if err := ebiten.RunGame(a); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// keys is the keyboard as the game's Input (the player's keys come in with
+// the rules, LOOP item 5).
+type keys struct{}
+
+func (keys) Held(k gm.Key) bool    { return ebiten.IsKeyPressed(ebitenKey(k)) }
+func (keys) Pressed(k gm.Key) bool { return inpututil.IsKeyJustPressed(ebitenKey(k)) }
+
+func ebitenKey(k gm.Key) ebiten.Key {
+	switch k {
+	case gm.KeyLeft:
+		return ebiten.KeyArrowLeft
+	case gm.KeyRight:
+		return ebiten.KeyArrowRight
+	case gm.KeyUp:
+		return ebiten.KeyArrowUp
+	case gm.KeyDown:
+		return ebiten.KeyArrowDown
+	case gm.KeySpace:
+		return ebiten.KeySpace
+	case gm.KeyEnter:
+		return ebiten.KeyEnter
+	case gm.KeyPgDn:
+		return ebiten.KeyPageDown
+	}
+	return ebiten.KeyF24
 }

@@ -96,6 +96,10 @@ func (o *Object) collisionHandlers() map[string]CollisionHandler {
 // at its previous position, then the event runs, and afterwards it moves on by
 // its (possibly changed) speed if that place is free.
 func (r *Room) Step(in Input) {
+	if r.Sleep > 0 {
+		r.Sleep--
+		return
+	}
 	each := func(f func(*Instance)) {
 		for _, i := range r.Instances[:len(r.Instances):len(r.Instances)] {
 			if !i.Destroyed {
@@ -173,6 +177,9 @@ func (r *Room) Step(in Input) {
 		if h := i.Obj.handler(func(e *Events) Handler { return e.EndStep }); h != nil {
 			h(r, i)
 		}
+	})
+	each(func(i *Instance) { // animation: image_index advances by image_speed
+		i.ImageIndex += i.ImageSpeed
 	})
 	live := r.Instances[:0]
 	for _, i := range r.Instances {

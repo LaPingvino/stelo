@@ -1,5 +1,5 @@
-// Package game is the Stelo remake's game: the world of one room and its
-// drawing. Rules: docs/STELO-RULES.md.
+// Package game is the Stelo remake's game: a level run on the Game Maker core
+// (internal/gm) and drawn as the original. Rules: docs/STELO-RULES.md.
 package game
 
 import (
@@ -9,30 +9,45 @@ import (
 	"io/fs"
 	"sort"
 
+	"github.com/LaPingvino/stelo/internal/gm"
 	"github.com/LaPingvino/stelo/internal/level"
 )
 
 // Screen size (the original's window and view).
 const ScreenW, ScreenH = 640, 480
 
-// Instance is one object in the room.
-type Instance struct {
-	Def    *ObjectDef
-	X, Y   float64
-	Sprite string
-	Frame  int
-}
-
 // World is the running room.
 type World struct {
 	Assets       *Assets
 	Level        *level.Level
-	Instances    []*Instance
+	Room         *gm.Room
 	ViewX, ViewY int
-	follow       *Instance
+	follow       *gm.Instance
 }
 
-// LoadLevel reads levels/<name>.txt and places its instances.
+// Object returns the engine object for an original object (sprite box,
+// solidity, drawing defaults), shared by all its instances.
+func (a *Assets) Object(name string) *gm.Object {
+	if o := a.gmObjects[name]; o != nil {
+		return o
+	}
+	o := &gm.Object{Name: name}
+	if d := a.Objects[name]; d != nil {
+		o.Solid, o.Sprite, o.Visible, o.Depth = d.Solid, d.Sprite, d.Visible, d.Depth
+		if sp := a.Sprites[d.Sprite]; sp != nil {
+			o.Mask = true
+			o.BBox = gm.Box{L: sp.BBox[0], R: sp.BBox[1], T: sp.BBox[2], B: sp.BBox[3]}
+		}
+	}
+	if a.gmObjects == nil {
+		a.gmObjects = map[string]*gm.Object{}
+	}
+	a.gmObjects[name] = o
+	return o
+}
+
+// LoadLevel reads levels/<name>.txt and places its instances, running their
+// create events in the level's order.
 func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 	data, err := fs.ReadFile(fsys, "levels/"+name+".txt")
 	if err != nil {
@@ -42,14 +57,9 @@ func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 	if err != nil {
 		return nil, err
 	}
-	w := &World{Assets: a, Level: l}
+	w := &World{Assets: a, Level: l, Room: &gm.Room{Name: l.Name, W: l.W, H: l.H}}
 	for _, in := range l.Instances {
-		def := a.Objects[in.Object]
-		if def == nil {
-			def = &ObjectDef{Name: in.Object}
-		}
-		inst := &Instance{Def: def, X: float64(in.X), Y: float64(in.Y), Sprite: def.Sprite}
-		w.Instances = append(w.Instances, inst)
+		inst := w.Room.Create(a.Object(in.Object), float64(in.X), float64(in.Y))
 		if l.View != nil && l.View.Follow == in.Object && w.follow == nil {
 			w.follow = inst
 		}
@@ -58,6 +68,12 @@ func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 		w.ViewX, w.ViewY = l.View.X, l.View.Y
 	}
 	return w, nil
+}
+
+// Step runs one step of the room, then moves the view.
+func (w *World) Step(in gm.Input) {
+	w.Room.Step(in)
+	w.UpdateView()
 }
 
 // UpdateView moves the view after the followed instance, as Game Maker does:
@@ -100,14 +116,14 @@ func (w *World) Draw(dst *image.RGBA) {
 			}
 		}
 	}
-	insts := append([]*Instance(nil), w.Instances...)
-	sort.SliceStable(insts, func(i, j int) bool { return insts[i].Def.Depth > insts[j].Def.Depth })
+	insts := append([]*gm.Instance(nil), w.Room.Instances...)
+	sort.SliceStable(insts, func(i, j int) bool { return insts[i].Obj.Depth > insts[j].Obj.Depth })
 	for _, in := range insts {
 		sp := w.Assets.Sprites[in.Sprite]
-		if !in.Def.Visible || sp == nil || len(sp.Frames) == 0 {
+		if !in.Obj.Visible || in.Destroyed || sp == nil || len(sp.Frames) == 0 {
 			continue
 		}
-		img := sp.Frames[in.Frame%len(sp.Frames)]
+		img := sp.Frames[int(in.ImageIndex)%len(sp.Frames)]
 		x, y := int(in.X)-w.ViewX, int(in.Y)-w.ViewY
 		r := img.Bounds().Add(image.Pt(x, y))
 		if r.Overlaps(dst.Bounds()) {

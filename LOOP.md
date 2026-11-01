@@ -22,10 +22,10 @@ rooms/*.json, sprites, sounds).
 2. [x] docs/LEVEL-FORMAT.md + `cmd/convert`: original/rooms/*.json → levels/*.txt, with a round-trip test.
 3. [x] Go module, Ebitengine skeleton (640×480 logical, 30 TPS), loads a level and draws it with the original
    sprites; GitHub Actions → Pages (wasm).
-4. [~] GM engine core (internal/gm), needed whether the objects are hand-ported or run as GML: done —
+4. [x] GM engine core (internal/gm), needed whether the objects are hand-ported or run as GML: done —
    motion+gravity, inclusive bounding boxes, place_free/place_meeting, move_contact_solid; alarms, the step
    order (alarms, keys, key press, step, move, outside room, collisions with solid put-back, end step),
-   instance create/destroy; parent objects (handlers inherited, collisions and with() cover children). Next: room changes and persistence, sleep, the runner that ties gm to the level/draw code.
+   instance create/destroy; parent objects (handlers inherited, collisions and with() cover children). room Goto request, action_sleep (frozen steps), image_index animation, instance variables; the game now runs levels on gm (instances created with create events, drawn from gm). Next: room changes/persistence in the game loop, then item 5.
 5. [ ] Player: walk, ladders, jump, gravity, solid blocks — level 1 playable.
 6. [ ] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD.
 7. [ ] All levels, the diamond → bonus level and back, nivelo5 waves.
@@ -56,3 +56,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 4 (item 4) — internal/gm: Game Maker engine core with tests (inclusive bboxes, place_free, place_meeting, move_contact_solid, gravity+speed motion, direction). ASSUMPTION marked: bbox at the rounded position. Queue renumbered (engine core inserted as 4).
 - 2026-11-01 tick 5 (item 4) — internal/gm Step: GM step order, alarms (count down, fire at 0), held/pressed keys, outside-room (box entirely outside), collision dispatch with solid put-back → event → move on if free (ASSUMPTION, marked), end step, destroy at step end; deterministic event order (key code; collisions by name, ASSUMPTION vs GM's object index). Tests: monster_dead's 10-step alarm, landing on a block via the character's own block event, outside-room, keys.
 - 2026-11-01 tick 6 (item 4) — parent objects in internal/gm: IsA, handler lookup up the chain (create/alarm/step/outside/end step; key and collision maps merged, child wins), collisions and All()/with() include children. Test with Pacmanio's monster→scared→intermonster chain; it records that both of pacman's monster/scared events see an intermonster — the open [engine] point for Pacmanio §3 stays open.
+- 2026-11-01 tick 7 (item 4) — internal/game now runs on internal/gm: levels become gm rooms (objects with sprite box, solidity, depth, visibility), instances created in level order, drawn from gm; World.Step = room step + view. gm: Room.Goto, Sleep/SleepMS (test: 1000 ms = 30 frozen steps), image_index/image_speed, per-instance Vars. Level-1 pixel test still passes; wasm builds. Item 4 done; NEXT item 5 (player) — waits on Joop's GML answer only in HOW the objects are written.

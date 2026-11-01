@@ -162,3 +162,20 @@ func TestParents(t *testing.T) {
 		t.Error("IsA follows parents only upwards")
 	}
 }
+
+func TestSleepFreezesSteps(t *testing.T) {
+	r := &Room{W: 640, H: 480}
+	in := r.Create(player, 0, 0)
+	in.HSpeed = 1
+	r.SleepMS(1000, 30) // action_sleep(1000) at room speed 30
+	for range 30 {
+		r.Step(noKeys)
+	}
+	if in.X != 0 {
+		t.Errorf("moved during the sleep: x %v", in.X)
+	}
+	r.Step(noKeys)
+	if in.X != 1 {
+		t.Errorf("moves after the sleep: x %v", in.X)
+	}
+}

@@ -34,8 +34,8 @@ func TestLevel1MatchesOriginalRender(t *testing.T) {
 		t.Fatal(err)
 	}
 	skip := map[image.Point]bool{}
-	for _, in := range w.Instances {
-		if !in.Def.Visible || in.Def.Sprite == "" {
+	for _, in := range w.Room.Instances {
+		if !in.Obj.Visible || in.Obj.Sprite == "" {
 			skip[image.Pt(int(in.X)/32, int(in.Y)/32)] = true
 		}
 	}

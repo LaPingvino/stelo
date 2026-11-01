@@ -30,7 +30,7 @@ var cheats = []cheat{
 	}},
 	{"miamasGrandanFraton", func(r *gm.Room, self *gm.Instance, a *Assets) { r.G.Score += 500 }},
 	{"pasispasinteco", func(r *gm.Room, self *gm.Instance, a *Assets) {
-		r.G.Vars["highscore_clear"] = 1 // highscore_clear() (the table: item 8, highscores)
+		r.G.Vars["highscore_clear"] = 1 // highscore_clear(): the Game clears its table
 		r.G.Score = -1
 	}},
 	{"pliajpoentoj", func(r *gm.Room, self *gm.Instance, a *Assets) {

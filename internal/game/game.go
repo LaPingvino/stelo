@@ -2,6 +2,7 @@ package game
 
 import (
 	"golang.org/x/image/font"
+	"image"
 	"io/fs"
 
 	"github.com/LaPingvino/stelo/internal/gm"
@@ -26,6 +27,12 @@ type Game struct {
 	// a key (klarigilo's keyboard_wait).
 	Title    bool
 	waitRoom bool
+	// The highscore table, its screen state and font; SaveHighscores stores
+	// the table when it changes (nil: kept in memory only).
+	Highscores     Highscores
+	hs             hsState
+	HSFont         font.Face
+	SaveHighscores func(Highscores)
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
@@ -37,6 +44,10 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 	if f, err := TextFont(fsys); err == nil {
 		g.TextFont = f
 	}
+	if f, err := HighscoreFont(fsys); err == nil {
+		g.HSFont = f
+	}
+	g.Highscores = ClearedHighscores()
 	// klarigilo's game start event (the first room holds the klarigilo):
 	// the komenco sound and the title picture until a key.
 	if room == RoomOrder[0] {
@@ -64,6 +75,9 @@ func (g *Game) enter(room string) error {
 	}
 	if len(w.Room.All("klarigilo")) > 0 {
 		g.waitRoom = true
+	}
+	if len(w.Room.All("plejbonaj_listo")) > 0 {
+		g.startHighscores()
 	}
 	return nil
 }
@@ -111,7 +125,27 @@ func (g *Game) Step(in gm.Input) error {
 	if t, ok := in.(Typer); ok {
 		g.G.Type(t.Typed())
 	}
+	if g.hs != hsNone {
+		anyKey := false
+		if a, ok := in.(AnyKey); ok {
+			anyKey = a.AnyPressed()
+		}
+		if g.stepHighscores(in.Pressed(gm.KeyEnter), anyKey) {
+			g.restart()
+			return nil
+		}
+		if g.hs != hsTable { // the name prompt and "Ho ve" block the room
+			return nil
+		}
+	}
 	g.World.Step(in)
+	if g.G.Vars["highscore_clear"] == 1 { // the pasispasinteco cheat
+		g.G.Vars["highscore_clear"] = 0
+		g.Highscores = ClearedHighscores()
+		if g.SaveHighscores != nil {
+			g.SaveHighscores(g.Highscores)
+		}
+	}
 	if g.G.NoMoreLives { // life_controller: "no more lives" → finlisto
 		g.G.NoMoreLives = false
 		g.World.Room.Goto = "finlisto"
@@ -168,4 +202,27 @@ func characterRooms(a *Assets, o *gm.Object) {
 			r.Goto = "@bonus"
 		}
 	}
+}
+
+// restart is game_restart(): a new game from the first room, the highscore
+// table kept.
+func (g *Game) restart() {
+	hs, save := g.Highscores, g.SaveHighscores
+	ng, err := NewGame(g.FS, g.Assets, RoomOrder[0])
+	if err != nil {
+		return
+	}
+	ng.Highscores, ng.SaveHighscores = hs, save
+	*g = *ng
+}
+
+// Draw draws the current screen: the title, or the room with the highscore
+// screen over it when it is up.
+func (g *Game) Draw(dst *image.RGBA) {
+	if g.Title {
+		g.World.DrawTitle(dst)
+		return
+	}
+	g.World.Draw(dst)
+	g.drawHighscores(dst)
 }

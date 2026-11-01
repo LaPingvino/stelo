@@ -55,11 +55,7 @@ func (a *app) Draw(screen *ebiten.Image) {
 	if a.game == nil {
 		return
 	}
-	if a.game.Title {
-		a.game.World.DrawTitle(a.frame)
-	} else {
-		a.game.World.Draw(a.frame)
-	}
+	a.game.Draw(a.frame)
 	screen.WritePixels(a.frame.Pix)
 }
 

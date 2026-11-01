@@ -29,10 +29,20 @@ rooms/*.json, sprites, sounds).
 5. [~] Player (hand-ported from character.gml; Joop hasn't answered the GML question yet): keys, step, block, outside room done. walk, ladders, jump, gravity, solid blocks — level 1 playable.
 6. [x] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD. Done: coins, hearts, fire, checkpoints, monsters/flyers/monster_dead, stomp, lives/score (gm.Globals). Room changes done (Game: @next, named, @bonus keeps the level, @saved returns; no more lives → finlisto). HUD done. Next: item 7.
 7. [~] All levels, the diamond → bonus level and back, nivelo5 waves. Done: bonus level and back (tick 10), spawners + waves, b_monster. Next: play-check every level start to end (scripted), danklisto (credits scroll following a b_monster).
-8. [~] Title, rules screen, credits, highscores (local storage on web), cheat codes. Done: title + rules (klarigilo), credits (tick 13). Cheat codes done. Next: highscores (plejbonaj_listo).
+8. [~] Title, rules screen, credits, highscores (local storage on web), cheat codes. Done: title + rules (klarigilo), credits (tick 13). Cheat codes, highscore screen done. Next: storing the table (local storage on the web, a file on the desktop).
 9. [ ] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG.
 10. [ ] Level editor (in-game mode + its own page) and packs.
 11. [ ] New art skin (switchable), roles chosen by trying them.
+12. [ ] Mobile: fill a phone screen (landscape; fractional scale when whole steps leave it tiny), no page
+    scroll/zoom, on-screen left/right/up/down shown on touch screens, the phone keyboard for the highscore
+    name, sound from the first tap.
+
+## Decisions (Joop)
+
+- 2026-11-01: true Esperanto letters on screen instead of the x-system (cx → ĉ …): converted when drawn
+  (internal/game/eo.go); original/ and levels/ keep the original text; cheat codes are still typed as before.
+- 2026-11-01: mobile support (touch controls, fitting the phone screen) — approved ("nothing I can disagree
+  with"): queue item 12.
 
 ## Questions for Joop
 
@@ -66,3 +76,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 — Pages workflow moved into .github/workflows/pages.yml.
 - 2026-11-01 tick 14 (item 8) — klarigilo: game start shows stelo_komenco until any key (keyboard_wait; komenco sound, then muziko1), klarigo waits for a key then goes to level 1; the game draws but doesn't step while waiting. cmd/stelo starts at the title now. Title identical to the Wine screenshot. Test: title → rules → nivelo1 on two keys.
 - 2026-11-01 tick 15 (item 8) — the nine cheat codes in the character's step (keyboard_string from typed characters, last 1024 kept; string_count is case-sensitive; each match clears the string): sekvosio, vivuplilonge, netusxumin, mibedauxras, esperanto, fekalfajro (fires become blocks), miamasGrandanFraton, pasispasinteco (score −1 + highscore clear flag, table pending), pliajpoentoj (bonus level). Test covers lives, score, case sensitivity, fire→block, invulnerability, next room.
+- 2026-11-01 tick 16 (item 8) — highscore screen (plejbonaj_listo): finavenko, name prompt (score > 10th) until Enter or 'Ho ve…' until a key, the table (draw_highscore box 69,69–544,384; ASSUMPTIONS marked: layout, '<nobody>' 0 for an empty table), a key → game_restart keeping the table; pasispasinteco clears it. Liberation Sans Bold 20 for Arial Rounded MT Bold. Test: game over with 1230 → name 'Joop' → table top → restart at the title. Plus Joop's request: true Esperanto letters on screen (eo.go, test).

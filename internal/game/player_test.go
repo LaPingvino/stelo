@@ -352,3 +352,38 @@ func TestCheatCodes(t *testing.T) {
 		t.Errorf("sekvosio: in %s", g.World.Level.Name)
 	}
 }
+
+// Game over with a score beating the table: a name until Enter, the table,
+// then a new game at the title; the table is kept.
+func TestHighscoreEntry(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.G.Score = 1230
+	g.G.Lives = 1
+	g.G.AddLives(-1) // no more lives → finlisto
+	g.Step(held{})
+	if g.World.Level.Name != "finlisto" || g.hs != hsName {
+		t.Fatalf("in %s, state %d", g.World.Level.Name, g.hs)
+	}
+	g.Step(typing{chars: []rune("Joop")})
+	g.Step(pressed{gm.KeyEnter: true})
+	if g.hs != hsTable || g.Highscores[0] != (Highscore{"Joop", 1230}) {
+		t.Fatalf("after Enter: state %d, table top %+v", g.hs, g.Highscores[0])
+	}
+	g.Step(anyKey{any: true})
+	if g.World.Level.Name != RoomOrder[0] || !g.Title || g.Highscores[0].Name != "Joop" {
+		t.Errorf("restart: in %s title %v, top %+v", g.World.Level.Name, g.Title, g.Highscores[0])
+	}
+}
+
+// pressed reports keys going down this step.
+type pressed map[gm.Key]bool
+
+func (p pressed) Held(gm.Key) bool      { return false }
+func (p pressed) Pressed(k gm.Key) bool { return p[k] }

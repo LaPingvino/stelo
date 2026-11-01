@@ -69,7 +69,7 @@ func (w *World) drawTexts(dst *image.RGBA) {
 	for _, in := range w.Room.All("tekstilo") {
 		t, _ := in.VarsStr["teksto"]
 		y := int(in.Y) - w.ViewY + m.Ascent.Ceil()
-		for _, line := range strings.Split(t, "#") {
+		for _, line := range strings.Split(hats(t), "#") {
 			d := font.Drawer{Dst: dst, Src: green, Face: w.TextFont, Dot: fixed.P(int(in.X)+3-w.ViewX, y)}
 			d.DrawString(line)
 			y += m.Height.Ceil()

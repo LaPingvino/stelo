@@ -17,7 +17,7 @@ rooms/*.json, sprites, sounds).
 
 ## Queue
 
-1. [ ] docs/STELO-RULES.md from original/objects/*.gml and timelines: every object, every event, in step order
+1. [x] docs/STELO-RULES.md from original/objects/*.gml and timelines: every object, every event, in step order
    (movement numbers, gravity, ladders, stomp test, scores, lives, checkpoints, bonus level, spawners, cheat codes).
 2. [ ] docs/LEVEL-FORMAT.md + `cmd/convert`: original/rooms/*.json → levels/*.txt, with a round-trip test.
 3. [ ] Go module, Ebitengine skeleton (640×480 logical, 30 TPS), loads a level and draws it with the original
@@ -38,3 +38,4 @@ rooms/*.json, sprites, sounds).
 ## Blocked
 
 ## Tick log
+- 2026-11-01 tick 1 (item 1) — docs/STELO-RULES.md written from original/objects (all 20) + timelines + sprite boxes: player keys/step/collisions, monsters, spawners, lives/HUD, rooms, cheat codes; engine behaviour (GM5 step order, solid put-back) marked [engine]. Found: the ladder grid-snap and Space/ammo are dead code; falling off the bottom costs no life; b_monster ignores invulnerability. NEXT: item 2 (level format + converter).

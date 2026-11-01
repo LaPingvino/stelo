@@ -5,9 +5,9 @@ import "github.com/LaPingvino/stelo/internal/gm"
 // The original objects' events, ported from original/objects/*.gml (see
 // docs/STELO-RULES.md). Each function adds an object's handlers to its engine
 // object; the comment above each handler quotes the original's action.
-var objectEvents = map[string]func(a *Assets, o *gm.Object){
-	"character": characterEvents,
-}
+var objectEvents = map[string]func(a *Assets, o *gm.Object){}
+
+func init() { objectEvents["character"] = characterEvents }
 
 // roomSpeed is every room's speed (steps per second), for action_sleep.
 const roomSpeed = 30
@@ -60,6 +60,7 @@ func characterEvents(a *Assets, o *gm.Object) {
 			self.VSpeed = 0
 		},
 	}
+	characterThings(a, o)
 	// Outside room: fell below the room → sound, 1 s pause, back to the start
 	// point (no life lost). PARTIAL: the sound (item 9).
 	o.Events.OutsideRoom = func(r *gm.Room, self *gm.Instance) {

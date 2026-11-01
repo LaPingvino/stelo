@@ -81,3 +81,43 @@ func TestPlayerStandsJumpsWalksAndClimbs(t *testing.T) {
 		t.Errorf("hangs on the ladder when no key is held: y %v", p.Y)
 	}
 }
+
+// A star coin is worth 10; stomping a monster from above is worth 50 and
+// leaves a flattened monster for 10 steps; walking into one costs a life.
+func TestCoinsAndMonsters(t *testing.T) {
+	w, p := level1(t)
+	g := w.Room.G
+	a := w.Assets
+	coin := w.Room.Create(a.Object("stelo_poentoj"), p.X, p.Y)
+	w.Step(held{})
+	if g.Score != 10 || !coin.Destroyed {
+		t.Fatalf("coin: score %d", g.Score)
+	}
+	// A monster just below the falling player: stomp.
+	m := w.Room.Create(a.Object("monster"), p.X, p.Y)
+	m.HSpeed = 0
+	p.Y -= 20
+	p.VSpeed = 4
+	m.Y = p.Y + 10 // player above m.Y+8 while falling
+	w.Step(held{})
+	if g.Score != 60 || m.Obj.Name != "monster_dead" {
+		t.Fatalf("stomp: score %d, monster is %s", g.Score, m.Obj.Name)
+	}
+	for range 10 {
+		w.Step(held{})
+	}
+	if !m.Destroyed {
+		t.Error("flattened monster gone after 10 steps")
+	}
+	// A monster walked into from the side: a life less, back to the start.
+	for range 40 {
+		w.Step(held{})
+	}
+	lives := g.Lives
+	m2 := w.Room.Create(a.Object("monster"), p.X, p.Y)
+	m2.HSpeed = 0
+	w.Step(held{})
+	if g.Lives != lives-1 || w.Room.Sleep == 0 {
+		t.Errorf("hit: lives %d (was %d), sleep %d", g.Lives, lives, w.Room.Sleep)
+	}
+}

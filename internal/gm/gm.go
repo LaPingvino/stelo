@@ -104,6 +104,47 @@ type Room struct {
 	// Sleep is action_sleep: steps during which the game is frozen (nothing
 	// moves, nothing is drawn anew).
 	Sleep int
+	// G holds what lives across rooms: score, lives, global variables.
+	G *Globals
+}
+
+// Globals are Game Maker's game-wide state.
+type Globals struct {
+	Score, Lives int
+	// NoMoreLives is set when lives drop to 0 or below: the "no more lives"
+	// event is due (the game runs it after the step).
+	NoMoreLives bool
+	Vars        map[string]float64
+	// Sound plays a sound by name (action_sound); nil = silent.
+	Sound func(name string)
+}
+
+// AddLives is action_set_life(n, relative).
+func (g *Globals) AddLives(n int) {
+	g.Lives += n
+	if g.Lives <= 0 {
+		g.NoMoreLives = true
+	}
+}
+
+// Play is action_sound(name).
+func (g *Globals) Play(name string) {
+	if g != nil && g.Sound != nil {
+		g.Sound(name)
+	}
+}
+
+// Change is action_change_object(obj, perform): the instance becomes an
+// instance of obj in place, taking obj's sprite; with perform it runs obj's
+// create event (and the old object's destroy event, which no Stelo object
+// has).
+func (r *Room) Change(in *Instance, obj *Object, perform bool) {
+	in.Obj, in.Sprite, in.ImageIndex = obj, obj.Sprite, 0
+	if perform {
+		if h := obj.handler(func(e *Events) Handler { return e.Create }); h != nil {
+			h(r, in)
+		}
+	}
 }
 
 // SleepMS is action_sleep(ms) at the room's speed (steps per second).

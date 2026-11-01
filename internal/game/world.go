@@ -60,7 +60,7 @@ func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 	if err != nil {
 		return nil, err
 	}
-	w := &World{Assets: a, Level: l, Room: &gm.Room{Name: l.Name, W: l.W, H: l.H}}
+	w := &World{Assets: a, Level: l, Room: &gm.Room{Name: l.Name, W: l.W, H: l.H, G: &gm.Globals{Lives: 3, Vars: map[string]float64{}}}}
 	for _, in := range l.Instances {
 		inst := w.Room.Create(a.Object(in.Object), float64(in.X), float64(in.Y))
 		if l.View != nil && l.View.Follow == in.Object && w.follow == nil {

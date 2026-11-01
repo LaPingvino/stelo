@@ -148,3 +148,10 @@ func (w *World) Draw(dst *image.RGBA) {
 		w.drawHUD(dst, g.Score, g.Lives)
 	}
 }
+
+// DrawTitle draws the title picture (background stelo_komenco) full-screen.
+func (w *World) DrawTitle(dst *image.RGBA) {
+	if bg := w.Assets.Backgrounds["stelo_komenco"]; bg != nil {
+		draw.Draw(dst, dst.Bounds(), bg, image.Point{}, draw.Src)
+	}
+}

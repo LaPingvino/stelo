@@ -269,3 +269,37 @@ func TestCreditsScroll(t *testing.T) {
 		t.Errorf("view did not scroll down: %d → %d", y0, g.World.ViewY)
 	}
 }
+
+type anyKey struct {
+	held
+	any bool
+}
+
+func (a anyKey) AnyPressed() bool { return a.any }
+
+// Game start: the title picture until a key, the rules screen until a key,
+// then level 1 (klarigilo).
+func TestTitleAndRules(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, RoomOrder[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 30 {
+		g.Step(anyKey{})
+	}
+	if !g.Title || g.World.Level.Name != "klarigo" {
+		t.Fatalf("waits on the title: title %v in %s", g.Title, g.World.Level.Name)
+	}
+	g.Step(anyKey{any: true})
+	if g.Title || !g.Waiting() || g.World.Level.Name != "klarigo" {
+		t.Fatalf("after a key: title %v waiting %v in %s", g.Title, g.Waiting(), g.World.Level.Name)
+	}
+	g.Step(anyKey{any: true})
+	if g.World.Level.Name != "nivelo1" || g.Waiting() {
+		t.Fatalf("after a second key: in %s, waiting %v", g.World.Level.Name, g.Waiting())
+	}
+}

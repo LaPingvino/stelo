@@ -55,7 +55,11 @@ func (a *app) Draw(screen *ebiten.Image) {
 	if a.game == nil {
 		return
 	}
-	a.game.World.Draw(a.frame)
+	if a.game.Title {
+		a.game.World.DrawTitle(a.frame)
+	} else {
+		a.game.World.Draw(a.frame)
+	}
 	screen.WritePixels(a.frame.Pix)
 }
 
@@ -67,7 +71,7 @@ func main() {
 		log.Fatal(err)
 	}
 	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH))}
-	a.load(1)
+	a.load(0)         // the title, then the rules screen
 	ebiten.SetTPS(30) // every room runs at 30 steps per second
 	ebiten.SetWindowSize(game.ScreenW, game.ScreenH)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
@@ -82,6 +86,9 @@ type keys struct{}
 
 func (keys) Held(k gm.Key) bool    { return ebiten.IsKeyPressed(ebitenKey(k)) }
 func (keys) Pressed(k gm.Key) bool { return inpututil.IsKeyJustPressed(ebitenKey(k)) }
+
+// AnyPressed is keyboard_wait's "any key".
+func (keys) AnyPressed() bool { return len(inpututil.AppendJustPressedKeys(nil)) > 0 }
 
 func ebitenKey(k gm.Key) ebiten.Key {
 	switch k {

@@ -22,6 +22,10 @@ type Game struct {
 	saved    *World // the persistent level left for the bonus level
 	Font     font.Face
 	TextFont font.Face
+	// Title: the title picture is up (game start); waitRoom: klarigo waits for
+	// a key (klarigilo's keyboard_wait).
+	Title    bool
+	waitRoom bool
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
@@ -32,6 +36,12 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 	}
 	if f, err := TextFont(fsys); err == nil {
 		g.TextFont = f
+	}
+	// klarigilo's game start event (the first room holds the klarigilo):
+	// the komenco sound and the title picture until a key.
+	if room == RoomOrder[0] {
+		g.Title = true
+		g.G.Play("@sound:komenco")
 	}
 	return g, g.enter(room)
 }
@@ -52,6 +62,9 @@ func (g *Game) enter(room string) error {
 	if code := roomCode[room]; code != nil {
 		code(g)
 	}
+	if len(w.Room.All("klarigilo")) > 0 {
+		g.waitRoom = true
+	}
 	return nil
 }
 
@@ -65,13 +78,42 @@ var roomCode = map[string]func(g *Game){
 	},
 }
 
+// AnyKey is the part of the input keyboard_wait needs: a key went down this
+// step (any key).
+type AnyKey interface{ AnyPressed() bool }
+
+// Waiting reports a keyboard_wait in progress: the title picture (Title) or
+// the rules screen. The game draws but doesn't step while waiting.
+func (g *Game) Waiting() bool { return g.Title || g.waitRoom }
+
 // Step runs one step and then any room change it asked for.
 func (g *Game) Step(in gm.Input) error {
+	// klarigilo (original/objects/klarigilo.gml): at game start the title
+	// picture stelo_komenco and keyboard_wait(); in klarigo's room start
+	// screen_redraw(); keyboard_wait(); room_goto_next().
+	if g.Waiting() {
+		if a, ok := in.(AnyKey); ok && a.AnyPressed() {
+			if g.Title {
+				g.Title = false
+				g.G.Play("@music:muziko1") // end komenco, loop muziko1
+				return nil
+			}
+			g.waitRoom = false
+			g.World.Room.Goto = "@next"
+			return g.change()
+		}
+		return nil
+	}
 	g.World.Step(in)
 	if g.G.NoMoreLives { // life_controller: "no more lives" → finlisto
 		g.G.NoMoreLives = false
 		g.World.Room.Goto = "finlisto"
 	}
+	return g.change()
+}
+
+// change performs the room change the room asked for, if any.
+func (g *Game) change() error {
 	to := g.World.Room.Goto
 	if to == "" || g.World.Room.Sleep > 0 {
 		return nil // a room change waits until the pause is over

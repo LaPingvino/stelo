@@ -33,7 +33,7 @@ rooms/*.json, sprites, sounds).
 9. [~] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG. WAV effects done; MIDI waits for a soundfont (Joop: sudo pacman -S soundfont-fluid).
 10. [ ] Level editor (in-game mode + its own page) and packs.
 11. [ ] New art skin (switchable), roles chosen by trying them.
-12. [ ] Mobile: fill a phone screen (landscape; fractional scale when whole steps leave it tiny), no page
+12. [~] Mobile (touch pads, tap = any key, no page zoom/scroll done; not yet tried on a real phone; the highscore name needs the phone keyboard): fill a phone screen (landscape; fractional scale when whole steps leave it tiny), no page
     scroll/zoom, on-screen left/right/up/down shown on touch screens, the phone keyboard for the highscore
     name, sound from the first tap.
 
@@ -81,3 +81,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 16 (item 8) — highscore screen (plejbonaj_listo): finavenko, name prompt (score > 10th) until Enter or 'Ho ve…' until a key, the table (draw_highscore box 69,69–544,384; ASSUMPTIONS marked: layout, '<nobody>' 0 for an empty table), a key → game_restart keeping the table; pasispasinteco clears it. Liberation Sans Bold 20 for Arial Rounded MT Bold. Test: game over with 1230 → name 'Joop' → table top → restart at the title. Plus Joop's request: true Esperanto letters on screen (eo.go, test).
 - 2026-11-01 tick 17 (item 8) — internal/store keeps the highscore table: localStorage on the web (guarded: storage can be refused), a JSON file in the user config dir on the desktop; cmd/stelo loads it and saves on every change (new entry, pasispasinteco). Test: round trip in a temp dir. Item 8 done; NEXT item 9 (sounds).
 - 2026-11-01 tick 18 (item 9) — internal/sound: the four WAV effects (getmushroom, killcharacter, killmonster, finishlevel) decoded at 44.1 kHz and played through Ebitengine audio on action_sound; music names left silent. restart keeps the sound hook. Pages CI installs libasound2-dev (oto). Test: all effects decode. NEXT: music once a soundfont is installed.
+- 2026-11-01 tick 19 (item 12) — touch controls: four translucent arrow pads in the screen's bottom corners (game coordinates, so they scale with the window), shown once the screen is touched (or with ?pads in the address); a finger on a pad holds that arrow, a tap elsewhere (or a click) is keyboard_wait's any key; the page no longer zooms or scrolls. Checked headless at 844×390 with ?pads. PARTIAL: real-device test; the phone keyboard for the highscore name. (Music waits for soundfont-fluid.)

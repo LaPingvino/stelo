@@ -19,6 +19,7 @@ var order = game.RoomOrder
 
 type app struct {
 	assets *game.Assets
+	touch  touchState
 	sound  *sound.Player
 	game   *game.Game
 	room   int
@@ -53,7 +54,8 @@ func (a *app) Update() error {
 		a.load(a.room - 1)
 	}
 	if a.game != nil {
-		if err := a.game.Step(keys{}); err != nil {
+		a.touch.update()
+		if err := a.game.Step(keys{&a.touch}); err != nil {
 			log.Print(err)
 		}
 	}
@@ -66,6 +68,7 @@ func (a *app) Draw(screen *ebiten.Image) {
 	}
 	a.game.Draw(a.frame)
 	screen.WritePixels(a.frame.Pix)
+	a.touch.draw(screen)
 }
 
 func (a *app) Layout(int, int) (int, int) { return game.ScreenW, game.ScreenH }
@@ -76,7 +79,8 @@ func main() {
 		log.Fatal(err)
 	}
 	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH))}
-	a.load(0)         // the title, then the rules screen
+	a.load(0) // the title, then the rules screen
+	a.touch.seen = showPadsFromURL()
 	ebiten.SetTPS(30) // every room runs at 30 steps per second
 	ebiten.SetWindowSize(game.ScreenW, game.ScreenH)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
@@ -87,9 +91,11 @@ func main() {
 
 // keys is the keyboard as the game's Input (the player's keys come in with
 // the rules, LOOP item 5).
-type keys struct{}
+type keys struct{ t *touchState }
 
-func (keys) Held(k gm.Key) bool    { return ebiten.IsKeyPressed(ebitenKey(k)) }
+func (k keys) Held(key gm.Key) bool {
+	return ebiten.IsKeyPressed(ebitenKey(key)) || (k.t != nil && k.t.held[key])
+}
 func (keys) Pressed(k gm.Key) bool { return inpututil.IsKeyJustPressed(ebitenKey(k)) }
 
 // Typed is what was typed since the last frame (keyboard_string; the cheat
@@ -97,7 +103,10 @@ func (keys) Pressed(k gm.Key) bool { return inpututil.IsKeyJustPressed(ebitenKey
 func (keys) Typed() []rune { return ebiten.AppendInputChars(nil) }
 
 // AnyPressed is keyboard_wait's "any key".
-func (keys) AnyPressed() bool { return len(inpututil.AppendJustPressedKeys(nil)) > 0 }
+func (k keys) AnyPressed() bool {
+	return len(inpututil.AppendJustPressedKeys(nil)) > 0 || (k.t != nil && k.t.tapped) ||
+		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
+}
 
 func ebitenKey(k gm.Key) ebiten.Key {
 	switch k {

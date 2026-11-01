@@ -100,13 +100,16 @@ func TestEditScreenActions(t *testing.T) {
 	if e.Doc.Text() == orig {
 		t.Fatal("nothing painted")
 	}
-	if got := e.Press(actionX+3, paletteY+3, false); got != "undo" || e.Doc.Text() != orig {
+	if got := e.Press(actionX+3, paletteY+3, false); got != "open" {
+		t.Errorf("open button: %q", got)
+	}
+	if got := e.Press(actionX+editor.Cell+3, paletteY+3, false); got != "undo" || e.Doc.Text() != orig {
 		t.Errorf("undo button: %q, undone %v", got, e.Doc.Text() == orig)
 	}
-	if got := e.Press(actionX+editor.Cell+3, paletteY+3, false); got != "save" {
+	if got := e.Press(actionX+2*editor.Cell+3, paletteY+3, false); got != "save" {
 		t.Errorf("save button: %q", got)
 	}
-	if got := e.Press(actionX+2*editor.Cell+3, paletteY+3, false); got != "play" {
+	if got := e.Press(actionX+3*editor.Cell+3, paletteY+3, false); got != "play" {
 		t.Errorf("play button: %q", got)
 	}
 	if actionX < len(Palette)*editor.Cell {

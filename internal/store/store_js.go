@@ -68,3 +68,34 @@ func Download(name, text string) bool {
 	js.Global().Get("URL").Call("revokeObjectURL", url)
 	return true
 }
+
+// OpenFile asks the browser for a file (a picker, from a tap or click just
+// made) and hands its name and text to got when read. It reports whether a
+// picker could be shown.
+func OpenFile(got func(name, text string)) bool {
+	defer func() { recover() }()
+	doc := js.Global().Get("document")
+	in := doc.Call("createElement", "input")
+	in.Set("type", "file")
+	in.Set("accept", ".txt,text/plain")
+	var onChange js.Func
+	onChange = js.FuncOf(func(js.Value, []js.Value) any {
+		onChange.Release()
+		files := in.Get("files")
+		if files.Length() == 0 {
+			return nil
+		}
+		f := files.Index(0)
+		var then js.Func
+		then = js.FuncOf(func(_ js.Value, args []js.Value) any {
+			then.Release()
+			got(f.Get("name").String(), args[0].String())
+			return nil
+		})
+		f.Call("text").Call("then", then)
+		return nil
+	})
+	in.Call("addEventListener", "change", onChange)
+	in.Call("click")
+	return true
+}

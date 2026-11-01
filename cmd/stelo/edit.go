@@ -25,12 +25,18 @@ type editState struct {
 	screen *game.EditScreen
 	docs   map[string]*editor.Doc
 	down   bool // a press is going on
+	// picked receives a level file's text from the browser's file picker
+	// (read on the browser's side; taken in Update).
+	picked chan string
 }
 
 // openEditor edits the named level (keeping earlier edits of it).
 func (a *app) openEditor(name string) {
 	if a.edit.docs == nil {
 		a.edit.docs = map[string]*editor.Doc{}
+	}
+	if a.edit.picked == nil {
+		a.edit.picked = make(chan string, 1)
 	}
 	d := a.edit.docs[name]
 	if d == nil {
@@ -76,6 +82,11 @@ func (a *app) playEdited() {
 
 // updateEditor handles the editor's input for a frame.
 func (a *app) updateEditor() {
+	select {
+	case text := <-a.edit.picked:
+		a.openText(text)
+	default:
+	}
 	e := a.edit.screen
 	x, y := ebiten.CursorPosition()
 	left := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
@@ -89,6 +100,13 @@ func (a *app) updateEditor() {
 	case (left || right) && !a.edit.down:
 		a.edit.down = true
 		switch e.Press(x, y, right) {
+		case "open":
+			store.OpenFile(func(name, text string) {
+				select { // never block the browser's callback
+				case a.edit.picked <- text:
+				default:
+				}
+			})
 		case "save":
 			a.saveEdited()
 		case "play":
@@ -133,6 +151,20 @@ func (a *app) saveEdited() {
 // in the editor, replacing any edits of a level with the same name.
 func (a *app) openDropped(files fs.FS) {
 	l, err := editor.FindLevel(files)
+	if err != nil {
+		log.Printf("editor: %v", err)
+		return
+	}
+	if a.edit.docs == nil {
+		a.edit.docs = map[string]*editor.Doc{}
+	}
+	a.edit.docs[l.Name] = editor.New(l)
+	a.openEditor(l.Name)
+}
+
+// openText opens a level file's text in the editor.
+func (a *app) openText(text string) {
+	l, err := level.Parse(text)
 	if err != nil {
 		log.Printf("editor: %v", err)
 		return

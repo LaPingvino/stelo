@@ -61,3 +61,6 @@ func writeLevel(name, text string) {
 // Download is the web's file offer; on the desktop the level is saved in
 // the config directory already (SaveLevel), so nothing more is done.
 func Download(name, text string) bool { return false }
+
+// OpenFile is the web's file picker; the desktop takes dropped files instead.
+func OpenFile(got func(name, text string)) bool { return false }

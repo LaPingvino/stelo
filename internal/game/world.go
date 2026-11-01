@@ -65,6 +65,12 @@ func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 	if err != nil {
 		return nil, err
 	}
+	return NewWorld(a, l), nil
+}
+
+// NewWorld makes the running room for a level (its instances created in
+// order, their creation code run).
+func NewWorld(a *Assets, l *level.Level) *World {
 	w := &World{Assets: a, Level: l, Room: &gm.Room{Name: l.Name, W: l.W, H: l.H, G: &gm.Globals{Lives: 3, Vars: map[string]float64{}}}}
 	for _, in := range l.Instances {
 		inst := w.Room.Create(a.Object(in.Object), float64(in.X), float64(in.Y))
@@ -80,7 +86,7 @@ func LoadLevel(fsys fs.FS, a *Assets, name string) (*World, error) {
 	if l.View != nil {
 		w.ViewX, w.ViewY = l.View.X, l.View.Y
 	}
-	return w, nil
+	return w
 }
 
 // Step runs one step of the room, then moves the view.

@@ -12,7 +12,7 @@ size 640 480
 speed 30
 colour #00FF80
 background background_sky
-view 0 0 640 480 follow character
+view 0 0 640 480 follow character border 64 64 speed 4 4
 grid
 #...|......M...|...#
 …one row per 32 px, one character per cell…
@@ -36,7 +36,7 @@ end
 | `persistent` | the room is kept as it is when left (none of the originals; the bonus level does this at run time) |
 | `background NAME` | a background image, tiled across the room |
 | `caption "…"` | the window caption, as a Go-quoted string |
-| `view X Y W H [follow OBJECT]` | the visible part of the room, following an object |
+| `view X Y W H [follow OBJECT border H V speed H V]` | the visible part of the room, following an object: it scrolls when the object comes within `border` pixels of an edge, by at most `speed` pixels per step (−1: no limit) |
 | `code "…"` | the room's creation code (Game Maker code, kept as text; the remake implements what the originals use) |
 
 ## Grid and ladders

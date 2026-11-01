@@ -20,7 +20,7 @@ rooms/*.json, sprites, sounds).
 1. [x] docs/STELO-RULES.md from original/objects/*.gml and timelines: every object, every event, in step order
    (movement numbers, gravity, ladders, stomp test, scores, lives, checkpoints, bonus level, spawners, cheat codes).
 2. [x] docs/LEVEL-FORMAT.md + `cmd/convert`: original/rooms/*.json → levels/*.txt, with a round-trip test.
-3. [ ] Go module, Ebitengine skeleton (640×480 logical, 30 TPS), loads a level and draws it with the original
+3. [x] Go module, Ebitengine skeleton (640×480 logical, 30 TPS), loads a level and draws it with the original
    sprites; GitHub Actions → Pages (wasm).
 4. [ ] Player: walk, ladders, jump, gravity, solid blocks — level 1 playable.
 5. [ ] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD.
@@ -37,6 +37,12 @@ rooms/*.json, sprites, sounds).
 
 ## Blocked
 
+- 2026-11-01: pushing `.github/workflows/pages.yml` is refused — the gh token lacks the `workflow` scope. The
+  workflow waits in docs/pages.yml.pending. Joop: `gh auth refresh -h github.com -s workflow`, then
+  `git mv docs/pages.yml.pending .github/workflows/pages.yml` and push (Pages is already switched on, source =
+  workflow: https://lapingvino.github.io/stelo/).
+
 ## Tick log
 - 2026-11-01 tick 1 (item 1) — docs/STELO-RULES.md written from original/objects (all 20) + timelines + sprite boxes: player keys/step/collisions, monsters, spawners, lives/HUD, rooms, cheat codes; engine behaviour (GM5 step order, solid put-back) marked [engine]. Found: the ladder grid-snap and Space/ammo are dead code; falling off the bottom costs no life; b_monster ignores invulnerability. NEXT: item 2 (level format + converter).
 - 2026-11-01 tick 2 (item 2) — Go module github.com/LaPingvino/stelo; internal/level (Format/Parse, LoadOriginal from original/project.json), cmd/convert → levels/*.txt (9 rooms), docs/LEVEL-FORMAT.md. Grid + separate ladder layer; instance/text lines for off-grid (nivelo1 diamond at 305,308), overlaps, code-carrying and control objects. go test: all 9 rooms round-trip (instances as a set) and levels/ is current. NEXT: item 3 (Ebitengine skeleton + Pages).
+- 2026-11-01 tick 3 (item 3) — Ebitengine skeleton: stelo.Files embeds original/ sprites, backgrounds, project.json and levels/; internal/game loads them (GM transparency = bottom-left pixel colour; bbox_lrbt), draws a room in pure Go (colour, tiled background at the view, instances by depth high→low, invisible ones skipped) and has GM view-follow (border + speed, now in the level format and all levels regenerated); cmd/stelo (30 TPS, 640×480, PageUp/Down step rooms until the rules are in); cmd/render → PNG. Test: level 1's first frame = gm53-reader's 1:1 render pixel for pixel (except invisible/sprite-less cells). wasm checked in headless Chromium. Pages workflow (go test, wasm, deploy). NEXT: item 4 (player).

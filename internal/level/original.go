@@ -26,6 +26,7 @@ type gmProject struct {
 		Views        []struct {
 			Visible bool
 			View    [4]int
+			Border  [4]int `json:"border_hv_speed_hv"`
 			Follow  int
 		}
 		Instances []struct {
@@ -74,6 +75,7 @@ func LoadOriginal(projectJSON string) ([]*Level, error) {
 					l.View = &View{X: v.View[0], Y: v.View[1], W: v.View[2], H: v.View[3]}
 					if v.Follow >= 0 {
 						l.View.Follow = obj(v.Follow)
+						l.View.BorderH, l.View.BorderV, l.View.SpeedH, l.View.SpeedV = v.Border[0], v.Border[1], v.Border[2], v.Border[3]
 					}
 					break
 				}

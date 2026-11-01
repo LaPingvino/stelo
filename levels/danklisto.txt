@@ -3,7 +3,7 @@ name danklisto
 size 640 960
 speed 30
 colour #000000
-view 0 0 640 480 follow b_monster
+view 0 0 640 480 follow b_monster border 128 128 speed -1 -1
 code "with (life_controller) {instance_destroy();}\r\nsound_stop_all();\r\nsound_loop(LaEspero);"
 grid
 #b.................#

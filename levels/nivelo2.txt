@@ -4,7 +4,7 @@ size 2560 480
 speed 30
 colour #00FF80
 background background_sky
-view 0 0 640 480 follow character
+view 0 0 640 480 follow character border 256 128 speed 4 4
 grid
 #@|F..........................##################################################
 #.|F..........................#*......#F........*...*...*...*...*...*...*...*..#

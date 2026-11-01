@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="eo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stelo</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #ccc; font: 14px sans-serif; }
+  #msg { position: fixed; inset: 0; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+<div id="msg">Ŝargante Stelon…</div>
+<script src="wasm_exec.js"></script>
+<script>
+  const go = new Go();
+  WebAssembly.instantiateStreaming(fetch("stelo.wasm"), go.importObject).then(r => {
+    document.getElementById("msg").remove();
+    go.run(r.instance);
+  }).catch(e => { document.getElementById("msg").textContent = "Eraro: " + e; });
+</script>
+</body>
+</html>

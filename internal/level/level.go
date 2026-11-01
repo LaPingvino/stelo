@@ -17,10 +17,15 @@ type Instance struct {
 	Code   string
 }
 
-// View is a room view (Game Maker views; the level follows Follow).
+// View is a room view (Game Maker views): the visible rectangle, the object
+// it follows, how close that object may come to the view's edge before it
+// scrolls (BorderH/V) and the most it scrolls per step (SpeedH/V; -1 = no
+// limit).
 type View struct {
-	X, Y, W, H int
-	Follow     string
+	X, Y, W, H       int
+	Follow           string
+	BorderH, BorderV int
+	SpeedH, SpeedV   int
 }
 
 // Level is one room.
@@ -72,7 +77,7 @@ func Format(l *Level) string {
 	if v := l.View; v != nil {
 		fmt.Fprintf(&b, "view %d %d %d %d", v.X, v.Y, v.W, v.H)
 		if v.Follow != "" {
-			fmt.Fprintf(&b, " follow %s", v.Follow)
+			fmt.Fprintf(&b, " follow %s border %d %d speed %d %d", v.Follow, v.BorderH, v.BorderV, v.SpeedH, v.SpeedV)
 		}
 		b.WriteString("\n")
 	}
@@ -202,12 +207,16 @@ func Parse(src string) (*Level, error) {
 		case "view":
 			v := &View{}
 			f := strings.Fields(rest)
-			if len(f) != 4 && len(f) != 6 {
-				return nil, fail("view: x y w h [follow obj]")
+			if len(f) != 4 && len(f) != 12 {
+				return nil, fail("view: x y w h [follow OBJ border H V speed H V]")
 			}
 			_, err = fmt.Sscan(strings.Join(f[:4], " "), &v.X, &v.Y, &v.W, &v.H)
-			if len(f) == 6 {
+			if err == nil && len(f) == 12 {
+				if f[4] != "follow" || f[6] != "border" || f[9] != "speed" {
+					return nil, fail("view: x y w h [follow OBJ border H V speed H V]")
+				}
 				v.Follow = f[5]
+				_, err = fmt.Sscan(strings.Join([]string{f[7], f[8], f[10], f[11]}, " "), &v.BorderH, &v.BorderV, &v.SpeedH, &v.SpeedV)
 			}
 			l.View = v
 		case "code":

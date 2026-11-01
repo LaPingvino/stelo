@@ -44,10 +44,45 @@ type Events struct {
 func (r *Room) Create(obj *Object, x, y float64) *Instance {
 	in := NewInstance(obj, x, y)
 	r.Instances = append(r.Instances, in)
-	if obj.Events.Create != nil {
-		obj.Events.Create(r, in)
+	if h := obj.handler(func(e *Events) Handler { return e.Create }); h != nil {
+		h(r, in)
 	}
 	return in
+}
+
+// handler finds an event's handler on the object or, failing that, its nearest
+// parent that has one.
+func (o *Object) handler(get func(*Events) Handler) Handler {
+	for _, p := range o.chain() {
+		if h := get(&p.Events); h != nil {
+			return h
+		}
+	}
+	return nil
+}
+
+// keyHandlers merges key maps up the parent chain (the child's own win).
+func (o *Object) keyHandlers(get func(*Events) map[Key]Handler) map[Key]Handler {
+	m := map[Key]Handler{}
+	ch := o.chain()
+	for i := len(ch) - 1; i >= 0; i-- {
+		for k, h := range get(&ch[i].Events) {
+			m[k] = h
+		}
+	}
+	return m
+}
+
+// collisionHandlers merges collision events up the parent chain.
+func (o *Object) collisionHandlers() map[string]CollisionHandler {
+	m := map[string]CollisionHandler{}
+	ch := o.chain()
+	for i := len(ch) - 1; i >= 0; i-- {
+		for k, h := range ch[i].Events.Collision {
+			m[k] = h
+		}
+	}
+	return m
 }
 
 // Step runs one step in Game Maker's order [engine]: alarms, keyboard, key
@@ -75,29 +110,31 @@ func (r *Room) Step(in Input) {
 			}
 			if i.Alarm[a]--; i.Alarm[a] == 0 {
 				i.Alarm[a] = -1
-				if h := i.Obj.Events.Alarm[a]; h != nil {
+				if h := i.Obj.handler(func(e *Events) Handler { return e.Alarm[a] }); h != nil {
 					h(r, i)
 				}
 			}
 		}
 	})
 	each(func(i *Instance) {
-		for _, k := range sortedKeys(i.Obj.Events.Key) {
+		keys := i.Obj.keyHandlers(func(e *Events) map[Key]Handler { return e.Key })
+		for _, k := range sortedKeys(keys) {
 			if in.Held(k) {
-				i.Obj.Events.Key[k](r, i)
+				keys[k](r, i)
 			}
 		}
 	})
 	each(func(i *Instance) {
-		for _, k := range sortedKeys(i.Obj.Events.KeyPress) {
+		keys := i.Obj.keyHandlers(func(e *Events) map[Key]Handler { return e.KeyPress })
+		for _, k := range sortedKeys(keys) {
 			if in.Pressed(k) {
-				i.Obj.Events.KeyPress[k](r, i)
+				keys[k](r, i)
 			}
 		}
 	})
 	each(func(i *Instance) {
-		if i.Obj.Events.Step != nil {
-			i.Obj.Events.Step(r, i)
+		if h := i.Obj.handler(func(e *Events) Handler { return e.Step }); h != nil {
+			h(r, i)
 		}
 	})
 	each(func(i *Instance) {
@@ -105,15 +142,16 @@ func (r *Room) Step(in Input) {
 		i.Move()
 	})
 	each(func(i *Instance) {
-		if i.Obj.Events.OutsideRoom != nil && r.outside(i) {
-			i.Obj.Events.OutsideRoom(r, i)
+		if h := i.Obj.handler(func(e *Events) Handler { return e.OutsideRoom }); h != nil && r.outside(i) {
+			h(r, i)
 		}
 	})
 	each(func(i *Instance) {
-		for _, name := range sortedNames(i.Obj.Events.Collision) {
-			h := i.Obj.Events.Collision[name]
+		cols := i.Obj.collisionHandlers()
+		for _, name := range sortedNames(cols) {
+			h := cols[name]
 			for _, o := range r.Instances {
-				if o == i || o.Destroyed || i.Destroyed || o.Obj.Name != name || !i.Obj.Mask || !o.Obj.Mask {
+				if o == i || o.Destroyed || i.Destroyed || !o.Obj.IsA(name) || !i.Obj.Mask || !o.Obj.Mask {
 					continue
 				}
 				if !i.BoxAt(i.X, i.Y).Overlaps(o.BoxAt(o.X, o.Y)) {
@@ -132,8 +170,8 @@ func (r *Room) Step(in Input) {
 		}
 	})
 	each(func(i *Instance) {
-		if i.Obj.Events.EndStep != nil {
-			i.Obj.Events.EndStep(r, i)
+		if h := i.Obj.handler(func(e *Events) Handler { return e.EndStep }); h != nil {
+			h(r, i)
 		}
 	})
 	live := r.Instances[:0]

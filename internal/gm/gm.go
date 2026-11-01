@@ -28,6 +28,29 @@ type Object struct {
 	Mask bool
 	// Events are the object's event handlers.
 	Events Events
+	// Parent: the object's parent. [engine] A child without its own handler for
+	// an event runs its parent's; "collision with P" and with(P) also cover
+	// P's children.
+	Parent *Object
+}
+
+// IsA reports whether the object is the named object or one of its children.
+func (o *Object) IsA(name string) bool {
+	for p := o; p != nil; p = p.Parent {
+		if p.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// handlers walks the object and its parents, nearest first.
+func (o *Object) chain() []*Object {
+	var c []*Object
+	for p := o; p != nil; p = p.Parent {
+		c = append(c, p)
+	}
+	return c
 }
 
 // Instance is one instance in the room.
@@ -98,11 +121,23 @@ func (r *Room) PlaceMeeting(in *Instance, x, y float64, obj string) *Instance {
 	}
 	b := in.BoxAt(x, y)
 	for _, o := range r.live() {
-		if o != in && o.Obj.Name == obj && o.Obj.Mask && b.Overlaps(o.BoxAt(o.X, o.Y)) {
+		if o != in && o.Obj.IsA(obj) && o.Obj.Mask && b.Overlaps(o.BoxAt(o.X, o.Y)) {
 			return o
 		}
 	}
 	return nil
+}
+
+// All is with(obj): the live instances of the object and its children, in
+// creation order.
+func (r *Room) All(obj string) []*Instance {
+	var out []*Instance
+	for _, o := range r.live() {
+		if o.Obj.IsA(obj) {
+			out = append(out, o)
+		}
+	}
+	return out
 }
 
 // MoveContactSolid is move_contact_solid(dir, maxdist): move one pixel at a

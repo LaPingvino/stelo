@@ -128,3 +128,37 @@ func TestOutsideRoomAndKeys(t *testing.T) {
 		t.Errorf("outside event: %d", out)
 	}
 }
+
+// Pacmanio's ghosts: scared is a child of monster, intermonster of scared.
+func TestParents(t *testing.T) {
+	monster := &Object{Name: "monster", Mask: true, BBox: Box{1, 30, 0, 31}}
+	scared := &Object{Name: "scared", Mask: true, BBox: Box{1, 30, 0, 31}, Parent: monster}
+	inter := &Object{Name: "intermonster", Mask: true, BBox: Box{1, 30, 0, 31}, Parent: scared}
+	stepped := 0
+	monster.Events.Step = func(r *Room, self *Instance) { stepped++ }
+	hits := map[string]int{}
+	pac := &Object{Name: "pacman", Mask: true, BBox: Box{2, 30, 2, 30}}
+	pac.Events.Collision = map[string]CollisionHandler{
+		"monster": func(r *Room, self, other *Instance) { hits["monster"]++ },
+		"scared":  func(r *Room, self, other *Instance) { hits["scared"]++ },
+	}
+	r := &Room{W: 640, H: 480}
+	r.Create(pac, 64, 64)
+	r.Create(inter, 64, 64)
+	r.Step(noKeys)
+	if stepped != 1 {
+		t.Errorf("intermonster runs monster's step event (inherited): %d", stepped)
+	}
+	// An intermonster is a scared and a monster, so both of pacman's events
+	// see it. [engine] Whether Game Maker 5.3 really runs both is the open
+	// point in Pacmanio's rules (§3); this records what the core does now.
+	if hits["monster"] != 1 || hits["scared"] != 1 {
+		t.Errorf("collision events seen: %v", hits)
+	}
+	if n := len(r.All("monster")); n != 1 {
+		t.Errorf("with(monster) covers children: %d", n)
+	}
+	if !inter.IsA("monster") || monster.IsA("scared") {
+		t.Error("IsA follows parents only upwards")
+	}
+}

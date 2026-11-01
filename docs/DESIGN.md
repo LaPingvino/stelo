@@ -27,7 +27,7 @@ with its rules and level format written down; an editor on top that makes levels
 ## 4. Order of work
 
 1. Rules doc and level converter (the original rooms into level files, with the round-trip test).
-2. The game playing level 1, then all levels and the bonus level; checked side by side with the original running under Wine.
+2. The game playing level 1, then all levels and the bonus level; checked against the recovered rooms and code.
 3. Title, rules, credits, highscores; sounds (2006 WAVs, MIDI pre-rendered).
 4. The editor.
 5. The new art skin.

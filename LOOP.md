@@ -7,8 +7,8 @@ rooms/*.json, sprites, sounds).
 ## Non-negotiables
 
 - The original is the truth: rules, numbers and level layouts come from `original/` (objects' code, rooms),
-  not from guessing. Where the code is unclear, play the original under Wine (on Crostini; ~/Projects/stelo/win
-  holds the exe) and write down what it does.
+  not from guessing. Where the code is unclear, say so in the rules doc and ask Joop (no Crostini needed;
+  wine is installed locally if a check is really needed, ~/Projects/stelo/win holds the exe).
 - `win/`, `linux/` and any `.exe` never go into git (they are the itch builds).
 - New art: `~/Projects/stelo-remake/research/assets/` (Joop's commissioned 32×32 set). Which sprite plays which
   role is ours to choose (Joop: the artist was unsure); record the choices in docs/DESIGN.md.

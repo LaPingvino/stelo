@@ -43,6 +43,9 @@ func (a *Assets) Object(name string) *gm.Object {
 		a.gmObjects = map[string]*gm.Object{}
 	}
 	a.gmObjects[name] = o
+	if ev := objectEvents[name]; ev != nil {
+		ev(a, o)
+	}
 	return o
 }
 

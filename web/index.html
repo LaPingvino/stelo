@@ -7,12 +7,38 @@
 <style>
   html, body { margin: 0; height: 100%; background: #000; color: #ccc; font: 14px sans-serif; overscroll-behavior: none; touch-action: none; -webkit-user-select: none; user-select: none; }
   #msg { position: fixed; inset: 0; display: grid; place-items: center; }
+  /* the phone keyboard: a button (touch screens) and an input kept out of sight */
+  #kbd { position: fixed; top: max(8px, env(safe-area-inset-top, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); z-index: 2;
+         font: 14px sans-serif; padding: .4em .8em; background: rgba(255,255,255,.25); color: #fff; border: 1px solid rgba(255,255,255,.5); border-radius: 4px; }
+  #typing { position: fixed; left: -100px; top: 0; width: 50px; font-size: 16px; opacity: 0; }
 </style>
 </head>
 <body>
 <div id="msg">Ŝargante Stelon…</div>
+<button id="kbd" hidden>Klavaro</button>
+<input id="typing" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Tajpu por la ludo">
 <script src="wasm_exec.js"></script>
 <script>
+  // The phone keyboard: each typed character, Backspace ("\b") and Enter
+  // ("\r") go into steloTyped, which the game empties every frame. Two
+  // spaces stay in the box so Backspace has something to delete.
+  window.steloTyped = [];
+  (function () {
+    const kbd = document.getElementById("kbd"), typing = document.getElementById("typing"), KEEP = "  ";
+    const reset = () => { typing.value = KEEP; typing.setSelectionRange(KEEP.length, KEEP.length); };
+    if (matchMedia("(pointer: coarse)").matches || /[?&](kbd|pads)/.test(location.search)) kbd.hidden = false;
+    kbd.addEventListener("click", () => { reset(); typing.focus(); });
+    typing.addEventListener("input", () => {
+      const v = typing.value;
+      if (v.length < KEEP.length) for (let i = v.length; i < KEEP.length; i++) steloTyped.push("\b");
+      else for (const ch of v.slice(KEEP.length)) steloTyped.push(ch);
+      reset();
+    });
+    for (const t of ["keydown", "keyup", "keypress"]) typing.addEventListener(t, e => {
+      e.stopPropagation(); // the game hears these through steloTyped only
+      if (t === "keydown" && e.key === "Enter") { e.preventDefault(); steloTyped.push("\r"); }
+    });
+  })();
   const go = new Go();
   WebAssembly.instantiateStreaming(fetch("stelo.wasm"), go.importObject).then(r => {
     document.getElementById("msg").remove();

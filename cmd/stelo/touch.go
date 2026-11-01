@@ -111,3 +111,10 @@ func drawArrow(screen *ebiten.Image, p pad) {
 		return c
 	}()})
 }
+
+// phoneKeys is what the page's phone keyboard (web/index.html) sent since
+// the last frame: characters ('\b' for Backspace) and Enter.
+type phoneKeys struct {
+	chars []rune
+	enter bool
+}

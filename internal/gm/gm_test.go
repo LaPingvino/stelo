@@ -179,3 +179,16 @@ func TestSleepFreezesSteps(t *testing.T) {
 		t.Errorf("moves after the sleep: x %v", in.X)
 	}
 }
+
+// keyboard_string: Backspace deletes the last character (not past empty).
+func TestTypeBackspace(t *testing.T) {
+	g := &Globals{}
+	g.Type([]rune("abĉ\b\bd"))
+	if g.KeyboardString != "ad" {
+		t.Errorf("got %q", g.KeyboardString)
+	}
+	g.Type([]rune("\b\b\b"))
+	if g.KeyboardString != "" {
+		t.Errorf("got %q", g.KeyboardString)
+	}
+}

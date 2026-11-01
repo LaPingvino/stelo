@@ -55,7 +55,7 @@ func (a *app) Update() error {
 	}
 	if a.game != nil {
 		a.touch.update()
-		if err := a.game.Step(keys{&a.touch}); err != nil {
+		if err := a.game.Step(keys{&a.touch, pollPhoneKeys()}); err != nil {
 			log.Print(err)
 		}
 	}
@@ -91,21 +91,32 @@ func main() {
 
 // keys is the keyboard as the game's Input (the player's keys come in with
 // the rules, LOOP item 5).
-type keys struct{ t *touchState }
+type keys struct {
+	t     *touchState
+	phone phoneKeys // this frame's characters and Enter from the phone keyboard
+}
 
 func (k keys) Held(key gm.Key) bool {
 	return ebiten.IsKeyPressed(ebitenKey(key)) || (k.t != nil && k.t.held[key])
 }
-func (keys) Pressed(k gm.Key) bool { return inpututil.IsKeyJustPressed(ebitenKey(k)) }
+func (k keys) Pressed(key gm.Key) bool {
+	return inpututil.IsKeyJustPressed(ebitenKey(key)) || (key == gm.KeyEnter && k.phone.enter)
+}
 
 // Typed is what was typed since the last frame (keyboard_string; the cheat
 // codes).
-func (keys) Typed() []rune { return ebiten.AppendInputChars(nil) }
+func (k keys) Typed() []rune {
+	t := ebiten.AppendInputChars(nil)
+	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+		t = append(t, '\b')
+	}
+	return append(t, k.phone.chars...)
+}
 
 // AnyPressed is keyboard_wait's "any key".
 func (k keys) AnyPressed() bool {
 	return len(inpututil.AppendJustPressedKeys(nil)) > 0 || (k.t != nil && k.t.tapped) ||
-		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
+		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) || len(k.phone.chars) > 0 || k.phone.enter
 }
 
 func ebitenKey(k gm.Key) ebiten.Key {

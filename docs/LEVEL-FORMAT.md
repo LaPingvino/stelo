@@ -72,3 +72,16 @@ After the two layers, one line each:
 
 The order in which instances were created in the original. It only matters where two instances' events depend
 on each other's order within a step, which the remake handles by its own fixed order.
+
+## Packs
+
+As in The Puzzle Pits, levels come in packs. The original five levels are the first pack. Any other pack is a
+folder of level files, played in file-name order (`01.txt`, `02.txt`, … sorts as expected), with an optional
+`pack.txt`:
+
+```
+name=Mia unua pako
+author=Joop
+```
+
+Without `pack.txt` the pack is named after its folder. Every other `*.txt` in the folder must be a level file.

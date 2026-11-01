@@ -19,7 +19,7 @@ rooms/*.json, sprites, sounds).
 
 1. [x] docs/STELO-RULES.md from original/objects/*.gml and timelines: every object, every event, in step order
    (movement numbers, gravity, ladders, stomp test, scores, lives, checkpoints, bonus level, spawners, cheat codes).
-2. [ ] docs/LEVEL-FORMAT.md + `cmd/convert`: original/rooms/*.json → levels/*.txt, with a round-trip test.
+2. [x] docs/LEVEL-FORMAT.md + `cmd/convert`: original/rooms/*.json → levels/*.txt, with a round-trip test.
 3. [ ] Go module, Ebitengine skeleton (640×480 logical, 30 TPS), loads a level and draws it with the original
    sprites; GitHub Actions → Pages (wasm).
 4. [ ] Player: walk, ladders, jump, gravity, solid blocks — level 1 playable.
@@ -39,3 +39,4 @@ rooms/*.json, sprites, sounds).
 
 ## Tick log
 - 2026-11-01 tick 1 (item 1) — docs/STELO-RULES.md written from original/objects (all 20) + timelines + sprite boxes: player keys/step/collisions, monsters, spawners, lives/HUD, rooms, cheat codes; engine behaviour (GM5 step order, solid put-back) marked [engine]. Found: the ladder grid-snap and Space/ammo are dead code; falling off the bottom costs no life; b_monster ignores invulnerability. NEXT: item 2 (level format + converter).
+- 2026-11-01 tick 2 (item 2) — Go module github.com/LaPingvino/stelo; internal/level (Format/Parse, LoadOriginal from original/project.json), cmd/convert → levels/*.txt (9 rooms), docs/LEVEL-FORMAT.md. Grid + separate ladder layer; instance/text lines for off-grid (nivelo1 diamond at 305,308), overlaps, code-carrying and control objects. go test: all 9 rooms round-trip (instances as a set) and levels/ is current. NEXT: item 3 (Ebitengine skeleton + Pages).

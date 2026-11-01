@@ -44,7 +44,7 @@ rooms/*.json, sprites, sounds).
 
 ## Blocked
 
-- 2026-11-01: pushing `.github/workflows/pages.yml` is refused — the gh token lacks the `workflow` scope. The
+- (RESOLVED 2026-11-01, Joop added the scope) pushing `.github/workflows/pages.yml` was refused — the gh token lacks the `workflow` scope. The
   workflow waits in docs/pages.yml.pending. Joop: `gh auth refresh -h github.com -s workflow`, then
   `git mv docs/pages.yml.pending .github/workflows/pages.yml` and push (Pages is already switched on, source =
   workflow: https://lapingvino.github.io/stelo/).
@@ -63,3 +63,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 11 (item 6) — the life controller's HUD: action_color(brush 11855591, pen 0) → light-yellow box (231,230,180) with a black outline at view (5,5)–(100,25); 'Poentoj: N' at (10,5) in black; one sprite_life per life from (player.x, player.y−10). Font: Liberation Sans (OFL, fonts/ with its licence) standing in for Arial Unicode MS 10 pt at 96 dpi. Drawn in every room with a player (= where the persistent life_controller exists). Checked against the Wine screenshot of nivelo1: layout and colours match; text 57×12 px vs the original's 55×10 — Wine likely substituted Arial Unicode MS, so not conclusive (open). Item 6 done; NEXT item 7 (all levels: nivelo5 waves, b_monster, spawners).
 - 2026-11-01 tick 12 (item 7) — gm timelines (moments by position, speed 1; ASSUMPTION: run after the step event, first position 0); monsterfarilo/finmonsterfarilo (start their timeline when none of their monster is left: three at 30/60/90, then free again); b_monster (monster + gravity, block: contact/vspeed 0/reverse); character vs b_monster (stomp +10, else back to the saved level, no life lost). CORRECTION to tick 1: the b_monster collision DOES check netusxu (character.gml line 101) — STELO-RULES.md fixed. Tests: level 5 waves (1 per spawner at step 31, 3 each by 91), bonus monsters fall.
 - 2026-11-01 tick 13 (item 7) — room creation code (danklisto: destroys the life controller, plays La Espero); the HUD exists from the room placing life_controller until destroyed (not on klarigo). tekstilo text (Liberation Sans Bold 11 pt, green, '#' line breaks, at x+3) — the rules screen matches the Wine screenshot of the original label for label. Tests: every room runs 300 steps; danklisto's view follows the zig-zagging b_monster down (after ~1200 steps). NEXT: klarigilo (rules screen waits for a key, then the next room) and the title (item 8).
+- 2026-11-01 — Pages workflow moved into .github/workflows/pages.yml.

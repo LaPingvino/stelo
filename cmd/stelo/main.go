@@ -8,6 +8,7 @@ import (
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/game"
 	"github.com/LaPingvino/stelo/internal/gm"
+	"github.com/LaPingvino/stelo/internal/store"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -30,6 +31,8 @@ func (a *app) load(i int) {
 		log.Printf("level %s: %v", order[a.room], err)
 		return
 	}
+	g.Highscores = store.LoadHighscores()
+	g.SaveHighscores = store.SaveHighscores
 	a.game = g
 	ebiten.SetWindowTitle("Stelo")
 }

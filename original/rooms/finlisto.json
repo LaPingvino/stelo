@@ -1,0 +1,518 @@
+{
+ "id": 7,
+ "name": "finlisto",
+ "caption": "",
+ "w": 640,
+ "h": 480,
+ "speed": 30,
+ "snap_x": 32,
+ "snap_y": 32,
+ "persistent": false,
+ "bg_color": 12632256,
+ "creation_code": "",
+ "views_enabled": false,
+ "order_position": 7,
+ "backgrounds": [
+  {
+   "visible": true,
+   "foreground": false,
+   "bg": 12,
+   "x": 0,
+   "y": 0,
+   "tile_h": true,
+   "tile_v": true,
+   "hspeed": 0,
+   "vspeed": 0,
+   "stretch": false,
+   "bg_name": "plejbonaj"
+  }
+ ],
+ "views": [],
+ "instances": [
+  {
+   "x": 32,
+   "y": 416,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 384,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 352,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 320,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 288,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 256,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 224,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 192,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 160,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 128,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 96,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 64,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 32,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 0,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 32,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 64,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 128,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 160,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 192,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 224,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 256,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 288,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 320,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 384,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 352,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 96,
+   "object": "ladder"
+  },
+  {
+   "x": 32,
+   "y": 0,
+   "object": "ladder"
+  },
+  {
+   "x": 576,
+   "y": 416,
+   "object": "ladder"
+  },
+  {
+   "x": 64,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 96,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 128,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 160,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 192,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 224,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 256,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 288,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 320,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 352,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 416,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 384,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 448,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 480,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 512,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 544,
+   "y": 416,
+   "object": "death"
+  },
+  {
+   "x": 64,
+   "y": 64,
+   "object": "plejbonaj_listo"
+  },
+  {
+   "x": 0,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 32,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 64,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 96,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 128,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 160,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 192,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 224,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 256,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 288,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 320,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 352,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 384,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 416,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 448,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 480,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 512,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 544,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 576,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 448,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 416,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 384,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 352,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 320,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 288,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 256,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 224,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 192,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 160,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 128,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 96,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 64,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 32,
+   "object": "block"
+  },
+  {
+   "x": 608,
+   "y": 0,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 0,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 32,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 64,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 96,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 128,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 160,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 192,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 224,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 256,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 288,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 320,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 352,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 384,
+   "object": "block"
+  },
+  {
+   "x": 0,
+   "y": 416,
+   "object": "block"
+  },
+  {
+   "x": 256,
+   "y": 416,
+   "object": "monster"
+  },
+  {
+   "x": 288,
+   "y": 416,
+   "object": "monster"
+  },
+  {
+   "x": 320,
+   "y": 416,
+   "object": "monster"
+  },
+  {
+   "x": 352,
+   "y": 416,
+   "object": "monster"
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+[[actions]]
+name = "play"
+path = "stelo.sh"
+
+[[actions]]
+name = "Older preview version"
+path = "stelo-av.sh"

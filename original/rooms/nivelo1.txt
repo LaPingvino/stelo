@@ -1,0 +1,18 @@
+nivelo1  640x480  (20x15 cells of 32px)
+legend: H=ladder  o=stelo_poentoj  X=death  #=block  M=monster  E=levelexit  F=flyer  B=bonus  |=marker  T=transirejo  a=iru_al_bonuso  @=character  c=life_controller
+
+#c..|......M...|...#
+#...############..E#
+#..##.....H....#####
+#......##TH##....oo#
+#.M...o|..H.|o..Moo#
+########..H.########
+#F.......##........#
+#..H...o....o...H.B#
+###H..########..H###
+#..H.....a......H..#
+#.HH.o........o.HH.#
+#.H#####X..X#####H.#
+#.H..............H.#
+#@H..o..o..o..o..H.#
+####################

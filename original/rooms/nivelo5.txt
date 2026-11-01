@@ -1,0 +1,18 @@
+nivelo5  640x480  (20x15 cells of 32px)
+legend: H=ladder  o=stelo_poentoj  #=block  F=flyer  a=finmonsterfarilo  E=levelexit  |=marker  M=monster  B=bonus  c=iru_al_bonuso  @=character
+
+####################
+#F.oooooooEoooooo..#
+#.................F#
+#..................#
+#@|aM..............#
+#################..#
+#..oooooooooooooo..#
+#.................a#
+#..#################
+#..oooooooooooooo..#
+#a.............H...#
+###############H...#
+#c.ooooooooooooH####
+#B.............Haaa#
+####################

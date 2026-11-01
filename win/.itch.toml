@@ -1,0 +1,7 @@
+[[actions]]
+name = "play"
+path = "stelo.exe"
+
+[[actions]]
+name = "Older preview version"
+path = "stelo-antauxvido.exe"

@@ -1,0 +1,157 @@
+{
+ "id": 9,
+ "name": "klarigo",
+ "caption": "",
+ "w": 640,
+ "h": 480,
+ "speed": 30,
+ "snap_x": 32,
+ "snap_y": 32,
+ "persistent": false,
+ "bg_color": 0,
+ "creation_code": "",
+ "views_enabled": false,
+ "order_position": 0,
+ "backgrounds": [],
+ "views": [],
+ "instances": [
+  {
+   "x": 64,
+   "y": 416,
+   "object": "ladder"
+  },
+  {
+   "x": 64,
+   "y": 288,
+   "object": "stelo_poentoj"
+  },
+  {
+   "x": 320,
+   "y": 32,
+   "object": "death"
+  },
+  {
+   "x": 64,
+   "y": 96,
+   "object": "block"
+  },
+  {
+   "x": 64,
+   "y": 160,
+   "object": "monster"
+  },
+  {
+   "x": 64,
+   "y": 224,
+   "object": "flyer"
+  },
+  {
+   "x": 64,
+   "y": 352,
+   "object": "levelexit"
+  },
+  {
+   "x": 320,
+   "y": 96,
+   "object": "bonus"
+  },
+  {
+   "x": 320,
+   "y": 160,
+   "object": "transirejo"
+  },
+  {
+   "x": 320,
+   "y": 224,
+   "object": "iru_al_bonuso"
+  },
+  {
+   "x": 96,
+   "y": 32,
+   "object": "tekstilo",
+   "creation_code": "teksto='La ludanto#Movu per la sagoklavoj#Salto = sago supren';"
+  },
+  {
+   "x": 0,
+   "y": 0,
+   "object": "klarigilo"
+  },
+  {
+   "x": 96,
+   "y": 96,
+   "object": "tekstilo",
+   "creation_code": "teksto='Muroj#Oni ne povas nek rajtas#trairi ilin...';"
+  },
+  {
+   "x": 96,
+   "y": 160,
+   "object": "tekstilo",
+   "creation_code": "teksto='Malamiko#Saltu sur la supron por mortigi#tiun kanajlon kaj gajni poentojn';"
+  },
+  {
+   "x": 96,
+   "y": 224,
+   "object": "tekstilo",
+   "creation_code": "teksto='Malamiko#Nemortigebla malamiko';"
+  },
+  {
+   "x": 96,
+   "y": 288,
+   "object": "tekstilo",
+   "creation_code": "teksto='Verda stelo#Prenu por gajni poentojn';"
+  },
+  {
+   "x": 96,
+   "y": 352,
+   "object": "tekstilo",
+   "creation_code": "teksto='Fino de la nivelo';"
+  },
+  {
+   "x": 96,
+   "y": 416,
+   "object": "tekstilo",
+   "creation_code": "teksto='Sxtupetaro#Por iri supren kaj malsupren';"
+  },
+  {
+   "x": 352,
+   "y": 32,
+   "object": "tekstilo",
+   "creation_code": "teksto='Fajro#Atentu ke vi ne falu en la fajron';"
+  },
+  {
+   "x": 352,
+   "y": 96,
+   "object": "tekstilo",
+   "creation_code": "teksto='Koro, donas pli da vivo#La steletoj super la kapo de vi#indikas kiom da vivo vi havas';"
+  },
+  {
+   "x": 352,
+   "y": 160,
+   "object": "tekstilo",
+   "creation_code": "teksto='Transirejo#Se vi preteriris gxin kaj vi mortas,#vi cxi tie rekomencos';"
+  },
+  {
+   "x": 352,
+   "y": 224,
+   "object": "tekstilo",
+   "creation_code": "teksto='Bonusnivelo#Gajnu pli da poentoj per#mortigado de malamikoj#Estas po unu bonusnivelo#en cxiuj niveloj';"
+  },
+  {
+   "x": 64,
+   "y": 0,
+   "object": "tekstilo",
+   "creation_code": "teksto='Klarigo de la reguloj de la ludo';"
+  },
+  {
+   "x": 352,
+   "y": 352,
+   "object": "tekstilo",
+   "creation_code": "teksto='La ludo estas dedicxita al#Tsukuru, mia fora frato el Japanio#           kaj#Aleks, mia plej bona amiko el Francio';"
+  },
+  {
+   "x": 64,
+   "y": 32,
+   "object": "character"
+  }
+ ]
+}

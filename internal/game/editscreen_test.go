@@ -83,3 +83,33 @@ func TestPlayEditedLevel(t *testing.T) {
 		t.Errorf("the game shares the editor's level")
 	}
 }
+
+// The strip's action buttons: undo is done by the screen, save and play are
+// returned for the program.
+func TestEditScreenActions(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, _ := stelo.Files.ReadFile("levels/nivelo1.txt")
+	l, _ := level.Parse(string(data))
+	e := NewEditScreen(a, editor.New(l))
+	orig := e.Doc.Text()
+	e.Press(7*32+3, 2*32+3, false) // paint a block
+	e.Release()
+	if e.Doc.Text() == orig {
+		t.Fatal("nothing painted")
+	}
+	if got := e.Press(actionX+3, paletteY+3, false); got != "undo" || e.Doc.Text() != orig {
+		t.Errorf("undo button: %q, undone %v", got, e.Doc.Text() == orig)
+	}
+	if got := e.Press(actionX+editor.Cell+3, paletteY+3, false); got != "save" {
+		t.Errorf("save button: %q", got)
+	}
+	if got := e.Press(actionX+2*editor.Cell+3, paletteY+3, false); got != "play" {
+		t.Errorf("play button: %q", got)
+	}
+	if actionX < len(Palette)*editor.Cell {
+		t.Errorf("the action buttons cover the palette")
+	}
+}

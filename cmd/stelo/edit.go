@@ -87,7 +87,13 @@ func (a *app) updateEditor() {
 	switch {
 	case (left || right) && !a.edit.down:
 		a.edit.down = true
-		e.Press(x, y, right)
+		switch e.Press(x, y, right) {
+		case "save":
+			a.saveEdited()
+		case "play":
+			a.playEdited()
+			return
+		}
 	case left || right:
 		e.Drag(x, y, right)
 	case a.edit.down:
@@ -98,10 +104,8 @@ func (a *app) updateEditor() {
 	switch {
 	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyZ):
 		e.Undo()
-	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyS): // keep it; on the web also offer the file
-		name, text := e.Doc.L.Name, e.Doc.Text()
-		store.SaveLevel(name, text)
-		store.Download(name, text)
+	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyS):
+		a.saveEdited()
 	case inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft):
 		e.Scroll(-1, 0)
 	case inpututil.IsKeyJustPressed(ebiten.KeyArrowRight):
@@ -113,4 +117,13 @@ func (a *app) updateEditor() {
 	case inpututil.IsKeyJustPressed(ebiten.KeyP):
 		a.playEdited()
 	}
+}
+
+// saveEdited keeps the level being edited; on the web it also offers the
+// file.
+func (a *app) saveEdited() {
+	e := a.edit.screen
+	name, text := e.Doc.L.Name, e.Doc.Text()
+	store.SaveLevel(name, text)
+	store.Download(name, text)
 }

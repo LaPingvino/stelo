@@ -52,18 +52,34 @@ func (e *EditScreen) toolSprite(tool string) *Sprite {
 	return nil
 }
 
+// Actions are the strip's buttons after the tools (for touch screens; the
+// keys do the same: Ctrl+Z, Ctrl+S, P).
+var Actions = []string{"undo", "save", "play"}
+
+// actionX is where the action buttons start: the strip's right end.
+const actionX = ScreenW - 3*editor.Cell
+
 // Press is a mouse press or a touch at screen (x, y): on the strip it picks
-// a tool; on the level it starts painting (right = erase).
-func (e *EditScreen) Press(x, y int, erase bool) {
+// a tool or returns an action ("undo" is done here; "save" and "play" are
+// for the caller); on the level it starts painting (right = erase).
+func (e *EditScreen) Press(x, y int, erase bool) (action string) {
 	e.painted = map[[2]int]bool{}
 	if y >= paletteY {
+		e.painted = nil
+		if x >= actionX {
+			action = Actions[(x-actionX)/editor.Cell]
+			if action == "undo" {
+				e.Undo()
+			}
+			return action
+		}
 		if i := x / editor.Cell; i < len(Palette) {
 			e.Tool = Palette[i]
 		}
-		e.painted = nil
-		return
+		return ""
 	}
 	e.Drag(x, y, erase)
+	return ""
 }
 
 // Drag paints the cell under (x, y), once per cell per press.
@@ -147,6 +163,48 @@ func (e *EditScreen) Draw(dst *image.RGBA) {
 			outline(dst, image.Rect(x, paletteY, x+editor.Cell, ScreenH), color.RGBA{255, 220, 0, 255})
 		}
 	}
+	// The action buttons: undo (a hook arrow), save (a down arrow onto a
+	// bar), play (a triangle) — drawn, the original has no art for them.
+	white := color.RGBA{230, 230, 230, 255}
+	for i, a := range Actions {
+		x0, y0 := actionX+i*editor.Cell, paletteY
+		outline(dst, image.Rect(x0+1, y0+1, x0+editor.Cell-1, ScreenH-1), color.RGBA{90, 90, 100, 255})
+		switch a {
+		case "undo":
+			for d := 0; d < 12; d++ { // the arc's top and right side, then the arrowhead
+				dst.Set(x0+10+d, y0+10, white)
+				dst.Set(x0+22, y0+10+d, white)
+				dst.Set(x0+10+d, y0+22, white)
+			}
+			for d := 0; d < 5; d++ {
+				dst.Set(x0+10+d, y0+10-d, white)
+				dst.Set(x0+10+d, y0+10+d, white)
+			}
+		case "save":
+			for d := 0; d < 14; d++ {
+				dst.Set(x0+16, y0+7+d, white)
+				dst.Set(x0+9+d, y0+24, white)
+			}
+			for d := 0; d < 6; d++ {
+				dst.Set(x0+16-d, y0+20-d, white)
+				dst.Set(x0+16+d, y0+20-d, white)
+			}
+		case "play":
+			for yy := 0; yy < 16; yy++ {
+				w := 8 - abs(yy-8)
+				for xx := 0; xx < w*2; xx++ {
+					dst.Set(x0+11+xx, y0+8+yy, color.RGBA{80, 220, 80, 255})
+				}
+			}
+		}
+	}
+}
+
+func abs(v int) int {
+	if v < 0 {
+		return -v
+	}
+	return v
 }
 
 func outline(dst *image.RGBA, r image.Rectangle, c color.Color) {

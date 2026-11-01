@@ -7,6 +7,7 @@ import (
 	"github.com/LaPingvino/stelo/internal/editor"
 	"github.com/LaPingvino/stelo/internal/game"
 	"github.com/LaPingvino/stelo/internal/level"
+	"github.com/LaPingvino/stelo/internal/store"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -14,7 +15,8 @@ import (
 // The level editor (LOOP item 10): F2 opens it on the room being played (the
 // level as its file has it), P plays the edited level from its start, F2
 // goes back to editing. The mouse (right button erases) or a finger paints;
-// the arrow keys scroll; Ctrl+Z undoes.
+// the arrow keys scroll; Ctrl+Z undoes; Ctrl+S saves (the web also downloads
+// the level file).
 
 // editState keeps the editor between plays: one document per level.
 type editState struct {
@@ -31,12 +33,17 @@ func (a *app) openEditor(name string) {
 	}
 	d := a.edit.docs[name]
 	if d == nil {
-		data, err := stelo.Files.ReadFile("levels/" + name + ".txt")
-		if err != nil {
-			log.Printf("editor: %v", err)
-			return
+		// The saved version (Ctrl+S) if there is one, else the level's file.
+		text, ok := store.LoadLevel(name)
+		if !ok {
+			data, err := stelo.Files.ReadFile("levels/" + name + ".txt")
+			if err != nil {
+				log.Printf("editor: %v", err)
+				return
+			}
+			text = string(data)
 		}
-		l, err := level.Parse(string(data))
+		l, err := level.Parse(text)
 		if err != nil {
 			log.Printf("editor: %v", err)
 			return
@@ -91,6 +98,10 @@ func (a *app) updateEditor() {
 	switch {
 	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyZ):
 		e.Undo()
+	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyS): // keep it; on the web also offer the file
+		name, text := e.Doc.L.Name, e.Doc.Text()
+		store.SaveLevel(name, text)
+		store.Download(name, text)
 	case inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft):
 		e.Scroll(-1, 0)
 	case inpututil.IsKeyJustPressed(ebiten.KeyArrowRight):

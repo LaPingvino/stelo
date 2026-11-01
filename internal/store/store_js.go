@@ -29,3 +29,42 @@ func write(data []byte) {
 		}()
 	}
 }
+
+const levelPrefix = "stelo-level-"
+
+func readLevel(name string) (string, bool) {
+	s := storage()
+	if s.IsUndefined() || s.IsNull() {
+		return "", false
+	}
+	v := s.Call("getItem", levelPrefix+name)
+	if v.IsNull() || v.IsUndefined() {
+		return "", false
+	}
+	return v.String(), true
+}
+
+func writeLevel(name, text string) {
+	if s := storage(); !s.IsUndefined() && !s.IsNull() {
+		func() {
+			defer func() { recover() }()
+			s.Call("setItem", levelPrefix+name, text)
+		}()
+	}
+}
+
+// Download offers the text to the browser as a file to save (<name>.txt).
+func Download(name, text string) bool {
+	defer func() { recover() }()
+	doc := js.Global().Get("document")
+	blob := js.Global().Get("Blob").New([]any{text}, map[string]any{"type": "text/plain"})
+	url := js.Global().Get("URL").Call("createObjectURL", blob)
+	a := doc.Call("createElement", "a")
+	a.Set("href", url)
+	a.Set("download", name+".txt")
+	doc.Get("body").Call("appendChild", a)
+	a.Call("click")
+	a.Call("remove")
+	js.Global().Get("URL").Call("revokeObjectURL", url)
+	return true
+}

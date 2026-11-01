@@ -32,3 +32,32 @@ func write(data []byte) {
 	}
 	_ = os.WriteFile(filepath.Join(d, key+".json"), data, 0o644)
 }
+
+func levelPath(name string) string {
+	d := Dir()
+	if d == "" {
+		return ""
+	}
+	return filepath.Join(d, "levels", filepath.Base(name)+".txt")
+}
+
+func readLevel(name string) (string, bool) {
+	p := levelPath(name)
+	if p == "" {
+		return "", false
+	}
+	data, err := os.ReadFile(p)
+	return string(data), err == nil
+}
+
+func writeLevel(name, text string) {
+	p := levelPath(name)
+	if p == "" || os.MkdirAll(filepath.Dir(p), 0o755) != nil {
+		return
+	}
+	_ = os.WriteFile(p, []byte(text), 0o644)
+}
+
+// Download is the web's file offer; on the desktop the level is saved in
+// the config directory already (SaveLevel), so nothing more is done.
+func Download(name, text string) bool { return false }

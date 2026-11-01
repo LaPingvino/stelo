@@ -1,6 +1,8 @@
 package game
 
 import (
+	"errors"
+	"fmt"
 	"github.com/LaPingvino/stelo/internal/level"
 	"golang.org/x/image/font"
 	"image"
@@ -36,9 +38,44 @@ type Game struct {
 	SaveHighscores func(Highscores)
 	// Levels are edited levels played instead of the files (by name).
 	Levels map[string]*level.Level
+	// Order is the rooms' play order when playing a pack (nil: RoomOrder).
+	Order []string
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
+// order is the rooms' play order: a pack's (Order) or the original's.
+func (g *Game) order() []string {
+	if g.Order != nil {
+		return g.Order
+	}
+	return RoomOrder
+}
+
+// NewGameWithPack plays a pack: its levels in order (as rooms "pack:1",
+// "pack:2", …, so their names can't clash with the original's), then the
+// original's credits and highscores, as after level 5.
+func NewGameWithPack(fsys fs.FS, a *Assets, levels []*level.Level) (*Game, error) {
+	if len(levels) == 0 {
+		return nil, errors.New("an empty pack")
+	}
+	g, err := NewGame(fsys, a, "")
+	if g == nil {
+		return nil, err
+	}
+	g.Levels = map[string]*level.Level{}
+	for i, l := range levels {
+		cp, err := level.Parse(level.Format(l))
+		if err != nil {
+			return nil, err
+		}
+		cp.Name = fmt.Sprintf("pack:%d", i+1)
+		g.Levels[cp.Name] = cp
+		g.Order = append(g.Order, cp.Name)
+	}
+	g.Order = append(g.Order, "danklisto", "finlisto")
+	return g, g.enter(g.Order[0])
+}
+
 // NewGameWithLevel plays an edited level (a copy of it) from its start, as
 // the editor's Play: the room's own name, the rest of the game as usual.
 func NewGameWithLevel(fsys fs.FS, a *Assets, l *level.Level) (*Game, error) {
@@ -189,9 +226,10 @@ func (g *Game) change() error {
 	g.World.Room.Goto = ""
 	switch to {
 	case "@next":
-		for i, n := range RoomOrder {
-			if n == g.World.Level.Name && i+1 < len(RoomOrder) {
-				return g.enter(RoomOrder[i+1])
+		order := g.order()
+		for i, n := range order {
+			if n == g.World.Level.Name && i+1 < len(order) {
+				return g.enter(order[i+1])
 			}
 		}
 		return nil

@@ -8,6 +8,7 @@ import (
 	"github.com/LaPingvino/stelo/internal/editor"
 	"github.com/LaPingvino/stelo/internal/game"
 	"github.com/LaPingvino/stelo/internal/level"
+	"github.com/LaPingvino/stelo/internal/pack"
 	"github.com/LaPingvino/stelo/internal/store"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -17,7 +18,8 @@ import (
 // level as its file has it), P plays the edited level from its start, F2
 // goes back to editing. The mouse (right button erases) or a finger paints;
 // the arrow keys scroll; Ctrl+Z undoes; Ctrl+S saves (the web also downloads
-// the level file); a level file dropped on the window opens in the editor.
+// the level file); a level file dropped on the window opens in the editor, a
+// dropped pack folder plays.
 
 // editState keeps the editor between plays: one document per level.
 type editState struct {
@@ -150,6 +152,18 @@ func (a *app) saveEdited() {
 // openDropped opens a level file dropped on the window (desktop or browser)
 // in the editor, replacing any edits of a level with the same name.
 func (a *app) openDropped(files fs.FS) {
+	// A dropped folder holding a pack plays it.
+	if entries, err := fs.ReadDir(files, "."); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			if p, err := pack.Load(files, e.Name()); err == nil {
+				a.playPack(p)
+				return
+			}
+		}
+	}
 	l, err := editor.FindLevel(files)
 	if err != nil {
 		log.Printf("editor: %v", err)
@@ -174,4 +188,20 @@ func (a *app) openText(text string) {
 	}
 	a.edit.docs[l.Name] = editor.New(l)
 	a.openEditor(l.Name)
+}
+
+// playPack plays a pack from its first level (leaving the editor).
+func (a *app) playPack(p *pack.Pack) {
+	g, err := game.NewGameWithPack(stelo.Files, a.assets, p.Levels)
+	if err != nil {
+		log.Printf("pack %s: %v", p.Name, err)
+		return
+	}
+	if a.game != nil {
+		g.G.Sound = a.game.G.Sound
+		g.Highscores, g.SaveHighscores = a.game.Highscores, a.game.SaveHighscores
+	}
+	a.game = g
+	a.edit.on = false
+	ebiten.SetWindowTitle("Stelo — " + p.Name)
 }

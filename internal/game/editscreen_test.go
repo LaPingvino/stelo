@@ -116,3 +116,46 @@ func TestEditScreenActions(t *testing.T) {
 		t.Errorf("the action buttons cover the palette")
 	}
 }
+
+// A pack plays its levels in order, then the credits: a pack of levels 3
+// and 1 starts in level 3; its exit leads to level 1, whose exit leads to
+// the credits.
+func TestPlayPack(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var ls []*level.Level
+	for _, n := range []string{"nivelo3", "nivelo1"} {
+		data, _ := stelo.Files.ReadFile("levels/" + n + ".txt")
+		l, _ := level.Parse(string(data))
+		ls = append(ls, l)
+	}
+	g, err := NewGameWithPack(stelo.Files, a, ls)
+	if err != nil {
+		t.Fatal(err)
+	}
+	coins := func() int { return len(g.World.Room.All("stelo_poentoj")) }
+	if g.World.Level.Name != "pack:1" || coins() != countCoins(ls[0]) {
+		t.Fatalf("starts in %s with %d coins", g.World.Level.Name, coins())
+	}
+	for _, want := range []string{"pack:2", "danklisto"} {
+		g.World.Room.Goto = "@next"
+		if err := g.change(); err != nil {
+			t.Fatal(err)
+		}
+		if g.World.Level.Name != want {
+			t.Fatalf("next: %s, want %s", g.World.Level.Name, want)
+		}
+	}
+}
+
+func countCoins(l *level.Level) int {
+	n := 0
+	for _, in := range l.Instances {
+		if in.Object == "stelo_poentoj" {
+			n++
+		}
+	}
+	return n
+}

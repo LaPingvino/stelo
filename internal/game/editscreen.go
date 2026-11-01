@@ -254,3 +254,28 @@ func (g *Game) DrawPackChoice(dst *image.RGBA, name string) {
 	d := font.Drawer{Dst: dst, Src: image.NewUniform(color.RGBA{255, 255, 255, 255}), Face: f, Dot: fixed.P((ScreenW-w)/2, y+m.Ascent.Ceil())}
 	d.DrawString(s)
 }
+
+// Prompt is a question asked over the editor (a pack's name, its author):
+// the label and the text typed so far.
+type Prompt struct {
+	Label, Text string
+}
+
+// DrawPrompt draws the prompt in a dark box across the middle of the screen.
+func (e *EditScreen) DrawPrompt(dst *image.RGBA, p *Prompt, f font.Face) {
+	if p == nil || f == nil {
+		return
+	}
+	m := f.Metrics()
+	h := 2*m.Height.Ceil() + 24
+	y0 := (ScreenH - h) / 2
+	r := image.Rect(40, y0, ScreenW-40, y0+h)
+	draw.Draw(dst, r, image.NewUniform(color.RGBA{20, 20, 28, 240}), image.Point{}, draw.Over)
+	outline(dst, r, color.RGBA{255, 220, 0, 255})
+	white := image.NewUniform(color.RGBA{255, 255, 255, 255})
+	d := font.Drawer{Dst: dst, Src: white, Face: f, Dot: fixed.P(r.Min.X+12, y0+10+m.Ascent.Ceil())}
+	d.DrawString(p.Label)
+	d = font.Drawer{Dst: dst, Src: image.NewUniform(color.RGBA{255, 220, 0, 255}), Face: f,
+		Dot: fixed.P(r.Min.X+12, y0+14+m.Height.Ceil()+m.Ascent.Ceil())}
+	d.DrawString(hats(p.Text) + "_")
+}

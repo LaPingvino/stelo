@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"log"
 	"sort"
+	"strings"
 
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/editor"
@@ -32,6 +33,10 @@ type editState struct {
 	// picked receives a level file's text from the browser's file picker
 	// (read on the browser's side; taken in Update).
 	picked chan string
+	// prompt, when set, asks the pack's name and then its author before
+	// saving the pack (Enter goes on, Esc cancels).
+	prompt   *game.Prompt
+	packName string
 }
 
 // openEditor edits the named level (keeping earlier edits of it).
@@ -86,6 +91,10 @@ func (a *app) playEdited() {
 
 // updateEditor handles the editor's input for a frame.
 func (a *app) updateEditor() {
+	if a.edit.prompt != nil {
+		a.updatePrompt()
+		return
+	}
 	select {
 	case text := <-a.edit.picked:
 		a.openText(text)
@@ -128,7 +137,7 @@ func (a *app) updateEditor() {
 	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyZ):
 		e.Undo()
 	case ctrl && ebiten.IsKeyPressed(ebiten.KeyShift) && inpututil.IsKeyJustPressed(ebiten.KeyS):
-		a.savePack()
+		a.edit.prompt = &game.Prompt{Label: "Nomo de la pako:", Text: "Mia Stelo-pako"}
 	case ctrl && inpututil.IsKeyJustPressed(ebiten.KeyS):
 		a.saveEdited()
 	case inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft):
@@ -214,13 +223,13 @@ func (a *app) playPack(p *pack.Pack) {
 // savePack saves every level edited this session as a pack (levels in name
 // order): a zip download on the web, a pack folder in the config directory
 // on the desktop.
-func (a *app) savePack() {
+func (a *app) savePack(name, author string) {
 	names := make([]string, 0, len(a.edit.docs))
 	for n := range a.edit.docs {
 		names = append(names, n)
 	}
 	sort.Strings(names)
-	p := &pack.Pack{Name: "Mia Stelo-pako"}
+	p := &pack.Pack{Name: name, Author: author}
 	for _, n := range names {
 		p.Levels = append(p.Levels, a.edit.docs[n].L)
 	}
@@ -233,4 +242,47 @@ func (a *app) savePack() {
 		return
 	}
 	store.SavePack(p.Name, data)
+}
+
+// updatePrompt types into the prompt: characters, Backspace, Enter (the name,
+// then the author, then the pack is saved), Esc (cancel).
+func (a *app) updatePrompt() {
+	p := a.edit.prompt
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		a.edit.prompt = nil
+		return
+	}
+	for _, c := range ebiten.AppendInputChars(nil) {
+		if len([]rune(p.Text)) < 40 {
+			p.Text += string(c)
+		}
+	}
+	for _, c := range pollPhoneKeys().chars {
+		if c == '\b' {
+			if r := []rune(p.Text); len(r) > 0 {
+				p.Text = string(r[:len(r)-1])
+			}
+		} else if len([]rune(p.Text)) < 40 {
+			p.Text += string(c)
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+		if r := []rune(p.Text); len(r) > 0 {
+			p.Text = string(r[:len(r)-1])
+		}
+	}
+	if !inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		return
+	}
+	name := game.Hats(strings.TrimSpace(p.Text)) // kept with the true letters
+	if name == "" {
+		return
+	}
+	if p.Label == "Nomo de la pako:" {
+		a.edit.packName = name
+		a.edit.prompt = &game.Prompt{Label: "Aŭtoro:"}
+		return
+	}
+	a.edit.prompt = nil
+	a.savePack(a.edit.packName, name)
 }

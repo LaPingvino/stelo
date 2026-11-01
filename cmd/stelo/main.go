@@ -104,6 +104,9 @@ func (a *app) Update() error {
 func (a *app) Draw(screen *ebiten.Image) {
 	if a.edit.on {
 		a.edit.screen.Draw(a.frame)
+		if a.game != nil {
+			a.edit.screen.DrawPrompt(a.frame, a.edit.prompt, a.game.TextFont)
+		}
 		screen.WritePixels(a.frame.Pix)
 		return
 	}

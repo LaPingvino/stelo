@@ -14,3 +14,7 @@ var hatReplacer = strings.NewReplacer(
 
 // hats converts x-system Esperanto to the true letters.
 func hats(s string) string { return hatReplacer.Replace(s) }
+
+// Hats is hats for other packages: typed x-system letters (cx, gx, …) as
+// the true Esperanto letters (pack names and authors are kept that way).
+func Hats(s string) string { return hats(s) }

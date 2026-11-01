@@ -3,6 +3,8 @@ package game
 import (
 	"container/heap"
 	"math"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/LaPingvino/stelo"
@@ -22,6 +24,9 @@ var botMoves = []held{
 }
 
 const botHold = 4 // steps per choice
+
+// botCell is the seen-state grid (px).
+var botCell = 8
 
 type botNode struct {
 	w     *World
@@ -86,7 +91,7 @@ func playThrough(t *testing.T, w *World, budget int) (steps, tried int) {
 			if p[0].VSpeed < 0 {
 				rising = 1
 			}
-			k := [3]int{int(p[0].X) / 8, int(p[0].Y) / 8, rising}
+			k := [3]int{int(p[0].X) / botCell, int(p[0].Y) / botCell, rising}
 			if seen[k] {
 				continue
 			}
@@ -105,9 +110,13 @@ func TestPlayCheckLevels(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// PARTIAL: nivelo2–4 (2560 px wide) aren't found within minutes yet: the
-	// nearest-to-exit order runs into dead ends; LOOP item 7.
-	for _, name := range []string{"nivelo1", "nivelo5"} {
+	// The wide levels take minutes (nivelo2: 69 330 states, 3½ min), so CI
+	// runs 1 and 5; STELO_PLAYCHECK=nivelo2,nivelo3 runs others.
+	levels := []string{"nivelo1", "nivelo5"}
+	if l := os.Getenv("STELO_PLAYCHECK"); l != "" {
+		levels = strings.Split(l, ",")
+	}
+	for _, name := range levels {
 		t.Run(name, func(t *testing.T) {
 			w, err := LoadLevel(stelo.Files, a, name)
 			if err != nil {

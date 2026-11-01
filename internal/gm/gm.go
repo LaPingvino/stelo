@@ -36,6 +36,9 @@ type Object struct {
 	// an event runs its parent's; "collision with P" and with(P) also cover
 	// P's children.
 	Parent *Object
+	// cache holds the merged handlers (built on first use: events are all
+	// set up before the first step).
+	cache *objCache
 }
 
 // IsA reports whether the object is the named object or one of its children.
@@ -198,7 +201,10 @@ func (r *Room) PlaceFree(in *Instance, x, y float64) bool {
 		return true
 	}
 	b := in.BoxAt(x, y)
-	for _, o := range r.live() {
+	for _, o := range r.Instances {
+		if o.Destroyed {
+			continue
+		}
 		if o != in && o.Obj.Solid && o.Obj.Mask && b.Overlaps(o.BoxAt(o.X, o.Y)) {
 			return false
 		}
@@ -213,7 +219,10 @@ func (r *Room) PlaceMeeting(in *Instance, x, y float64, obj string) *Instance {
 		return nil
 	}
 	b := in.BoxAt(x, y)
-	for _, o := range r.live() {
+	for _, o := range r.Instances {
+		if o.Destroyed {
+			continue
+		}
 		if o != in && o.Obj.IsA(obj) && o.Obj.Mask && b.Overlaps(o.BoxAt(o.X, o.Y)) {
 			return o
 		}
@@ -225,7 +234,10 @@ func (r *Room) PlaceMeeting(in *Instance, x, y float64, obj string) *Instance {
 // creation order.
 func (r *Room) All(obj string) []*Instance {
 	var out []*Instance
-	for _, o := range r.live() {
+	for _, o := range r.Instances {
+		if o.Destroyed {
+			continue
+		}
 		if o.Obj.IsA(obj) {
 			out = append(out, o)
 		}

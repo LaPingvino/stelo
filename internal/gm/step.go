@@ -121,16 +121,18 @@ func (r *Room) Step(in Input) {
 		}
 	})
 	each(func(i *Instance) {
-		keys := i.Obj.keyHandlers(func(e *Events) map[Key]Handler { return e.Key })
-		for _, k := range sortedKeys(keys) {
+		c := i.Obj.cached()
+		keys := c.key
+		for _, k := range c.keyOrder {
 			if in.Held(k) {
 				keys[k](r, i)
 			}
 		}
 	})
 	each(func(i *Instance) {
-		keys := i.Obj.keyHandlers(func(e *Events) map[Key]Handler { return e.KeyPress })
-		for _, k := range sortedKeys(keys) {
+		c := i.Obj.cached()
+		keys := c.press
+		for _, k := range c.pressOrder {
 			if in.Pressed(k) {
 				keys[k](r, i)
 			}
@@ -164,8 +166,9 @@ func (r *Room) Step(in Input) {
 		}
 	})
 	each(func(i *Instance) {
-		cols := i.Obj.collisionHandlers()
-		for _, name := range sortedNames(cols) {
+		c := i.Obj.cached()
+		cols := c.coll
+		for _, name := range c.collOrder {
 			h := cols[name]
 			for _, o := range r.Instances {
 				if o == i || o.Destroyed || i.Destroyed || !o.Obj.IsA(name) || !i.Obj.Mask || !o.Obj.Mask {
@@ -233,4 +236,25 @@ func sortedNames(m map[string]CollisionHandler) []string {
 	}
 	sort.Strings(ns)
 	return ns
+}
+
+// objCache is an object's merged handlers, in the order Step runs them.
+type objCache struct {
+	key, press           map[Key]Handler
+	keyOrder, pressOrder []Key
+	coll                 map[string]CollisionHandler
+	collOrder            []string
+}
+
+func (o *Object) cached() *objCache {
+	if o.cache == nil {
+		c := &objCache{
+			key:   o.keyHandlers(func(e *Events) map[Key]Handler { return e.Key }),
+			press: o.keyHandlers(func(e *Events) map[Key]Handler { return e.KeyPress }),
+			coll:  o.collisionHandlers(),
+		}
+		c.keyOrder, c.pressOrder, c.collOrder = sortedKeys(c.key), sortedKeys(c.press), sortedNames(c.coll)
+		o.cache = c
+	}
+	return o.cache
 }

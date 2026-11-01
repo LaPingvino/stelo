@@ -5,6 +5,9 @@ import (
 	"image/color"
 	"image/draw"
 
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
+
 	"github.com/LaPingvino/stelo/internal/editor"
 )
 
@@ -233,4 +236,21 @@ func outline(dst *image.RGBA, r image.Rectangle, c color.Color) {
 		dst.Set(r.Min.X, y, c)
 		dst.Set(r.Max.X-1, y, c)
 	}
+}
+
+// DrawPackChoice draws the title's pack line (when there are packs besides
+// the original, as in The Puzzle Pits): "<  name  >" centred in the empty
+// strip under the title's instructions (clear of the original's art), in the
+// labels' font.
+func (g *Game) DrawPackChoice(dst *image.RGBA, name string) {
+	f := g.TextFont
+	if f == nil {
+		return
+	}
+	s := "<   " + name + "   >"
+	w := font.MeasureString(f, s).Ceil()
+	m := f.Metrics()
+	y := 36
+	d := font.Drawer{Dst: dst, Src: image.NewUniform(color.RGBA{255, 255, 255, 255}), Face: f, Dot: fixed.P((ScreenW-w)/2, y+m.Ascent.Ceil())}
+	d.DrawString(s)
 }

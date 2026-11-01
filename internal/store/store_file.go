@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/LaPingvino/stelo/internal/pack"
 )
 
 // Dir is where the desktop game keeps its files (overridable for tests).
@@ -99,4 +101,28 @@ func SavePack(name string, zipData []byte) {
 		}
 		_ = os.WriteFile(p, data, 0o644)
 	}
+}
+
+// ListPacks reads the packs in <config>/stelo/packs/ (each a folder, see
+// pack.Load), in folder-name order; unreadable ones are skipped.
+func ListPacks() []*pack.Pack {
+	d := Dir()
+	if d == "" {
+		return nil
+	}
+	root := filepath.Join(d, "packs")
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil
+	}
+	var out []*pack.Pack
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		if p, err := pack.Load(os.DirFS(root), e.Name()); err == nil {
+			out = append(out, p)
+		}
+	}
+	return out
 }

@@ -2,7 +2,11 @@
 
 package store
 
-import "syscall/js"
+import (
+	"syscall/js"
+
+	"github.com/LaPingvino/stelo/internal/pack"
+)
 
 func storage() js.Value {
 	defer func() { recover() }() // storage can be refused (private mode, blocked site data)
@@ -116,3 +120,6 @@ func SavePack(name string, zipData []byte) {
 	a.Call("remove")
 	js.Global().Get("URL").Call("revokeObjectURL", url)
 }
+
+// ListPacks: on the web packs are opened or dropped, not listed.
+func ListPacks() []*pack.Pack { return nil }

@@ -8,6 +8,7 @@ import (
 	"github.com/LaPingvino/stelo"
 	"github.com/LaPingvino/stelo/internal/game"
 	"github.com/LaPingvino/stelo/internal/gm"
+	"github.com/LaPingvino/stelo/internal/pack"
 	"github.com/LaPingvino/stelo/internal/sound"
 	"github.com/LaPingvino/stelo/internal/store"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,6 +22,10 @@ type app struct {
 	assets *game.Assets
 	touch  touchState
 	edit   editState
+	// packs are the playable packs: the original first, then the ones in
+	// the config folder; pack is the one chosen on the title.
+	packs  []*pack.Pack
+	pack   int
 	sound  *sound.Player
 	game   *game.Game
 	room   int
@@ -61,6 +66,22 @@ func (a *app) Update() error {
 		a.updateEditor()
 		return nil
 	}
+	// The title's pack line (Pits' way): Left/Right choose while the title
+	// waits; the next other key starts the chosen pack.
+	if a.game != nil && a.game.Title && len(a.packs) > 1 {
+		switch {
+		case inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft):
+			a.pack = (a.pack + len(a.packs) - 1) % len(a.packs)
+			return nil
+		case inpututil.IsKeyJustPressed(ebiten.KeyArrowRight):
+			a.pack = (a.pack + 1) % len(a.packs)
+			return nil
+		}
+		if a.pack > 0 && (len(inpututil.AppendJustPressedKeys(nil)) > 0 || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)) {
+			a.playPack(a.packs[a.pack])
+			return nil
+		}
+	}
 	// Development aid until the title and cheats are in: Page Up/Down restart at
 	// the previous/next room.
 	if inpututil.IsKeyJustPressed(ebiten.KeyPageDown) {
@@ -88,6 +109,9 @@ func (a *app) Draw(screen *ebiten.Image) {
 		return
 	}
 	a.game.Draw(a.frame)
+	if a.game.Title && len(a.packs) > 1 {
+		a.game.DrawPackChoice(a.frame, a.packs[a.pack].Name)
+	}
 	screen.WritePixels(a.frame.Pix)
 	a.touch.draw(screen)
 }
@@ -102,6 +126,9 @@ func main() {
 	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH))}
 	a.load(0) // the title, then the rules screen
 	a.touch.seen = showPadsFromURL()
+	if o, err := pack.Original(stelo.Files); err == nil {
+		a.packs = append([]*pack.Pack{o}, store.ListPacks()...)
+	}
 	if editFromURL() { // ?edit: straight into the editor on level 1
 		a.openEditor("nivelo1")
 	}

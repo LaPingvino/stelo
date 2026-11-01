@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/LaPingvino/stelo"
+	"github.com/LaPingvino/stelo/internal/pack"
+
 	"github.com/LaPingvino/stelo/internal/game"
 )
 
@@ -50,5 +53,22 @@ func TestSavePackUnzips(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(dir, "packs", "Mia pako", "pack.txt"))
 	if err != nil || string(data) != "name=Mia pako\n" {
 		t.Errorf("%q %v", data, err)
+	}
+}
+
+// A pack saved with SavePack is listed.
+func TestListPacks(t *testing.T) {
+	dir := t.TempDir()
+	Dir = func() string { return dir }
+	o, err := pack.Original(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o.Name = "Testo"
+	data, _ := o.Zip()
+	SavePack(o.Name, data)
+	ps := ListPacks()
+	if len(ps) != 1 || ps[0].Name != "Testo" || len(ps[0].Levels) != 5 {
+		t.Fatalf("%d packs", len(ps))
 	}
 }

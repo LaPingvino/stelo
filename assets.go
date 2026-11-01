@@ -9,5 +9,5 @@ import "embed"
 // fonts/*.ttf (Liberation Sans,
 // SIL Open Font License, standing in for the original's Arial).
 //
-//go:embed original/project.json original/sprites/*.png original/backgrounds/*.png original/sounds/*.wav levels/*.txt fonts/*.ttf
+//go:embed original/project.json original/sprites/*.png original/backgrounds/*.png original/sounds/*.wav levels/*.txt fonts/*.ttf art/nova/*.png
 var Files embed.FS

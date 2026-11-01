@@ -25,6 +25,8 @@ type World struct {
 	Room         *gm.Room
 	ViewX, ViewY int
 	follow       *gm.Instance
+	// Skin, if set, replaces the original sprites when drawing (item 11).
+	Skin *Skin
 	// Font is the HUD font (HUDFont); nil = no score text. TextFont is the
 	// text labels' font (TextFont).
 	Font, TextFont font.Face
@@ -137,12 +139,30 @@ func (w *World) Draw(dst *image.RGBA) {
 	}
 	insts := append([]*gm.Instance(nil), w.Room.Instances...)
 	sort.SliceStable(insts, func(i, j int) bool { return insts[i].Obj.Depth > insts[j].Obj.Depth })
+	var blocks map[[2]int]bool // the skin's floor tops: blocks with no block above
+	if w.Skin != nil && w.Skin.BlockTop != nil {
+		blocks = map[[2]int]bool{}
+		for _, in := range w.Room.Instances {
+			if in.Obj.Name == "block" && !in.Destroyed {
+				blocks[[2]int{int(in.X), int(in.Y)}] = true
+			}
+		}
+	}
 	for _, in := range insts {
 		sp := w.Assets.Sprites[in.Sprite]
 		if !in.Obj.Visible || in.Destroyed || sp == nil || len(sp.Frames) == 0 {
 			continue
 		}
-		img := sp.Frames[int(in.ImageIndex)%len(sp.Frames)]
+		frames := sp.Frames
+		if w.Skin != nil {
+			if fr := w.Skin.Sprites[in.Sprite]; len(fr) > 0 {
+				frames = fr
+			}
+			if in.Obj.Name == "block" && blocks != nil && !blocks[[2]int{int(in.X), int(in.Y) - 32}] {
+				frames = w.Skin.BlockTop
+			}
+		}
+		img := frames[int(in.ImageIndex)%len(frames)]
 		x, y := int(in.X)-w.ViewX, int(in.Y)-w.ViewY
 		r := img.Bounds().Add(image.Pt(x, y))
 		if r.Overlaps(dst.Bounds()) {

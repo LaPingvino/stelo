@@ -56,6 +56,10 @@ func (a *app) Update() error {
 	if files := ebiten.DroppedFiles(); files != nil { // a level file dropped on the window
 		a.openDropped(files)
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyF3) && a.game != nil { // the original art ⇄ the new skin
+		a.toggleSkin()
+		return nil
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF2) && a.game != nil { // the editor, on this room
 		if a.edit.on {
 			a.edit.on = false // back to the game as it was
@@ -139,6 +143,9 @@ func main() {
 	if o, err := pack.Original(stelo.Files); err == nil {
 		a.packs = append([]*pack.Pack{o}, store.ListPacks()...)
 	}
+	if novaFromURL() { // ?nova: start with the new art
+		a.toggleSkin()
+	}
 	if editFromURL() { // ?edit: straight into the editor on level 1
 		a.openEditor("nivelo1")
 	}
@@ -198,4 +205,21 @@ func ebitenKey(k gm.Key) ebiten.Key {
 		return ebiten.KeyPageDown
 	}
 	return ebiten.KeyF24
+}
+
+// toggleSkin switches between the original art and the new skin (F3).
+func (a *app) toggleSkin() {
+	if a.game.Skin == nil {
+		s, err := game.LoadNovaSkin(stelo.Files)
+		if err != nil {
+			log.Printf("skin: %v", err)
+			return
+		}
+		a.game.Skin = s
+	} else {
+		a.game.Skin = nil
+	}
+	if a.game.World != nil {
+		a.game.World.Skin = a.game.Skin
+	}
 }

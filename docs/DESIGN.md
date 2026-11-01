@@ -39,3 +39,24 @@ with its rules and level format written down; an editor on top that makes levels
 - Language: Esperanto only, or also English?
 - Cheat codes: KEEP (Joop, 2026-11-01). Credits screen: proposed keep.
 - DONE: recovered source published at github.com/LaPingvino/stelo (original/), reader at github.com/LaPingvino/gm53-reader (MIT).
+
+## New art (item 11)
+
+Joop's commissioned 32×32 set is in `art/nova/`, a drawing-only skin: collision boxes stay the original's, so the
+rules don't change. F3 switches it on and off; `?nova` on the web starts with it. The roles (the artist was unsure;
+ours to choose, Joop 2026-11-01):
+
+| Original | New art |
+|---|---|
+| player (sprite_right / left / climbing) | the protagonist star (its left sheet; climbing: its first frame) |
+| monster, b_monster | the orange villain (mirrored facing left) |
+| flyer | the green villain (it can't be stomped, so it looks meaner) |
+| star coin | the orb on a pole |
+| heart, diamond | heart, diamond |
+| checkpoint unused / used | the checkpoint's first frame / all its frames (shining) |
+| fire | the spikes |
+| level exit | the arrow sign |
+| ladder | the ladder |
+| block | floor with grass where nothing is above it, the wall elsewhere |
+
+Not covered (original art kept): the flattened monster, the life icon, the title, the backgrounds.

@@ -7,3 +7,5 @@ func showPadsFromURL() bool { return false }
 func pollPhoneKeys() phoneKeys { return phoneKeys{} }
 
 func editFromURL() bool { return false }
+
+func novaFromURL() bool { return false }

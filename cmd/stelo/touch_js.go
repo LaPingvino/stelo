@@ -37,3 +37,8 @@ func pollPhoneKeys() phoneKeys {
 func editFromURL() bool {
 	return strings.Contains(js.Global().Get("location").Get("search").String(), "edit")
 }
+
+// novaFromURL: "?nova" in the page's address starts with the new art.
+func novaFromURL() bool {
+	return strings.Contains(js.Global().Get("location").Get("search").String(), "nova")
+}

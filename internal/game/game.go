@@ -43,6 +43,8 @@ type Game struct {
 	// OnLevel, if set, is told the pack level (1-based) entered when playing
 	// a pack or the original's levels (progress per pack).
 	OnLevel func(n int)
+	// Skin is the drawing skin for every room (nil: the original art).
+	Skin *Skin
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
@@ -135,6 +137,7 @@ func (g *Game) enter(room string) error {
 		}
 	}
 	w.Room.G = g.G
+	w.Skin = g.Skin
 	w.Font, w.TextFont = g.Font, g.TextFont
 	g.World = w
 	// The persistent life controller exists from the room that places it
@@ -287,6 +290,7 @@ func (g *Game) restart() {
 	}
 	ng.Highscores, ng.SaveHighscores, ng.G.Sound = hs, save, snd
 	ng.OnLevel = g.OnLevel
+	ng.Skin = g.Skin
 	*g = *ng
 }
 

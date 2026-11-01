@@ -26,6 +26,8 @@ type Object struct {
 	// Mask reports whether the object collides at all (an object without a
 	// sprite has no box).
 	Mask bool
+	// Events are the object's event handlers.
+	Events Events
 }
 
 // Instance is one instance in the room.

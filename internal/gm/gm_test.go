@@ -64,3 +64,67 @@ func TestGravityAndCap(t *testing.T) {
 		t.Errorf("falling direction %v, want 270", d)
 	}
 }
+
+type keys struct{ held, pressed map[Key]bool }
+
+func (k keys) Held(x Key) bool    { return k.held[x] }
+func (k keys) Pressed(x Key) bool { return k.pressed[x] }
+
+var noKeys = keys{}
+
+func TestAlarmFiresAfterNSteps(t *testing.T) {
+	fired := 0
+	obj := &Object{Name: "dead"}
+	obj.Events.Alarm[0] = func(r *Room, self *Instance) { fired++; self.Destroyed = true }
+	r := &Room{W: 640, H: 480}
+	in := r.Create(obj, 0, 0)
+	in.Alarm[0] = 10 // monster_dead: action_set_alarm(10, 0)
+	for s := 1; s <= 10; s++ {
+		r.Step(noKeys)
+		if (s < 10) != (fired == 0) {
+			t.Fatalf("step %d: fired %d", s, fired)
+		}
+	}
+	if len(r.Instances) != 0 {
+		t.Error("destroyed instance removed at the end of the step")
+	}
+}
+
+func TestSolidCollisionPutsBackThenEvent(t *testing.T) {
+	r := &Room{W: 640, H: 480}
+	p := &Object{Name: "character", Mask: true, BBox: Box{7, 23, 2, 31}}
+	var sawY float64
+	p.Events.Collision = map[string]CollisionHandler{"block": func(r *Room, self, other *Instance) {
+		sawY = self.Y
+		r.MoveContactSolid(self, self.Direction(), 12) // character's block event
+		self.VSpeed = 0
+	}}
+	r.Create(block, 64, 96)
+	in := r.Create(p, 64, 60)
+	in.VSpeed = 6 // falling: 60 → 66 overlaps the floor (box bottom 97)
+	r.Step(noKeys)
+	if sawY != 60 {
+		t.Errorf("event ran at y %v, want the previous position 60", sawY)
+	}
+	if in.Y != 64 || in.VSpeed != 0 {
+		t.Errorf("after the event: y %v vspeed %v, want 64 (on the floor) and 0", in.Y, in.VSpeed)
+	}
+}
+
+func TestOutsideRoomAndKeys(t *testing.T) {
+	r := &Room{W: 640, H: 480}
+	p := &Object{Name: "character", Mask: true, BBox: Box{7, 23, 2, 31}}
+	out := 0
+	p.Events.OutsideRoom = func(r *Room, self *Instance) { out++ }
+	p.Events.Key = map[Key]Handler{KeyRight: func(r *Room, self *Instance) { self.X += 4 }}
+	in := r.Create(p, 600, 470)
+	r.Step(keys{held: map[Key]bool{KeyRight: true}})
+	if in.X != 604 || out != 0 {
+		t.Errorf("x %v outside %d", in.X, out)
+	}
+	in.Y = 480 - 1 // box top at 481: entirely below the room
+	r.Step(noKeys)
+	if out != 1 {
+		t.Errorf("outside event: %d", out)
+	}
+}

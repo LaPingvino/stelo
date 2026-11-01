@@ -1,6 +1,7 @@
 package game
 
 import (
+	"golang.org/x/image/font"
 	"io/fs"
 
 	"github.com/LaPingvino/stelo/internal/gm"
@@ -19,11 +20,15 @@ type Game struct {
 	G      *gm.Globals
 	World  *World
 	saved  *World // the persistent level left for the bonus level
+	Font   font.Face
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
 func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 	g := &Game{FS: fsys, Assets: a, G: &gm.Globals{Lives: 3, Vars: map[string]float64{}}}
+	if f, err := HUDFont(fsys); err == nil {
+		g.Font = f
+	}
 	return g, g.enter(room)
 }
 
@@ -33,6 +38,7 @@ func (g *Game) enter(room string) error {
 		return err
 	}
 	w.Room.G = g.G
+	w.Font = g.Font
 	g.World = w
 	return nil
 }

@@ -23,6 +23,7 @@ func TestLevel1MatchesOriginalRender(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := image.NewRGBA(image.Rect(0, 0, ScreenW, ScreenH))
+	w.Room.G = nil // the level only, without the life controller's HUD
 	w.Draw(got)
 	f, err := os.Open("../../original/rooms/nivelo1.png")
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/LaPingvino/stelo/internal/gm"
 	"github.com/LaPingvino/stelo/internal/level"
+	"golang.org/x/image/font"
 )
 
 // Screen size (the original's window and view).
@@ -23,6 +24,8 @@ type World struct {
 	Room         *gm.Room
 	ViewX, ViewY int
 	follow       *gm.Instance
+	// Font is the HUD font (HUDFont); nil = no score text.
+	Font font.Face
 }
 
 // Object returns the engine object for an original object (sprite box,
@@ -132,5 +135,8 @@ func (w *World) Draw(dst *image.RGBA) {
 		if r.Overlaps(dst.Bounds()) {
 			draw.Draw(dst, r, img, image.Point{}, draw.Over)
 		}
+	}
+	if g := w.Room.G; g != nil {
+		w.drawHUD(dst, g.Score, g.Lives)
 	}
 }

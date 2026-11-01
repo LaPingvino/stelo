@@ -141,6 +141,19 @@ func (r *Room) Step(in Input) {
 			h(r, i)
 		}
 	})
+	// Timelines: the moment at the current position runs, then the position
+	// advances by 1. ASSUMPTION [engine]: after the step event, before
+	// movement; the first moment checked is position 0.
+	each(func(i *Instance) {
+		if t := i.Timeline; t != nil {
+			if h := t.Moments[i.TimelinePos]; h != nil {
+				h(r, i)
+			}
+			if i.Timeline == t {
+				i.TimelinePos++
+			}
+		}
+	})
 	each(func(i *Instance) {
 		i.XPrevious, i.YPrevious = i.X, i.Y
 		i.Move()

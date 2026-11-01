@@ -74,6 +74,16 @@ type Instance struct {
 	ImageSpeed float64
 	// Vars holds the object's own variables (used, timelineaktiva, …).
 	Vars map[string]float64
+	// Timeline is the running timeline (nil: none) and TimelinePos its
+	// position (timeline_index, timeline_position; speed 1).
+	Timeline    *Timeline
+	TimelinePos int
+}
+
+// Timeline is a Game Maker timeline: handlers at step positions (moments).
+type Timeline struct {
+	Name    string
+	Moments map[int]Handler
 }
 
 // NewInstance places an instance; its start and previous position are where it

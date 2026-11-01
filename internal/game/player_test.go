@@ -166,3 +166,62 @@ func TestRoomChanges(t *testing.T) {
 		t.Errorf("exit: in %s", g.World.Level.Name)
 	}
 }
+
+// Level 5's spawners: with no monsters left, each starts a wave — monsters at
+// steps 30, 60 and 90 at the spawner — and may start again after the third.
+func TestLevel5Waves(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo5")
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := g.World.Room
+	spawners := len(r.All("finmonsterfarilo"))
+	for _, m := range r.All("monster") {
+		m.Destroyed = true
+	}
+	g.World.Room.All("character")[0].Vars["netusxu"] = 1 // keep the player out of it
+	count := func() int { return len(r.All("monster")) }
+	for range 31 {
+		g.Step(held{})
+	}
+	if count() != spawners {
+		t.Fatalf("after 31 steps: %d monsters, want one per spawner (%d)", count(), spawners)
+	}
+	for range 60 {
+		g.Step(held{})
+	}
+	if count() != 3*spawners {
+		t.Errorf("after 91 steps: %d monsters, want %d", count(), 3*spawners)
+	}
+}
+
+// The bonus level's b_monsters fall (gravity) and land on blocks.
+func TestBonusMonstersFall(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "bonusnivelo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.World.Room.All("character")[0].Vars["netusxu"] = 1
+	for range 31 {
+		g.Step(held{})
+	}
+	bs := g.World.Room.All("b_monster")
+	if len(bs) == 0 {
+		t.Fatal("no b_monster after 31 steps")
+	}
+	y0 := bs[0].Y
+	for range 60 {
+		g.Step(held{})
+	}
+	if bs[0].Y <= y0 {
+		t.Errorf("b_monster did not fall: y %v → %v", y0, bs[0].Y)
+	}
+}

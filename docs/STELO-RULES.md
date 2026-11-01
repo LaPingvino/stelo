@@ -76,8 +76,7 @@ Starts with `netusxu = 0` (invulnerability off).
    non-persistent again, stop all sounds and loop `muziko1`.
 7. Cheat codes: see §8.
 
-**Collisions** (all except block, the diamond and the bonus-level monster first check: if invulnerable, nothing
-happens):
+**Collisions** (all except block and the diamond first check: if invulnerable, nothing happens):
 
 | With | What happens |
 |---|---|
@@ -88,7 +87,7 @@ happens):
 | `death` (fire) | sound `killcharacter`, the game pauses 1 s, lives −1, back to the start point |
 | `monster` | if falling (`vspeed > 0`) and `y < monster.y + 8`: stomp — sound `killmonster`, score +50, the monster stops and becomes `monster_dead`. Otherwise: sound `killcharacter`, pause 1 s, lives −1, back to the start point |
 | `flyer` | sound `killcharacter`, pause 1 s; in the bonus level: back to the saved level (no life lost); elsewhere: lives −1, back to the start point. Flyers can't be stomped |
-| `b_monster` (bonus level) | no invulnerability check. Stomp as for `monster` but score +10; otherwise sound `killcharacter`, pause 1 s, back to the saved level (no life lost) |
+| `b_monster` (bonus level) | stomp as for `monster` but score +10; otherwise sound `killcharacter`, pause 1 s, back to the saved level (no life lost) |
 | `iru_al_bonuso` (diamond) | the current room becomes persistent (kept as it is), `global.ludnivelo` = this room, the diamond disappears, sounds stop, `bonussono` loops, go to `bonusnivelo` |
 | `levelexit` | sound `finishlevel`, pause 1 s, go to the next room (if there is one) |
 

@@ -62,6 +62,7 @@ func characterEvents(a *Assets, o *gm.Object) {
 	}
 	characterThings(a, o)
 	characterRooms(a, o)
+	characterBonus(a, o)
 	// Outside room: fell below the room → sound, 1 s pause, back to the start
 	// point (no life lost). PARTIAL: the sound (item 9).
 	o.Events.OutsideRoom = func(r *gm.Room, self *gm.Instance) {

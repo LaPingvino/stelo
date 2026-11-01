@@ -51,3 +51,35 @@ func TestEditScreenPaint(t *testing.T) {
 		t.Fatalf("undo: %q", o)
 	}
 }
+
+// Play runs the edited level: a coin painted in the editor is in the room.
+func TestPlayEditedLevel(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, _ := stelo.Files.ReadFile("levels/nivelo1.txt")
+	l, _ := level.Parse(string(data))
+	d := editor.New(l)
+	before := 0
+	for _, in := range l.Instances {
+		if in.Object == "stelo_poentoj" {
+			before++
+		}
+	}
+	d.Paint(7, 2, "stelo_poentoj")
+	g, err := NewGameWithLevel(stelo.Files, a, d.L)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.Title || g.World == nil || g.World.Level.Name != "nivelo1" {
+		t.Fatalf("not playing the level (title %v)", g.Title)
+	}
+	if n := len(g.World.Room.All("stelo_poentoj")); n != before+1 {
+		t.Errorf("%d coins in play, want %d", n, before+1)
+	}
+	d.Paint(8, 2, "stelo_poentoj") // later edits don't reach the running game
+	if n := len(g.World.Room.All("stelo_poentoj")); n != before+1 {
+		t.Errorf("the game shares the editor's level")
+	}
+}

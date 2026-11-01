@@ -32,3 +32,8 @@ func pollPhoneKeys() phoneKeys {
 	q.Call("splice", 0, q.Length())
 	return p
 }
+
+// editFromURL: "?edit" in the page's address opens the level editor.
+func editFromURL() bool {
+	return strings.Contains(js.Global().Get("location").Get("search").String(), "edit")
+}

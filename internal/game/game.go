@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/LaPingvino/stelo/internal/level"
 	"golang.org/x/image/font"
 	"image"
 	"io/fs"
@@ -33,9 +34,27 @@ type Game struct {
 	hs             hsState
 	HSFont         font.Face
 	SaveHighscores func(Highscores)
+	// Levels are edited levels played instead of the files (by name).
+	Levels map[string]*level.Level
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
+// NewGameWithLevel plays an edited level (a copy of it) from its start, as
+// the editor's Play: the room's own name, the rest of the game as usual.
+func NewGameWithLevel(fsys fs.FS, a *Assets, l *level.Level) (*Game, error) {
+	cp, err := level.Parse(level.Format(l))
+	if err != nil {
+		return nil, err
+	}
+	g, err := NewGame(fsys, a, "")
+	if g == nil {
+		return nil, err
+	}
+	g.Title = false
+	g.Levels = map[string]*level.Level{cp.Name: cp}
+	return g, g.enter(cp.Name)
+}
+
 func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 	g := &Game{FS: fsys, Assets: a, G: &gm.Globals{Lives: 3, Vars: map[string]float64{}}}
 	if f, err := HUDFont(fsys); err == nil {
@@ -54,13 +73,21 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 		g.Title = true
 		g.G.Play("@sound:komenco")
 	}
+	if room == "" {
+		return g, nil
+	}
 	return g, g.enter(room)
 }
 
 func (g *Game) enter(room string) error {
-	w, err := LoadLevel(g.FS, g.Assets, room)
-	if err != nil {
-		return err
+	var w *World
+	if l := g.Levels[room]; l != nil { // an edited level (the editor's Play)
+		w = NewWorld(g.Assets, l)
+	} else {
+		var err error
+		if w, err = LoadLevel(g.FS, g.Assets, room); err != nil {
+			return err
+		}
 	}
 	w.Room.G = g.G
 	w.Font, w.TextFont = g.Font, g.TextFont

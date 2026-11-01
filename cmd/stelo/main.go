@@ -20,6 +20,7 @@ var order = game.RoomOrder
 type app struct {
 	assets *game.Assets
 	touch  touchState
+	edit   editState
 	sound  *sound.Player
 	game   *game.Game
 	room   int
@@ -45,6 +46,18 @@ func (a *app) load(i int) {
 }
 
 func (a *app) Update() error {
+	if inpututil.IsKeyJustPressed(ebiten.KeyF2) && a.game != nil { // the editor, on this room
+		if a.edit.on {
+			a.edit.on = false // back to the game as it was
+		} else if a.game.World != nil {
+			a.openEditor(a.game.World.Level.Name)
+		}
+		return nil
+	}
+	if a.edit.on {
+		a.updateEditor()
+		return nil
+	}
 	// Development aid until the title and cheats are in: Page Up/Down restart at
 	// the previous/next room.
 	if inpututil.IsKeyJustPressed(ebiten.KeyPageDown) {
@@ -63,6 +76,11 @@ func (a *app) Update() error {
 }
 
 func (a *app) Draw(screen *ebiten.Image) {
+	if a.edit.on {
+		a.edit.screen.Draw(a.frame)
+		screen.WritePixels(a.frame.Pix)
+		return
+	}
 	if a.game == nil {
 		return
 	}
@@ -81,6 +99,9 @@ func main() {
 	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH))}
 	a.load(0) // the title, then the rules screen
 	a.touch.seen = showPadsFromURL()
+	if editFromURL() { // ?edit: straight into the editor on level 1
+		a.openEditor("nivelo1")
+	}
 	ebiten.SetTPS(30) // every room runs at 30 steps per second
 	ebiten.SetWindowSize(game.ScreenW, game.ScreenH)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)

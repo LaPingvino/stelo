@@ -40,6 +40,9 @@ type Game struct {
 	Levels map[string]*level.Level
 	// Order is the rooms' play order when playing a pack (nil: RoomOrder).
 	Order []string
+	// OnLevel, if set, is told the pack level (1-based) entered when playing
+	// a pack or the original's levels (progress per pack).
+	OnLevel func(n int)
 }
 
 // NewGame starts at a room (normally RoomOrder[0]).
@@ -117,6 +120,11 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 }
 
 func (g *Game) enter(room string) error {
+	if g.OnLevel != nil {
+		if n := g.levelNumber(room); n > 0 {
+			g.OnLevel(n)
+		}
+	}
 	var w *World
 	if l := g.Levels[room]; l != nil { // an edited level (the editor's Play)
 		w = NewWorld(g.Assets, l)
@@ -278,6 +286,7 @@ func (g *Game) restart() {
 		return
 	}
 	ng.Highscores, ng.SaveHighscores, ng.G.Sound = hs, save, snd
+	ng.OnLevel = g.OnLevel
 	*g = *ng
 }
 
@@ -290,4 +299,20 @@ func (g *Game) Draw(dst *image.RGBA) {
 	}
 	g.World.Draw(dst)
 	g.drawHighscores(dst)
+}
+
+// levelNumber is a room's place among the levels being played (1-based):
+// pack:n for a pack, nivelo1–5 for the original; 0 for other rooms.
+func (g *Game) levelNumber(room string) int {
+	var n int
+	if g.Order != nil {
+		if _, err := fmt.Sscanf(room, "pack:%d", &n); err == nil {
+			return n
+		}
+		return 0
+	}
+	if _, err := fmt.Sscanf(room, "nivelo%d", &n); err == nil {
+		return n
+	}
+	return 0
 }

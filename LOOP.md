@@ -46,6 +46,8 @@ rooms/*.json, sprites, sounds).
 
 ## Questions for Joop
 
+- Packs: the furthest level reached is now kept per pack and shown on the title. Should a pack (not the original) also let you continue from there, or always start at its level 1 with 3 lives like the original?
+
 - Install a soundfont for rendering the 2006 MIDI music: `sudo pacman -S soundfont-fluid` (FluidR3, MIT); fluidsynth is already there.
 
 - 2026-11-01: run the original GML (an embedded GML interpreter + the 76 built-ins the two games use) instead of
@@ -98,3 +100,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 33 (item 10, step 9) — playing a pack: game.NewGameWithPack (the levels as rooms pack:1…n so names can't clash, then the original's danklisto and finlisto; Game.Order drives @next); a pack folder dropped on the window plays (a single level file still opens the editor). Test: a pack of levels 3 and 1 starts in 3, goes to 1, then the credits. NOT CHECKED: a folder drop in a real browser. NEXT: the editor saving a pack (add the level to a pack, download it as a zip), progress per pack, a pack chooser on the title.
 - 2026-11-01 tick 34 (item 10, step 10) — saving a pack: pack.Zip (a folder named after the pack with pack.txt and 01.txt, 02.txt… in play order; reads back with Load — round-trip test), store.SavePack (web: a .zip download; desktop: unzipped into <config>/stelo/packs/, test), Ctrl+Shift+S in the editor saves the levels edited this session as 'Mia Stelo-pako' (name order). NOT CHECKED: the zip download in a real browser. NEXT: packs in the config folder listed and chosen on the title (and on the web, from saved zips), progress per pack, a pack name/author field.
 - 2026-11-01 tick 35 (item 10, step 11) — choosing a pack on the title, as Pits: the original pack first, then <config>/stelo/packs/* (store.ListPacks; test with a saved pack); when there are more, '<  name  >' shows in the empty strip under the title's instructions (clear of the 2006 art), Left/Right choose, any other key starts the chosen pack (the original as before). Web: packs are opened/dropped, not listed. Render: the title with the line. NEXT: progress per pack (which level reached), a pack name/author field when saving, then item 10 is done.
+- 2026-11-01 tick 36 (item 10, step 12) — progress per pack, recorded and shown: Game.OnLevel tells the level entered (pack:n, or nivelo1–5 for the original), store.Reached keeps the furthest per pack (localStorage / config file; test), the title's pack line shows 'name (n/m)'. Not done on purpose: resuming from the level reached — the original always starts at level 1 with 3 lives; a 'continue' for packs would be new rules, so it waits for Joop (Questions). Tests: progress kept, the pack play reports level 2.

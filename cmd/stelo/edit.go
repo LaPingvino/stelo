@@ -205,6 +205,7 @@ func (a *app) playPack(p *pack.Pack) {
 		g.G.Sound = a.game.G.Sound
 		g.Highscores, g.SaveHighscores = a.game.Highscores, a.game.SaveHighscores
 	}
+	g.OnLevel = func(n int) { store.Reached(p.Name, n) }
 	a.game = g
 	a.edit.on = false
 	ebiten.SetWindowTitle("Stelo — " + p.Name)

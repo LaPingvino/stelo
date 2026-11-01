@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -46,6 +47,7 @@ func (a *app) load(i int) {
 	g.G.Sound = a.sound.Play
 	g.Highscores = store.LoadHighscores()
 	g.SaveHighscores = store.SaveHighscores
+	g.OnLevel = func(n int) { store.Reached("Stelo", n) } // the original pack's progress
 	a.game = g
 	ebiten.SetWindowTitle("Stelo")
 }
@@ -110,7 +112,12 @@ func (a *app) Draw(screen *ebiten.Image) {
 	}
 	a.game.Draw(a.frame)
 	if a.game.Title && len(a.packs) > 1 {
-		a.game.DrawPackChoice(a.frame, a.packs[a.pack].Name)
+		p := a.packs[a.pack]
+		label := p.Name
+		if n := store.Progress(p.Name); n > 0 { // the furthest level reached in it
+			label = fmt.Sprintf("%s (%d/%d)", p.Name, min(n, len(p.Levels)), len(p.Levels))
+		}
+		a.game.DrawPackChoice(a.frame, label)
 	}
 	screen.WritePixels(a.frame.Pix)
 	a.touch.draw(screen)

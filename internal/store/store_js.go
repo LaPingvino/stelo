@@ -123,3 +123,24 @@ func SavePack(name string, zipData []byte) {
 
 // ListPacks: on the web packs are opened or dropped, not listed.
 func ListPacks() []*pack.Pack { return nil }
+
+func readKey(k string) ([]byte, bool) {
+	s := storage()
+	if s.IsUndefined() || s.IsNull() {
+		return nil, false
+	}
+	v := s.Call("getItem", "stelo-"+k)
+	if v.IsNull() || v.IsUndefined() {
+		return nil, false
+	}
+	return []byte(v.String()), true
+}
+
+func writeKey(k string, data []byte) {
+	if s := storage(); !s.IsUndefined() && !s.IsNull() {
+		func() {
+			defer func() { recover() }()
+			s.Call("setItem", "stelo-"+k, string(data))
+		}()
+	}
+}

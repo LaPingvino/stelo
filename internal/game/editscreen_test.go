@@ -135,6 +135,8 @@ func TestPlayPack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	reached := 0
+	g.OnLevel = func(n int) { reached = n }
 	coins := func() int { return len(g.World.Room.All("stelo_poentoj")) }
 	if g.World.Level.Name != "pack:1" || coins() != countCoins(ls[0]) {
 		t.Fatalf("starts in %s with %d coins", g.World.Level.Name, coins())
@@ -146,6 +148,9 @@ func TestPlayPack(t *testing.T) {
 		}
 		if g.World.Level.Name != want {
 			t.Fatalf("next: %s, want %s", g.World.Level.Name, want)
+		}
+		if want == "pack:2" && reached != 2 {
+			t.Errorf("progress: %d", reached)
 		}
 	}
 }

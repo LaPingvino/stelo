@@ -126,3 +126,20 @@ func ListPacks() []*pack.Pack {
 	}
 	return out
 }
+
+func readKey(k string) ([]byte, bool) {
+	d := Dir()
+	if d == "" {
+		return nil, false
+	}
+	data, err := os.ReadFile(filepath.Join(d, filepath.Base(k)+".txt"))
+	return data, err == nil
+}
+
+func writeKey(k string, data []byte) {
+	d := Dir()
+	if d == "" || os.MkdirAll(d, 0o755) != nil {
+		return
+	}
+	_ = os.WriteFile(filepath.Join(d, filepath.Base(k)+".txt"), data, 0o644)
+}

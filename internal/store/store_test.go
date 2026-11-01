@@ -72,3 +72,16 @@ func TestListPacks(t *testing.T) {
 		t.Fatalf("%d packs", len(ps))
 	}
 }
+
+func TestProgress(t *testing.T) {
+	dir := t.TempDir()
+	Dir = func() string { return dir }
+	if Progress("Testo") != 0 {
+		t.Fatal("progress before playing")
+	}
+	Reached("Testo", 3)
+	Reached("Testo", 2) // the furthest is kept
+	if Progress("Testo") != 3 || Progress("Stelo") != 0 {
+		t.Errorf("%d %d", Progress("Testo"), Progress("Stelo"))
+	}
+}

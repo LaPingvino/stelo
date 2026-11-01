@@ -5,6 +5,8 @@ package store
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
 
 	"github.com/LaPingvino/stelo/internal/game"
 )
@@ -37,3 +39,20 @@ func SaveLevel(name, text string) { writeLevel(name, text) }
 
 // LoadLevel returns a saved level's text.
 func LoadLevel(name string) (string, bool) { return readLevel(name) }
+
+// Progress is the furthest level reached in a pack (1-based; 0 none).
+func Progress(pack string) int {
+	data, ok := readKey("progress-" + pack)
+	if !ok {
+		return 0
+	}
+	n, _ := strconv.Atoi(strings.TrimSpace(string(data)))
+	return n
+}
+
+// Reached records a level reached in a pack, keeping the furthest.
+func Reached(pack string, n int) {
+	if n > Progress(pack) {
+		writeKey("progress-"+pack, []byte(strconv.Itoa(n)))
+	}
+}

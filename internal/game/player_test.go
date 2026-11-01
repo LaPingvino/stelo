@@ -121,3 +121,48 @@ func TestCoinsAndMonsters(t *testing.T) {
 		t.Errorf("hit: lives %d (was %d), sleep %d", g.Lives, lives, w.Room.Sleep)
 	}
 }
+
+// The exit goes to the next level after the 1 s pause; the diamond goes to
+// the bonus level and a flyer there brings the player back to the saved level
+// as it was left.
+func TestRoomChanges(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := g.World.Room.All("character")[0]
+	// The diamond.
+	d := g.World.Room.All("iru_al_bonuso")[0]
+	p.X, p.Y = d.X, d.Y
+	g.Step(held{})
+	if g.World.Level.Name != "bonusnivelo" {
+		t.Fatalf("diamond: in %s", g.World.Level.Name)
+	}
+	// A flyer in the bonus level: back to the saved level, no life lost.
+	lives := g.G.Lives
+	bp := g.World.Room.All("character")[0]
+	f := g.World.Room.All("flyer")[0]
+	bp.X, bp.Y = f.X, f.Y
+	for range 40 {
+		g.Step(held{})
+	}
+	if g.World.Level.Name != "nivelo1" || g.G.Lives != lives {
+		t.Fatalf("flyer in the bonus level: in %s, lives %d (was %d)", g.World.Level.Name, g.G.Lives, lives)
+	}
+	if len(g.World.Room.All("iru_al_bonuso")) != 0 || g.World.Room.All("character")[0] != p {
+		t.Error("the saved level is the same room, diamond taken")
+	}
+	// The exit: next room after the pause.
+	e := g.World.Room.All("levelexit")[0]
+	p.X, p.Y = e.X, e.Y
+	for range 40 {
+		g.Step(held{})
+	}
+	if g.World.Level.Name != "nivelo2" {
+		t.Errorf("exit: in %s", g.World.Level.Name)
+	}
+}

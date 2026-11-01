@@ -13,11 +13,11 @@ import (
 )
 
 // The original's rooms in play order (the bonus level is reached in play).
-var order = []string{"klarigo", "nivelo1", "nivelo2", "nivelo3", "nivelo4", "nivelo5", "danklisto", "finlisto", "bonusnivelo"}
+var order = game.RoomOrder
 
 type app struct {
 	assets *game.Assets
-	world  *game.World
+	game   *game.Game
 	room   int
 	frame  *image.RGBA
 	screen *ebiten.Image
@@ -25,34 +25,37 @@ type app struct {
 
 func (a *app) load(i int) {
 	a.room = (i + len(order)) % len(order)
-	w, err := game.LoadLevel(stelo.Files, a.assets, order[a.room])
+	g, err := game.NewGame(stelo.Files, a.assets, order[a.room])
 	if err != nil {
 		log.Printf("level %s: %v", order[a.room], err)
 		return
 	}
-	a.world = w
-	ebiten.SetWindowTitle("Stelo — " + order[a.room])
+	a.game = g
+	ebiten.SetWindowTitle("Stelo")
 }
 
 func (a *app) Update() error {
-	// Until the rules are in (LOOP item 4+): Page Up/Down step through the rooms.
+	// Development aid until the title and cheats are in: Page Up/Down restart at
+	// the previous/next room.
 	if inpututil.IsKeyJustPressed(ebiten.KeyPageDown) {
 		a.load(a.room + 1)
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyPageUp) {
 		a.load(a.room - 1)
 	}
-	if a.world != nil {
-		a.world.Step(keys{})
+	if a.game != nil {
+		if err := a.game.Step(keys{}); err != nil {
+			log.Print(err)
+		}
 	}
 	return nil
 }
 
 func (a *app) Draw(screen *ebiten.Image) {
-	if a.world == nil {
+	if a.game == nil {
 		return
 	}
-	a.world.Draw(a.frame)
+	a.game.World.Draw(a.frame)
 	screen.WritePixels(a.frame.Pix)
 }
 

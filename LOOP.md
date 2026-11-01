@@ -22,15 +22,21 @@ rooms/*.json, sprites, sounds).
 2. [x] docs/LEVEL-FORMAT.md + `cmd/convert`: original/rooms/*.json → levels/*.txt, with a round-trip test.
 3. [x] Go module, Ebitengine skeleton (640×480 logical, 30 TPS), loads a level and draws it with the original
    sprites; GitHub Actions → Pages (wasm).
-4. [ ] Player: walk, ladders, jump, gravity, solid blocks — level 1 playable.
-5. [ ] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD.
-6. [ ] All levels, the diamond → bonus level and back, nivelo5 waves.
-7. [ ] Title, rules screen, credits, highscores (local storage on web), cheat codes.
-8. [ ] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG.
-9. [ ] Level editor (in-game mode + its own page) and packs.
-10. [ ] New art skin (switchable), roles chosen by trying them.
+4. [~] GM engine core (internal/gm), needed whether the objects are hand-ported or run as GML: done —
+   motion+gravity, inclusive bounding boxes, place_free/place_meeting, move_contact_solid. Next: alarms, the
+   step order with solid put-back, collision event dispatch, outside-room, room changes.
+5. [ ] Player: walk, ladders, jump, gravity, solid blocks — level 1 playable.
+6. [ ] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD.
+7. [ ] All levels, the diamond → bonus level and back, nivelo5 waves.
+8. [ ] Title, rules screen, credits, highscores (local storage on web), cheat codes.
+9. [ ] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG.
+10. [ ] Level editor (in-game mode + its own page) and packs.
+11. [ ] New art skin (switchable), roles chosen by trying them.
 
 ## Questions for Joop
+
+- 2026-11-01: run the original GML (an embedded GML interpreter + the 76 built-ins the two games use) instead of
+  hand-porting the objects? Asked in chat; the engine core (item 4) is needed either way.
 
 - Audio: 2006 sounds/MIDI in the baseline (proposed) or new ones?
 - Language: Esperanto only, or also English?
@@ -46,3 +52,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 1 (item 1) — docs/STELO-RULES.md written from original/objects (all 20) + timelines + sprite boxes: player keys/step/collisions, monsters, spawners, lives/HUD, rooms, cheat codes; engine behaviour (GM5 step order, solid put-back) marked [engine]. Found: the ladder grid-snap and Space/ammo are dead code; falling off the bottom costs no life; b_monster ignores invulnerability. NEXT: item 2 (level format + converter).
 - 2026-11-01 tick 2 (item 2) — Go module github.com/LaPingvino/stelo; internal/level (Format/Parse, LoadOriginal from original/project.json), cmd/convert → levels/*.txt (9 rooms), docs/LEVEL-FORMAT.md. Grid + separate ladder layer; instance/text lines for off-grid (nivelo1 diamond at 305,308), overlaps, code-carrying and control objects. go test: all 9 rooms round-trip (instances as a set) and levels/ is current. NEXT: item 3 (Ebitengine skeleton + Pages).
 - 2026-11-01 tick 3 (item 3) — Ebitengine skeleton: stelo.Files embeds original/ sprites, backgrounds, project.json and levels/; internal/game loads them (GM transparency = bottom-left pixel colour; bbox_lrbt), draws a room in pure Go (colour, tiled background at the view, instances by depth high→low, invisible ones skipped) and has GM view-follow (border + speed, now in the level format and all levels regenerated); cmd/stelo (30 TPS, 640×480, PageUp/Down step rooms until the rules are in); cmd/render → PNG. Test: level 1's first frame = gm53-reader's 1:1 render pixel for pixel (except invisible/sprite-less cells). wasm checked in headless Chromium. Pages workflow (go test, wasm, deploy). NEXT: item 4 (player).
+- 2026-11-01 tick 4 (item 4) — internal/gm: Game Maker engine core with tests (inclusive bboxes, place_free, place_meeting, move_contact_solid, gravity+speed motion, direction). ASSUMPTION marked: bbox at the rounded position. Queue renumbered (engine core inserted as 4).

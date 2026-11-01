@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/LaPingvino/stelo"
@@ -387,3 +388,33 @@ type pressed map[gm.Key]bool
 
 func (p pressed) Held(gm.Key) bool      { return false }
 func (p pressed) Pressed(k gm.Key) bool { return p[k] }
+
+// A cloned world steps exactly like the original and apart from it: the
+// same keys give the same state; stepping the copy leaves the original be.
+func TestWorldClone(t *testing.T) {
+	w, _ := level1(t)
+	for range 30 {
+		w.Step(held{})
+	}
+	c := w.Clone()
+	state := func(w *World) string {
+		s := fmt.Sprint(w.Room.G.Score, w.Room.G.Lives, w.ViewX)
+		for _, in := range w.Room.Instances {
+			s += fmt.Sprint(in.Obj.Name, in.X, in.Y, in.HSpeed, in.VSpeed, in.Destroyed, in.Alarm)
+		}
+		return s
+	}
+	before := state(w)
+	for range 60 {
+		c.Step(held{gm.KeyRight: true})
+	}
+	if state(w) != before {
+		t.Fatal("stepping the copy changed the original")
+	}
+	for range 60 {
+		w.Step(held{gm.KeyRight: true})
+	}
+	if state(w) != state(c) {
+		t.Error("the copy and the original went different ways with the same keys")
+	}
+}

@@ -155,3 +155,13 @@ func (w *World) DrawTitle(dst *image.RGBA) {
 		draw.Draw(dst, dst.Bounds(), bg, image.Point{}, draw.Src)
 	}
 }
+
+// Clone copies the world's running state (gm.Room.Clone), the view and the
+// instance it follows; assets and fonts are shared.
+func (w *World) Clone() *World {
+	c := *w
+	var m map[*gm.Instance]*gm.Instance
+	c.Room, m = w.Room.Clone()
+	c.follow = m[w.follow]
+	return &c
+}

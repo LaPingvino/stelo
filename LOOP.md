@@ -48,7 +48,7 @@ rooms/*.json, sprites, sounds).
     furthest level reached — after the baseline.
 13b. [ ] In-game language switch (Joop 2026-11-02: "You can add a language change option in Stelo"): a key / tap on
    the title screen toggles Esperanto ↔ English (Esperanto stays the default and the original), kept per browser.
-15. [ ] GML interpreter trial (Joop 2026-11-02: try it; "if you run into any issues, Go port is fine"): run the
+15. [→] MOVED to ~/Projects/gmgo (Joop 2026-11-02: a GameMaker clone in Go as its own low-priority project; Stelo keeps its Go port). Was: GML interpreter trial (Joop 2026-11-02: try it; "if you run into any issues, Go port is fine"): run the
    original objects' GML (original/objects/*.gml) on internal/gm instead of the hand ports. Steps: (a) a GML 5.3
    lexer/parser + tree-walking interpreter for what the two games' code uses (expressions, with/other, var,
    if/repeat/while, the 76 built-ins mapped onto internal/gm); (b) run one object (monster) under it beside the Go

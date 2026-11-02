@@ -30,8 +30,8 @@ type Skin struct {
 // shows its first frame; the life icon it, shrunk), the orange villain the walking monster and the
 // bonus level's (mirrored to face left), the green villain the flyer (it
 // can't be stomped, so it looks meaner), the checkpoint's star a star coin, the
-// heart and diamond themselves, the checkpoint unused (first frame) and
-// used (shining), the spikes the fire, the arrow sign the level exit, the
+// heart and diamond themselves, the checkpoint unused (the orb on a pole) and
+// used (the shining star), the spikes the fire, the arrow sign the level exit, the
 // ladder, and wall / floor-with-grass for blocks.
 func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 	sheet := func(name string) ([]*image.RGBA, error) {
@@ -91,7 +91,10 @@ func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 	s.Sprites["sprite_stelo_poentoj"] = starCoin(got["checkpoint"])
 	s.Sprites["sprite_bonus"] = got["heart"]
 	s.Sprites["diamanto"] = got["diamond"]
-	s.Sprites["transirejo_na"] = got["checkpoint"][:1]
+	// The checkpoint: the orb on a pole (a switch) until it is reached, the
+	// shining star after (Joop 2026-11-02: the star in both states made the
+	// change too subtle to see).
+	s.Sprites["transirejo_na"] = got["orb"]
 	s.Sprites["transirejo_a"] = got["checkpoint"]
 	s.Sprites["sprite_death"] = got["spikes"]
 	s.Sprites["sprite_level"] = got["arrow"]
@@ -109,6 +112,7 @@ func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 		"sprite_monsterr": 0.15, "sprite_monsterl": 0.15,
 		"sprite_flyingr": 0.12, "sprite_flyingl": 0.12,
 		"sprite_stelo_poentoj": 0.1, "transirejo_a": 0.1, // the stars twinkle
+		"transirejo_na": 0.1, // the switch sways
 		"sprite_bonus": 0.08, "diamanto": 0.1, // the heart's glow, the diamond's glint
 	}
 	s.IdleFirst = map[string]bool{"sprite_right": true, "sprite_left": true}

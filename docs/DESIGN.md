@@ -56,7 +56,7 @@ ours to choose, Joop 2026-11-01):
 | flyer | the green villain (it can't be stomped, so it looks meaner) |
 | star coin | the twinkling star cut from the checkpoint's pole (Joop 2026-11-02: the orb on a pole was not a good pick) |
 | heart, diamond | heart, diamond |
-| checkpoint unused / used | the checkpoint's first frame / all its frames (shining) |
+| checkpoint unused / used | the orb on a pole (a switch) / the checkpoint's star, shining (Joop 2026-11-02: the star in both states hid the change) |
 | fire | the spikes |
 | level exit | the arrow sign |
 | ladder | the ladder |

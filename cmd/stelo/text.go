@@ -7,6 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 
@@ -56,8 +57,12 @@ func face(w game.Weight, px int) font.Face {
 	return f
 }
 
-// drawOverlay draws the frame's texts onto the screen.
+// drawOverlay draws the frame's rectangles, then its texts, onto the screen.
 func drawOverlay(screen *ebiten.Image, o *game.Overlay) {
+	for _, r := range o.Rects {
+		vector.FillRect(screen, float32(view.ox+r.X*view.scale), float32(view.oy+r.Y*view.scale),
+			float32(r.W*view.scale), float32(r.H*view.scale), r.Color, false)
+	}
 	for _, t := range o.Texts {
 		f := face(t.Weight, int(math.Round(t.Size*view.scale)))
 		if f == nil {

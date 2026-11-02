@@ -36,10 +36,23 @@ const (
 // Overlay collects the frame's texts while it is drawn; the program draws
 // them on top once the frame is on the screen. A nil *Overlay means no
 // overlay (tests, the render tool): the old in-frame lettering is used.
-type Overlay struct{ Texts []Text }
+type Overlay struct {
+	Rects []Rect // drawn first
+	Texts []Text
+}
+
+// Rect is a filled rectangle in frame coordinates (menu highlights, panels),
+// drawn at the screen's resolution under the texts.
+type Rect struct {
+	X, Y, W, H float64
+	Color      color.Color
+}
+
+// AddRect queues a rectangle.
+func (o *Overlay) AddRect(r Rect) { o.Rects = append(o.Rects, r) }
 
 // Add queues a text.
 func (o *Overlay) Add(t Text) { o.Texts = append(o.Texts, t) }
 
 // Reset empties it for the next frame.
-func (o *Overlay) Reset() { o.Texts = o.Texts[:0] }
+func (o *Overlay) Reset() { o.Texts, o.Rects = o.Texts[:0], o.Rects[:0] }

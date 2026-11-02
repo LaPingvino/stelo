@@ -57,6 +57,11 @@ rooms/*.json, sprites, sounds).
    solid put-back, alarms) and note why. Pacmanio can reuse it afterwards.
 16. [ ] Render the 2006 MIDI music with FluidR3_GM.sf2 (installed 2026-11-02) into the baseline's audio.
 
+U0. [ ] **Touch controls off the playfield, and full screen** (Joop 2026-11-02: "stelo and pacmanio onscreen controls
+   cover play space, and no fullscreen present") — NEXT. Now that the frame is centred with margins, the pads go into
+   the margins (as Pits' d-pad: beside the frame on a phone on its side, under it upright), drawn at the screen's
+   resolution, not onto the frame; the frame shrinks a little where the margins are too narrow. A full-screen button
+   (and F11 / Alt+Enter on the desktop): ebiten.SetFullscreen from a tap or click.
 U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling + text at real resolution, Noto Sans,
    Pits-like menus (title, pause, settings, level pick of reached levels, resume), new "Kiel ludi" and "Pri"
    texts (drafts to Joop first), slim HUD, proper highscores. Steps: U1 shared UI package (scaler, text, menu

@@ -162,6 +162,9 @@ Typed at any time during a level (checked each step against everything typed; a 
 
 ## 9. Open points
 
-- The 1 s pause (`action_sleep(1000)`) freezes the whole game, drawing included; the remake does the same.
+- The 1 s pause (`action_sleep(1000)`) freezes the whole game in the original, drawing included. The remake
+  keeps its length and the logic waits exactly as before, but the screen stays alive (quality of life, Joop
+  2026-11-02: "keep the beat, no freeze"): the moment the pause began is shown with its animations running,
+  the view and the HUD hold still; the rest of the event shows when the pause ends.
 - Highscore table drawing details (Game Maker's `draw_highscore` layout and font) are engine behaviour; to be
   matched by eye against the original.

@@ -103,7 +103,7 @@ func (w *World) Step(in gm.Input) {
 // stays inside the room.
 func (w *World) UpdateView() {
 	v := w.Level.View
-	if v == nil || w.follow == nil {
+	if v == nil || w.follow == nil || w.Room.Paused != nil { // a pause shows the moment it began: the view waits too
 		return
 	}
 	step := func(pos, size, room, objPos, border, speed int) int {
@@ -137,12 +137,12 @@ func (w *World) Draw(dst *image.RGBA) {
 			}
 		}
 	}
-	insts := append([]*gm.Instance(nil), w.Room.Instances...)
+	insts := append([]*gm.Instance(nil), w.Room.Drawn()...) // during a pause, the moment it began
 	sort.SliceStable(insts, func(i, j int) bool { return insts[i].Obj.Depth > insts[j].Obj.Depth })
 	var blocks map[[2]int]bool // the skin's floor tops: blocks with no block above
 	if w.Skin != nil && w.Skin.BlockTop != nil {
 		blocks = map[[2]int]bool{}
-		for _, in := range w.Room.Instances {
+		for _, in := range w.Room.Drawn() {
 			if in.Obj.Name == "block" && !in.Destroyed {
 				blocks[[2]int{int(in.X), int(in.Y)}] = true
 			}
@@ -170,7 +170,7 @@ func (w *World) Draw(dst *image.RGBA) {
 		}
 	}
 	w.drawTexts(dst)
-	if g := w.Room.G; g != nil {
+	if g := w.Room.ShownG(); g != nil {
 		w.drawHUD(dst, g.Score, g.Lives)
 	}
 }

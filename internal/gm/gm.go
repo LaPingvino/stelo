@@ -119,6 +119,10 @@ type Room struct {
 	// Sleep is action_sleep: steps during which the game is frozen (nothing
 	// moves, nothing is drawn anew).
 	Sleep int
+	// Paused is the instances, PausedG the globals, as they were when the
+	// current pause began (nil outside a pause). See SleepMS.
+	Paused  []*Instance
+	PausedG *Globals
 	// G holds what lives across rooms: score, lives, global variables.
 	G *Globals
 }
@@ -183,7 +187,44 @@ func (r *Room) Change(in *Instance, obj *Object, perform bool) {
 }
 
 // SleepMS is action_sleep(ms) at the room's speed (steps per second).
-func (r *Room) SleepMS(ms, speed int) { r.Sleep += ms * speed / 1000 }
+//
+// Quality of life (Joop 2026-11-02: "keep the beat, no freeze"): the pause
+// keeps its length and the game logic waits exactly as in the original, but
+// the screen stays alive — what was showing when the pause began (Paused, a
+// copy of the instances at that moment) is drawn with its animations running,
+// instead of a frozen picture; PausedG keeps the score and lives of that
+// moment for the HUD.
+func (r *Room) SleepMS(ms, speed int) {
+	if r.Sleep == 0 {
+		r.Paused = make([]*Instance, 0, len(r.Instances))
+		for _, i := range r.Instances {
+			c := *i
+			r.Paused = append(r.Paused, &c)
+		}
+		if r.G != nil {
+			g := *r.G
+			r.PausedG = &g
+		}
+	}
+	r.Sleep += ms * speed / 1000
+}
+
+// ShownG is the globals to show (score, lives): during a pause those of the
+// moment it began.
+func (r *Room) ShownG() *Globals {
+	if r.PausedG != nil {
+		return r.PausedG
+	}
+	return r.G
+}
+
+// Drawn is what to draw: during a pause the moment it began, else the room.
+func (r *Room) Drawn() []*Instance {
+	if r.Paused != nil {
+		return r.Paused
+	}
+	return r.Instances
+}
 
 func (r *Room) live() []*Instance {
 	out := r.Instances[:0:0]

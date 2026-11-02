@@ -80,6 +80,14 @@ func (w *World) drawTexts(dst *image.RGBA) {
 // drawHUD draws the life controller's HUD for the room's player.
 func (w *World) drawHUD(dst *image.RGBA, score, lives int) {
 	players := w.Room.All("character")
+	if w.Room.Paused != nil { // during a pause, where the player was when it began
+		players = players[:0:0]
+		for _, in := range w.Room.Paused {
+			if in.Obj.IsA("character") && !in.Destroyed {
+				players = append(players, in)
+			}
+		}
+	}
 	v := w.Room.G.Vars
 	if len(players) == 0 || v["life_controller_alive"] != 1 || v["life_controller_gone"] == 1 {
 		return

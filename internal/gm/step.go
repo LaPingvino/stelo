@@ -98,6 +98,12 @@ func (o *Object) collisionHandlers() map[string]CollisionHandler {
 func (r *Room) Step(in Input) {
 	if r.Sleep > 0 {
 		r.Sleep--
+		for _, i := range r.Paused { // the paused picture stays alive: animations run
+			i.ImageIndex += i.ImageSpeed
+		}
+		if r.Sleep == 0 {
+			r.Paused, r.PausedG = nil, nil
+		}
 		return
 	}
 	each := func(f func(*Instance)) {

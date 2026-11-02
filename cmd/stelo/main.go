@@ -146,7 +146,7 @@ func main() {
 	if langFromURL() == "en" { // ?lang=en / STELO_LANG=en: the English translation
 		game.Lang = "en"
 	}
-	if novaFromURL() { // ?nova: start with the new art
+	if !originalArtFromURL() { // the new art by default (Joop 2026-11-02); ?original / STELO_ART=original: the 2006 art
 		a.toggleSkin()
 	}
 	if editFromURL() { // ?edit: straight into the editor on level 1

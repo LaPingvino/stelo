@@ -38,9 +38,10 @@ func editFromURL() bool {
 	return strings.Contains(js.Global().Get("location").Get("search").String(), "edit")
 }
 
-// novaFromURL: "?nova" in the page's address starts with the new art.
-func novaFromURL() bool {
-	return strings.Contains(js.Global().Get("location").Get("search").String(), "nova")
+// originalArtFromURL: "?original" in the page's address starts with the 2006
+// art instead of the new art (F3 switches at any time).
+func originalArtFromURL() bool {
+	return strings.Contains(js.Global().Get("location").Get("search").String(), "original")
 }
 
 // langFromURL: "?lang=en" in the page's address draws the English text.

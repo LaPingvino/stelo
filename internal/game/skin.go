@@ -12,6 +12,13 @@ import (
 // the rules don't change. Sprites it doesn't name keep the original art.
 type Skin struct {
 	Sprites map[string][]*image.RGBA
+	// Rate is each sprite's animation speed in frames per step (the skin's
+	// own pace, slower than the original's image_speed: at 30 steps a second
+	// 0.2 is 6 frames a second); sprites it doesn't name use defaultRate.
+	Rate map[string]float64
+	// IdleFirst sprites show their first frame while the instance stands
+	// still (the protagonist only walks its cycle when it moves).
+	IdleFirst map[string]bool
 	// BlockTop is drawn for a block with no block right above it (a floor
 	// with grass), the plain block frames elsewhere.
 	BlockTop []*image.RGBA
@@ -22,7 +29,7 @@ type Skin struct {
 // the protagonist star is the player (its left sheet facing left; climbing
 // shows its first frame; the life icon it, shrunk), the orange villain the walking monster and the
 // bonus level's (mirrored to face left), the green villain the flyer (it
-// can't be stomped, so it looks meaner), the orb on a pole a star coin, the
+// can't be stomped, so it looks meaner), the checkpoint's star a star coin, the
 // heart and diamond themselves, the checkpoint unused (first frame) and
 // used (shining), the spikes the fire, the arrow sign the level exit, the
 // ladder, and wall / floor-with-grass for blocks.
@@ -77,7 +84,11 @@ func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 	s.Sprites["sprite_monsterl"] = mirror(got["villain"])
 	s.Sprites["sprite_flyingr"] = got["villain2"]
 	s.Sprites["sprite_flyingl"] = mirror(got["villain2"])
-	s.Sprites["sprite_stelo_poentoj"] = got["orb"]
+	// The star coin (stelo_poentoj, +10): the twinkling star from the top of the
+	// checkpoint's pole (its four frames shine orange, yellow, white, yellow),
+	// centred in the cell — the game is Stelo, a star; the orb on a pole read as
+	// a switch, not a thing to pick up (Joop 2026-11-02).
+	s.Sprites["sprite_stelo_poentoj"] = starCoin(got["checkpoint"])
 	s.Sprites["sprite_bonus"] = got["heart"]
 	s.Sprites["diamanto"] = got["diamond"]
 	s.Sprites["transirejo_na"] = got["checkpoint"][:1]
@@ -93,7 +104,49 @@ func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 	s.Sprites["sprite_monsterflat"] = []*image.RGBA{scale(got["villain"][0], 32, 8, 0, 24, 32, 32)}
 	s.Sprites["sprite_life"] = []*image.RGBA{scale(got["protagonist"][0], 10, 10, 0, 0, 10, 10)}
 	s.BlockTop = got["floor"]
+	s.Rate = map[string]float64{
+		"sprite_right": 0.2, "sprite_left": 0.2, // a walk of 6 frames a second
+		"sprite_monsterr": 0.15, "sprite_monsterl": 0.15,
+		"sprite_flyingr": 0.12, "sprite_flyingl": 0.12,
+		"sprite_stelo_poentoj": 0.1, "transirejo_a": 0.1, // the stars twinkle
+		"sprite_bonus": 0.08, "diamanto": 0.1, // the heart's glow, the diamond's glint
+	}
+	s.IdleFirst = map[string]bool{"sprite_right": true, "sprite_left": true}
 	return s, nil
+}
+
+// defaultRate is the skin's animation speed for sprites Rate doesn't name.
+const defaultRate = 0.15
+
+// Frame is the frame to draw of an instance's skin sprite, at the skin's own
+// pace from a step counter (tick), each instance offset by where it started so
+// a row of coins doesn't flash together; an IdleFirst sprite standing still
+// shows its first frame.
+func (s *Skin) Frame(sprite string, frames []*image.RGBA, tick int, xStart, yStart, x, y, xPrev, yPrev float64) *image.RGBA {
+	if len(frames) == 1 {
+		return frames[0]
+	}
+	if s.IdleFirst[sprite] && x == xPrev && y == yPrev {
+		return frames[0]
+	}
+	rate, ok := s.Rate[sprite]
+	if !ok {
+		rate = defaultRate
+	}
+	phase := int(xStart)/32*7 + int(yStart)/32*13
+	return frames[(int(float64(tick)*rate)+phase)%len(frames)]
+}
+
+// starCoin cuts the star off the checkpoint's frames (rows 1–13, columns
+// 10–22) and centres it in a 32×32 cell.
+func starCoin(checkpoint []*image.RGBA) []*image.RGBA {
+	out := make([]*image.RGBA, len(checkpoint))
+	for i, fr := range checkpoint {
+		c := image.NewRGBA(image.Rect(0, 0, 32, 32))
+		draw.Draw(c, image.Rect(10, 10, 23, 23), fr, image.Pt(10, 1), draw.Src)
+		out[i] = c
+	}
+	return out
 }
 
 // scale draws src (nearest neighbour) into the w×h area at (x, y) of a new

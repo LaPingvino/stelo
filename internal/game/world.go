@@ -30,6 +30,8 @@ type World struct {
 	// Font is the HUD font (HUDFont); nil = no score text. TextFont is the
 	// text labels' font (TextFont).
 	Font, TextFont font.Face
+	// Tick counts the steps (the skin's animation clock).
+	Tick int
 }
 
 // Object returns the engine object for an original object (sprite box,
@@ -93,6 +95,7 @@ func NewWorld(a *Assets, l *level.Level) *World {
 
 // Step runs one step of the room, then moves the view.
 func (w *World) Step(in gm.Input) {
+	w.Tick++ // the skin's animation clock (it runs through pauses too)
 	w.Room.Step(in)
 	w.UpdateView()
 }
@@ -154,15 +157,22 @@ func (w *World) Draw(dst *image.RGBA) {
 			continue
 		}
 		frames := sp.Frames
+		var img *image.RGBA
 		if w.Skin != nil {
+			skinned := false
 			if fr := w.Skin.Sprites[in.Sprite]; len(fr) > 0 {
-				frames = fr
+				frames, skinned = fr, true
 			}
 			if in.Obj.Name == "block" && blocks != nil && !blocks[[2]int{int(in.X), int(in.Y) - 32}] {
-				frames = w.Skin.BlockTop
+				frames, skinned = w.Skin.BlockTop, true
+			}
+			if skinned { // the skin's own, calmer pace
+				img = w.Skin.Frame(in.Sprite, frames, w.Tick, in.XStart, in.YStart, in.X, in.Y, in.XPrevious, in.YPrevious)
 			}
 		}
-		img := frames[int(in.ImageIndex)%len(frames)]
+		if img == nil {
+			img = frames[int(in.ImageIndex)%len(frames)]
+		}
 		x, y := int(in.X)-w.ViewX, int(in.Y)-w.ViewY
 		r := img.Bounds().Add(image.Pt(x, y))
 		if r.Overlaps(dst.Bounds()) {

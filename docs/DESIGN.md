@@ -43,7 +43,10 @@ with its rules and level format written down; an editor on top that makes levels
 ## New art (item 11)
 
 Joop's commissioned 32×32 set is in `art/nova/`, a drawing-only skin: collision boxes stay the original's, so the
-rules don't change. F3 switches it on and off; `?nova` on the web starts with it. The roles (the artist was unsure;
+rules don't change. It is the default (Joop 2026-11-02: "switch to the commission art first"); F3 switches
+to the 2006 art and back; `?original` on the web (STELO_ART=original on the desktop) starts with the 2006 art.
+It animates at its own, calmer pace (about 3–6 frames a second, each instance offset so rows don't flash
+together; the protagonist only walks its cycle while it moves). The roles (the artist was unsure;
 ours to choose, Joop 2026-11-01):
 
 | Original | New art |
@@ -51,7 +54,7 @@ ours to choose, Joop 2026-11-01):
 | player (sprite_right / left / climbing) | the protagonist star (its left sheet; climbing: its first frame) |
 | monster, b_monster | the orange villain (mirrored facing left) |
 | flyer | the green villain (it can't be stomped, so it looks meaner) |
-| star coin | the orb on a pole |
+| star coin | the twinkling star cut from the checkpoint's pole (Joop 2026-11-02: the orb on a pole was not a good pick) |
 | heart, diamond | heart, diamond |
 | checkpoint unused / used | the checkpoint's first frame / all its frames (shining) |
 | fire | the spikes |

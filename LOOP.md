@@ -46,15 +46,15 @@ rooms/*.json, sprites, sounds).
 
 ## Questions for Joop
 
-- Packs: the furthest level reached is now kept per pack and shown on the title. Should a pack (not the original) also let you continue from there, or always start at its level 1 with 3 lives like the original?
+- (ANSWERED 2026-11-02, Joop: 'start how it was, then we'll probably implement those quality of life features later. Resuming for example will be really nice.') Packs: the furthest level reached is now kept per pack and shown on the title. Should a pack (not the original) also let you continue from there, or always start at its level 1 with 3 lives like the original?
 
-- Install a soundfont for rendering the 2006 MIDI music: `sudo pacman -S soundfont-fluid` (FluidR3, MIT); fluidsynth is already there.
+- (Joop will run it later 2026-11-02) Install a soundfont for rendering the 2006 MIDI music: `sudo pacman -S soundfont-fluid` (FluidR3, MIT); fluidsynth is already there.
 
 - 2026-11-01: run the original GML (an embedded GML interpreter + the 76 built-ins the two games use) instead of
   hand-porting the objects? Asked in chat; the engine core (item 4) is needed either way.
 
-- Audio: 2006 sounds/MIDI in the baseline (proposed) or new ones?
-- Language: Esperanto only, or also English?
+- (ANSWERED 2026-11-02 by 'start how it was': the 2006 sounds / MIDI in the baseline) Audio: 2006 sounds/MIDI in the baseline (proposed) or new ones?
+- (ANSWERED 2026-11-02, Joop: 'Translating is ok!') Language: Esperanto only, or also English?
 
 ## Blocked
 
@@ -104,3 +104,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 37 (item 10, step 13) — naming a pack: Ctrl+Shift+S asks 'Nomo de la pako:' then 'Aŭtoro:' in a box over the editor (typing incl. the phone keyboard, Backspace, Enter on, Esc cancel); the x-system typed shows and is kept as true letters (game.Hats); then the pack is saved with that name and author. Render: the prompt ('Cxielaj' → 'Ĉielaj'). Item 10 now has: editor, play, save/load levels, open/drop, packs (load, play, save, choose, progress, name). LEFT: continuing a pack (question to Joop); a touch button for the pack save.
 - 2026-11-01 tick 38 (item 11) — the new art as a drawing-only skin: art/nova/ (the commissioned sheets), game.LoadNovaSkin slices 32 px frames, mirrors the villains for facing left; World.Skin swaps frames by sprite name, blocks with nothing above draw as the grass floor; F3 toggles, ?nova starts with it; the roles in docs/DESIGN.md. Render: level 1 in the new art. LEFT: the flattened monster, the life icon (no art), a look at every level, Joop's opinion on the roles.
 - 2026-11-01 tick 39 (item 11) — the two sprites without art derived from the set: the flattened monster (villain squashed into rows 24–31) and the HUD life icon (protagonist at 10×10, the HUD now asks the skin); levels 2–5 rendered in the new art (consistent). LEFT: Joop's opinion on the roles (sent level 1); title/backgrounds stay original.
+- 2026-11-02 (Joop's answers, recorded from the goloco session) — baseline = how it was: packs start at level 1 with 3 lives like the original; quality-of-life features come later (resume from the furthest level is wanted then — queue it after the baseline); 2006 audio in the baseline; an English translation is OK (Esperanto stays the original). Still open: the GML-interpreter question.

@@ -69,7 +69,7 @@ func (w *World) drawTexts(dst *image.RGBA) {
 	for _, in := range w.Room.All("tekstilo") {
 		t, _ := in.VarsStr["teksto"]
 		y := int(in.Y) - w.ViewY + m.Ascent.Ceil()
-		for _, line := range strings.Split(hats(t), "#") {
+		for _, line := range strings.Split(hats(Tr(t)), "#") {
 			d := font.Drawer{Dst: dst, Src: green, Face: w.TextFont, Dot: fixed.P(int(in.X)+3-w.ViewX, y)}
 			d.DrawString(line)
 			y += m.Height.Ceil()
@@ -105,6 +105,6 @@ func (w *World) drawHUD(dst *image.RGBA, score, lives int) {
 	if w.Font != nil {
 		d := font.Drawer{Dst: dst, Src: image.NewUniform(color.Black), Face: w.Font}
 		d.Dot = fixed.P(10, 5+w.Font.Metrics().Ascent.Ceil())
-		d.DrawString("Poentoj: " + strconv.Itoa(score))
+		d.DrawString(Tr("Poentoj: ") + strconv.Itoa(score))
 	}
 }

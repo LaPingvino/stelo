@@ -42,3 +42,11 @@ func editFromURL() bool {
 func novaFromURL() bool {
 	return strings.Contains(js.Global().Get("location").Get("search").String(), "nova")
 }
+
+// langFromURL: "?lang=en" in the page's address draws the English text.
+func langFromURL() string {
+	if strings.Contains(js.Global().Get("location").Get("search").String(), "lang=en") {
+		return "en"
+	}
+	return ""
+}

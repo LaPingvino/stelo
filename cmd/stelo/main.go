@@ -143,6 +143,9 @@ func main() {
 	if o, err := pack.Original(stelo.Files); err == nil {
 		a.packs = append([]*pack.Pack{o}, store.ListPacks()...)
 	}
+	if langFromURL() == "en" { // ?lang=en / STELO_LANG=en: the English translation
+		game.Lang = "en"
+	}
 	if novaFromURL() { // ?nova: start with the new art
 		a.toggleSkin()
 	}

@@ -151,9 +151,9 @@ func (g *Game) drawHighscores(dst *image.RGBA) {
 			draw.Draw(dst, bg.Bounds(), bg, image.Point{}, draw.Src)
 		}
 		if g.hs == hsName {
-			drawGMText(dst, f, 70, 70, hsGood+g.G.KeyboardString+"_")
+			drawGMText(dst, f, 70, 70, Tr(hsGood)+g.G.KeyboardString+"_")
 		} else {
-			drawGMText(dst, f, 70, 70, hsSorry_)
+			drawGMText(dst, f, 70, 70, Tr(hsSorry_))
 		}
 	case hsTable:
 		// draw_highscore(x+5, y+5, x+480, y+320) for the instance at (64, 64).

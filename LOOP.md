@@ -40,8 +40,10 @@ rooms/*.json, sprites, sounds).
 13. [~] English translation (Joop 2026-11-02: "Translating is ok!"): every text the game draws, Esperanto stays the
     default. Done tick (2026-11-02): internal/game/lang.go (Lang, Tr, the table — the rules screen, the credits,
     nivelo5's sign, the HUD's "Poentoj:", both highscore prompts), ?lang=en on the web page / STELO_LANG=en on the
-    desktop. Left: a way to switch in the game itself (a key on the title?), the editor's own labels, the page's HTML
-    text; the title picture's lettering is an image (stays).
+    desktop; the web page's own text (loading, Keyboard button, its label, errors, html lang) follows ?lang=en.
+    Left: a way to switch in the game itself (a key on the title? Joop's call: it adds to the original's
+    interface); the editor's labels are English already (open / undo / save / play), an Esperanto set for the
+    default would be Joop's call too; the title picture's lettering is an image (stays).
 14. [ ] Later quality of life (Joop: "start how it was … resuming will be really nice"): resume a pack from the
     furthest level reached — after the baseline.
 
@@ -53,6 +55,7 @@ rooms/*.json, sprites, sounds).
   with"): queue item 12.
 
 ## Questions for Joop
+- Item 13: switch the language inside the game (e.g. a key on the title screen), or keep ?lang=en / STELO_LANG=en only? And the editor's labels are English (open / undo / save / play): give them Esperanto in the default language?
 
 - (ANSWERED 2026-11-02, Joop: 'start how it was, then we'll probably implement those quality of life features later. Resuming for example will be really nice.') Packs: the furthest level reached is now kept per pack and shown on the title. Should a pack (not the original) also let you continue from there, or always start at its level 1 with 3 lives like the original?
 
@@ -114,3 +117,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-01 tick 39 (item 11) — the two sprites without art derived from the set: the flattened monster (villain squashed into rows 24–31) and the HUD life icon (protagonist at 10×10, the HUD now asks the skin); levels 2–5 rendered in the new art (consistent). LEFT: Joop's opinion on the roles (sent level 1); title/backgrounds stay original.
 - 2026-11-02 (Joop's answers, recorded from the goloco session) — baseline = how it was: packs start at level 1 with 3 lives like the original; quality-of-life features come later (resume from the furthest level is wanted then — queue it after the baseline); 2006 audio in the baseline; an English translation is OK (Esperanto stays the original). Still open: the GML-interpreter question.
 - 2026-11-02 (goloco session's Stelo turn) — item 13 started: English translation. internal/game/lang.go: Lang ('eo' default — the original — or 'en') and Tr over a table keyed by the original strings exactly as in levels/ and the code (x-system, '#' breaks): all 26 text labels of klarigo / danklisto / nivelo5, the HUD's 'Poentoj: ', both highscore prompts; tekstilo's Draw, the HUD and the highscore screen go through Tr. ?lang=en (web) / STELO_LANG=en (desktop). TestEnglishCoversTheText (kept): every level text label has English and no table key is stale. Visual check (rendered headless): the rules screen and the credits in English fit their places (the dedication's longest line just inside 640). Also recorded Joop's answers (baseline as it was; resume later = item 14; 2006 audio; translation OK). Open: the GML-interpreter question; an in-game language switch.
+- 2026-11-02 (goloco session's Stelo turn, item 13) — the web page's own text follows ?lang=en (web/index.html: 'Loading Stelo…', the 'Keyboard' button, the typing box's label, 'Error:', html lang=en); the editor's labels turned out to be English already. Checked in the browser: the wasm built and served headless with ?lang=en, Enter on the title gives the rules screen in English. All tests green. Left in 13: an in-game switch and an Esperanto editor, both Joop's call (Questions).

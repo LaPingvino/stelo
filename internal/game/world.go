@@ -35,6 +35,10 @@ type World struct {
 	// Overlay, when set, receives the HUD's text to be drawn sharp at the
 	// screen's resolution (docs/UI.md); nil: drawn into the frame as before.
 	Overlay *Overlay
+	// Label is the level's name for the HUD ("Nivelo 2", "Bonusnivelo"),
+	// shown large for its first 60 steps; Steps counts the room's steps.
+	Label string
+	Steps int
 }
 
 // Object returns the engine object for an original object (sprite box,

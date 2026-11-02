@@ -7,6 +7,7 @@ import (
 	"golang.org/x/image/font"
 	"image"
 	"io/fs"
+	"strconv"
 
 	"github.com/LaPingvino/stelo/internal/gm"
 )
@@ -147,6 +148,12 @@ func (g *Game) enter(room string) error {
 	w.Skin = g.Skin
 	w.Font, w.TextFont = g.Font, g.TextFont
 	g.World = w
+	switch n := g.levelNumber(room); {
+	case n > 0:
+		w.Label = Tr("Nivelo") + " " + strconv.Itoa(n)
+	case room == "bonusnivelo":
+		w.Label = Tr("Bonusnivelo")
+	}
 	// The persistent life controller exists from the room that places it
 	// (nivelo1) until it is destroyed.
 	if len(w.Room.All("life_controller")) > 0 {
@@ -188,6 +195,9 @@ func (g *Game) Waiting() bool { return g.Title || g.waitRoom }
 
 // Step runs one step and then any room change it asked for.
 func (g *Game) Step(in gm.Input) error {
+	if g.World != nil {
+		g.World.Steps++
+	}
 	// klarigilo (original/objects/klarigilo.gml): at game start the title
 	// picture stelo_komenco and keyboard_wait(); in klarigo's room start
 	// screen_redraw(); keyboard_wait(); room_goto_next().

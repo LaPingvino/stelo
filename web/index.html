@@ -22,6 +22,15 @@
   // The phone keyboard: each typed character, Backspace ("\b") and Enter
   // ("\r") go into steloTyped, which the game empties every frame. Two
   // spaces stay in the box so Backspace has something to delete.
+  // ?lang=en: the page's own text in English too (the game reads the same
+  // parameter; internal/game/lang.go).
+  const english = /[?&]lang=en/.test(location.search);
+  if (english) {
+    document.documentElement.lang = "en";
+    document.getElementById("msg").textContent = "Loading Stelo…";
+    document.getElementById("kbd").textContent = "Keyboard";
+    document.getElementById("typing").setAttribute("aria-label", "Type for the game");
+  }
   window.steloTyped = [];
   (function () {
     const kbd = document.getElementById("kbd"), typing = document.getElementById("typing"), KEEP = "  ";
@@ -43,7 +52,7 @@
   WebAssembly.instantiateStreaming(fetch("stelo.wasm"), go.importObject).then(r => {
     document.getElementById("msg").remove();
     go.run(r.instance);
-  }).catch(e => { document.getElementById("msg").textContent = "Eraro: " + e; });
+  }).catch(e => { document.getElementById("msg").textContent = (english ? "Error: " : "Eraro: ") + e; });
 </script>
 </body>
 </html>

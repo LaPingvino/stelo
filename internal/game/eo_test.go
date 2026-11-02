@@ -27,6 +27,9 @@ func TestHats(t *testing.T) {
 // label in the levels has an English translation.
 func TestEnglishCoversTheText(t *testing.T) {
 	used := map[string]bool{"Poentoj: ": true, hsGood: true, hsSorry_: true}
+	for _, w := range MenuWords {
+		used[w] = true
+	}
 	files, _ := filepath.Glob("../../levels/*.txt")
 	re := regexp.MustCompile(`^text \d+ \d+ "(.*)"$`)
 	for _, f := range files {

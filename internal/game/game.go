@@ -43,6 +43,9 @@ type Game struct {
 	// OnLevel, if set, is told the pack level (1-based) entered when playing
 	// a pack or the original's levels (progress per pack).
 	OnLevel func(n int)
+	// OnRestart, when set, replaces game_restart: the program goes back to
+	// its title screen.
+	OnRestart func()
 	// Skin is the drawing skin for every room (nil: the original art).
 	Skin *Skin
 }
@@ -283,6 +286,10 @@ func characterRooms(a *Assets, o *gm.Object) {
 // restart is game_restart(): a new game from the first room, the highscore
 // table kept.
 func (g *Game) restart() {
+	if g.OnRestart != nil { // the program's title screen takes over (docs/UI.md)
+		g.OnRestart()
+		return
+	}
 	hs, save, snd := g.Highscores, g.SaveHighscores, g.G.Sound
 	ng, err := NewGame(g.FS, g.Assets, RoomOrder[0])
 	if err != nil {
@@ -307,6 +314,22 @@ func (g *Game) Draw(dst *image.RGBA) {
 
 // levelNumber is a room's place among the levels being played (1-based):
 // pack:n for a pack, nivelo1–5 for the original; 0 for other rooms.
+// EnterLevel starts level n (1-based, the pack's or the original's order),
+// leaving any title or waiting room: the new title's Play and Continue.
+func (g *Game) EnterLevel(n int) error {
+	g.Title, g.waitRoom = false, false
+	rooms := RoomOrder
+	if g.Order != nil {
+		rooms = g.Order
+	}
+	for _, r := range rooms {
+		if g.levelNumber(r) == n {
+			return g.enter(r)
+		}
+	}
+	return fmt.Errorf("no level %d", n)
+}
+
 func (g *Game) levelNumber(room string) int {
 	var n int
 	if g.Order != nil {

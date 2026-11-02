@@ -216,6 +216,7 @@ func (a *app) playPack(p *pack.Pack) {
 	}
 	g.OnLevel = func(n int) { store.Reached(p.Name, n) }
 	a.game = g
+	a.applySkin()
 	a.edit.on = false
 	ebiten.SetWindowTitle("Stelo — " + p.Name)
 }

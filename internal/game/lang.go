@@ -54,3 +54,16 @@ var english = map[string]string{
 	"La Esperantistaro - Mia nekompreneble bona celgrupo":                                    "The Esperanto community - My incomprehensibly good audience",
 	"Retposxtu al mi ke vi venis cxi tie, por ke mi faru pliajn nivelojn#[ikojba@gmail.com]": "E-mail me that you got this far, so that I make more levels#[ikojba@gmail.com]",
 }
+
+// MenuWords are the title menu's words (cmd/stelo/title.go), translated in
+// english like the rest.
+var MenuWords = []string{"Ludi", "Daŭrigi", "Niveloj", "Lingvo", "Arto", "nova", "de 2006", "Redaktilo", "Fini",
+	"Esperanto", "Platforma ludo · 2006, refarita 2026", "nivelo"}
+
+func init() {
+	for k, v := range map[string]string{"Ludi": "Play", "Daŭrigi": "Continue", "Niveloj": "Levels", "Lingvo": "Language",
+		"Arto": "Art", "nova": "new", "de 2006": "2006", "Redaktilo": "Level editor", "Fini": "Quit",
+		"Esperanto": "Esperanto", "Platforma ludo · 2006, refarita 2026": "A platform game · 2006, remade 2026", "nivelo": "level"} {
+		english[k] = v
+	}
+}

@@ -34,6 +34,8 @@ type app struct {
 	canvas  *ebiten.Image // the frame as an image, scaled onto the screen
 	overlay game.Overlay  // texts drawn sharp over it (text.go)
 	screen  *ebiten.Image
+	skin    *game.Skin // the drawing skin (nil: the 2006 art); F3 / ?original
+	title   titleScreen
 }
 
 func (a *app) load(i int) {
@@ -51,6 +53,7 @@ func (a *app) load(i int) {
 	g.SaveHighscores = store.SaveHighscores
 	g.OnLevel = func(n int) { store.Reached("Stelo", n) } // the original pack's progress
 	a.game = g
+	a.applySkin()
 	ebiten.SetWindowTitle("Stelo")
 }
 
@@ -58,8 +61,19 @@ func (a *app) Update() error {
 	if files := ebiten.DroppedFiles(); files != nil { // a level file dropped on the window
 		a.openDropped(files)
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyF3) && a.game != nil { // the original art ⇄ the new skin
+	if inpututil.IsKeyJustPressed(ebiten.KeyF3) { // the original art ⇄ the new skin
 		a.toggleSkin()
+		if a.title.on {
+			a.buildTitleMenu(a.title.menu.Sel)
+		}
+		return nil
+	}
+	if a.title.on {
+		a.updateTitle()
+		return nil
+	}
+	if !a.edit.on && a.game == nil { // left the editor with no game running
+		a.openTitle()
 		return nil
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF2) && a.game != nil { // the editor, on this room
@@ -108,6 +122,14 @@ func (a *app) Update() error {
 }
 
 func (a *app) Draw(screen *ebiten.Image) {
+	if a.title.on {
+		a.overlay.Reset()
+		a.drawTitle()
+		a.canvas.WritePixels(a.frame.Pix)
+		present(screen, a.canvas)
+		drawOverlay(screen, &a.overlay)
+		return
+	}
 	if a.edit.on {
 		a.edit.screen.Draw(a.frame)
 		if a.game != nil {
@@ -149,7 +171,6 @@ func main() {
 	}
 	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH)), canvas: ebiten.NewImage(game.ScreenW, game.ScreenH)}
 	loadNoto(stelo.Files)
-	a.load(0) // the title, then the rules screen
 	a.touch.seen = showPadsFromURL()
 	if o, err := pack.Original(stelo.Files); err == nil {
 		a.packs = append([]*pack.Pack{o}, store.ListPacks()...)
@@ -160,7 +181,9 @@ func main() {
 	if !originalArtFromURL() { // the new art by default (Joop 2026-11-02); ?original / STELO_ART=original: the 2006 art
 		a.toggleSkin()
 	}
+	a.openTitle() // the new title (docs/UI.md); the 2006 title picture and rules room are no longer shown
 	if editFromURL() { // ?edit: straight into the editor on level 1
+		a.title.on = false
 		a.openEditor("nivelo1")
 	}
 	ebiten.SetTPS(30) // every room runs at 30 steps per second
@@ -223,17 +246,26 @@ func ebitenKey(k gm.Key) ebiten.Key {
 
 // toggleSkin switches between the original art and the new skin (F3).
 func (a *app) toggleSkin() {
-	if a.game.Skin == nil {
+	if a.skin == nil {
 		s, err := game.LoadNovaSkin(stelo.Files)
 		if err != nil {
 			log.Printf("skin: %v", err)
 			return
 		}
-		a.game.Skin = s
+		a.skin = s
 	} else {
-		a.game.Skin = nil
+		a.skin = nil
 	}
+	a.applySkin()
+}
+
+// applySkin gives the running game the app's skin (nil: the 2006 art).
+func (a *app) applySkin() {
+	if a.game == nil {
+		return
+	}
+	a.game.Skin = a.skin
 	if a.game.World != nil {
-		a.game.World.Skin = a.game.Skin
+		a.game.World.Skin = a.skin
 	}
 }

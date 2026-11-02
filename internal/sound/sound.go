@@ -1,30 +1,41 @@
-// Package sound plays the original's sound effects (original/sounds/*.wav)
-// through Ebitengine's audio. The game names a sound as action_sound does;
-// "@music:…" and "@sound:…" (the MIDI tunes) are left to the music player.
-// PARTIAL: music — the 2006 MIDI files are to be rendered to OGG.
+// Package sound plays the game's sounds through Ebitengine's audio: the
+// original's effects and music, converted for today's machines by
+// scripts/convert-audio.sh into Ogg Opus at SampleRate, decoded by gopus (a
+// pure-Go Opus decoder) (audio/effects,
+// audio/music; the 2006 WAV and MIDI files stay as they were).
+//
+// The game names a sound as action_sound does: an effect by its name; music
+// as "@music:name" (sound_loop) or "@sound:name" (played once). As in Game
+// Maker 5, where MIDI went through one music channel, starting a tune stops
+// the one before; effects may sound together.
 package sound
 
 import (
 	"bytes"
+	"io"
 	"io/fs"
 	"path"
 	"strings"
 	"sync"
 
+	"github.com/LaPingvino/gopus"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
-// SampleRate is the audio context's rate; the WAVs are resampled to it.
-const SampleRate = 44100
+// SampleRate is the audio context's rate, and the converted files' rate, so
+// nothing is resampled at run time.
+const SampleRate = 48000 // Opus' own rate
 
-// Decode reads a WAV into PCM at SampleRate (the original's files, any rate).
+// Dir is where the converted sounds are (effects/, music/).
+const Dir = "audio"
+
+// Decode reads an effect into PCM at SampleRate.
 func Decode(fsys fs.FS, name string) ([]byte, error) {
-	data, err := fs.ReadFile(fsys, path.Join("original/sounds", name+".wav"))
+	data, err := fs.ReadFile(fsys, path.Join(Dir, "effects", name+".opus"))
 	if err != nil {
 		return nil, err
 	}
-	s, err := wav.DecodeWithSampleRate(SampleRate, bytes.NewReader(data))
+	s, err := gopus.NewStream(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
@@ -35,18 +46,18 @@ func Decode(fsys fs.FS, name string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Player plays the effects, each decoded once. All of them are decoded in the
-// background as soon as the player is made: decoding (and resampling to
-// SampleRate) inside a game step made the first play of each effect stall the
-// game for a moment — up to 0.4 s natively for the longest, several times
-// that in the browser. The pauses the original asks for (action_sleep after
-// some sounds) are separate and kept.
+// Player plays the effects, each decoded once — all of them in the
+// background as soon as the player is made, so no first play has to decode
+// inside a game step — and one tune at a time, streamed as it plays.
 type Player struct {
 	fsys fs.FS
 	ctx  *audio.Context
 	mu   sync.Mutex
 	pcm  map[string][]byte
 	done chan struct{} // closed when the background preload has finished
+
+	music     *audio.Player
+	musicName string
 }
 
 // NewPlayer makes the audio context (once per program) and starts decoding
@@ -62,9 +73,9 @@ func (p *Player) startPreload() {
 	p.done = make(chan struct{})
 	go func() {
 		defer close(p.done)
-		names, _ := fs.Glob(p.fsys, "original/sounds/*.wav")
+		names, _ := fs.Glob(p.fsys, Dir+"/effects/*.opus")
 		for _, n := range names {
-			p.decoded(strings.TrimSuffix(path.Base(n), ".wav"))
+			p.decoded(strings.TrimSuffix(path.Base(n), ".opus"))
 		}
 	}()
 }
@@ -88,13 +99,54 @@ func (p *Player) decoded(name string) []byte {
 	return pcm
 }
 
-// Play is action_sound(name, loop=0): the effect from the start; several may
-// sound at once, as in Game Maker.
+// Play is action_sound: an effect from the start, or a tune ("@music:" looped,
+// "@sound:" once) in place of the one playing.
 func (p *Player) Play(name string) {
-	if strings.HasPrefix(name, "@") {
-		return // music (MIDI) — not yet
+	if tune, ok := strings.CutPrefix(name, "@music:"); ok {
+		p.playMusic(tune, true)
+		return
+	}
+	if tune, ok := strings.CutPrefix(name, "@sound:"); ok {
+		p.playMusic(tune, false)
+		return
 	}
 	if pcm := p.decoded(name); pcm != nil {
 		p.ctx.NewPlayerFromBytes(pcm).Play()
 	}
+}
+
+// playMusic starts a tune in place of the one playing, streamed from its file.
+func (p *Player) playMusic(name string, loop bool) {
+	p.StopMusic()
+	data, err := fs.ReadFile(p.fsys, path.Join(Dir, "music", name+".opus"))
+	if err != nil {
+		return
+	}
+	s, err := gopus.NewStream(bytes.NewReader(data))
+	if err != nil {
+		return
+	}
+	var src io.Reader = s
+	if loop {
+		src = audio.NewInfiniteLoop(s, s.Length())
+	}
+	pl, err := p.ctx.NewPlayer(src)
+	if err != nil {
+		return
+	}
+	p.music, p.musicName = pl, name
+	pl.Play()
+}
+
+// StopMusic stops the tune playing (sound_stop_all for the music channel).
+func (p *Player) StopMusic() {
+	if p.music != nil {
+		p.music.Close()
+		p.music, p.musicName = nil, ""
+	}
+}
+
+// Playing is sound_isplaying for a tune: whether it is the one playing.
+func (p *Player) Playing(name string) bool {
+	return p.music != nil && p.musicName == name && p.music.IsPlaying()
 }

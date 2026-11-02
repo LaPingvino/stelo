@@ -1,11 +1,14 @@
 package sound
 
 import (
+	"bytes"
 	"io/fs"
+	"os"
 	"path"
 	"strings"
 	"testing"
 
+	"github.com/LaPingvino/gopus"
 	"github.com/LaPingvino/stelo"
 )
 
@@ -25,15 +28,48 @@ func TestPreloadDecodesEveryEffect(t *testing.T) {
 	p := &Player{fsys: fsys}
 	p.startPreload()
 	<-p.done
-	names, _ := fs.Glob(fsys, "original/sounds/*.wav")
+	names, _ := fs.Glob(fsys, "audio/effects/*.opus")
 	if len(names) == 0 {
 		t.Fatal("no effects")
 	}
 	for _, n := range names {
-		k := strings.TrimSuffix(path.Base(n), ".wav")
+		k := strings.TrimSuffix(path.Base(n), ".opus")
 		if len(p.pcm[k]) == 0 {
 			t.Errorf("%s not decoded", k)
 		}
 	}
 	t.Logf("%d effects decoded in the background", len(names))
+}
+
+// Every 2006 sound has its converted file (scripts/convert-audio.sh): each
+// WAV an effect, each MIDI a tune; and every tune decodes.
+func TestEveryOriginalSoundConverted(t *testing.T) {
+	origs, _ := fs.Glob(os.DirFS("../.."), "original/sounds/*")
+	if len(origs) == 0 {
+		t.Skip("no originals")
+	}
+	for _, o := range origs {
+		ext := path.Ext(o)
+		n := strings.TrimSuffix(path.Base(o), ext)
+		var want string
+		switch ext {
+		case ".wav":
+			want = "audio/effects/" + n + ".opus"
+		case ".mid":
+			want = "audio/music/" + n + ".opus"
+		default:
+			continue
+		}
+		data, err := fs.ReadFile(stelo.Files, want)
+		if err != nil {
+			t.Errorf("%s: no %s (run scripts/convert-audio.sh)", o, want)
+			continue
+		}
+		if ext == ".mid" {
+			s, err := gopus.NewStream(bytes.NewReader(data))
+			if err != nil || s.Length() == 0 {
+				t.Errorf("%s: %v", want, err)
+			}
+		}
+	}
 }

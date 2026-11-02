@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/LaPingvino/gopus v0.1.0
 	github.com/ebitengine/gomobile v0.0.0-20250923094054-ea854a63cce1 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/oto/v3 v3.4.0 // indirect
@@ -17,3 +18,5 @@ require (
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
 )
+
+replace github.com/LaPingvino/gopus => ../gopus

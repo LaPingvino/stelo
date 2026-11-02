@@ -56,3 +56,18 @@ func Reached(pack string, n int) {
 		writeKey("progress-"+pack, []byte(strconv.Itoa(n)))
 	}
 }
+
+// Muted is the sound button's setting (off: false).
+func Muted() bool {
+	data, ok := readKey("muted")
+	return ok && strings.TrimSpace(string(data)) == "1"
+}
+
+// SetMuted keeps the sound button's setting.
+func SetMuted(m bool) {
+	v := "0"
+	if m {
+		v = "1"
+	}
+	writeKey("muted", []byte(v))
+}

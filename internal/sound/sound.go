@@ -58,6 +58,26 @@ type Player struct {
 
 	music     *audio.Player
 	musicName string
+	muted     bool
+}
+
+// SetMuted turns all sound off or on (the sound button, M): effects are not
+// played while muted, the tune keeps going silently so unmuting picks it up.
+func (p *Player) SetMuted(m bool) {
+	p.muted = m
+	if p.music != nil {
+		p.music.SetVolume(p.volume())
+	}
+}
+
+// Muted reports whether the sound is off.
+func (p *Player) Muted() bool { return p.muted }
+
+func (p *Player) volume() float64 {
+	if p.muted {
+		return 0
+	}
+	return 1
 }
 
 // NewPlayer makes the audio context (once per program) and starts decoding
@@ -110,6 +130,9 @@ func (p *Player) Play(name string) {
 		p.playMusic(tune, false)
 		return
 	}
+	if p.muted {
+		return
+	}
 	if pcm := p.decoded(name); pcm != nil {
 		p.ctx.NewPlayerFromBytes(pcm).Play()
 	}
@@ -135,6 +158,7 @@ func (p *Player) playMusic(name string, loop bool) {
 		return
 	}
 	p.music, p.musicName = pl, name
+	pl.SetVolume(p.volume())
 	pl.Play()
 }
 

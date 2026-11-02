@@ -47,6 +47,8 @@ func (a *app) load(i int) {
 	}
 	if a.sound == nil {
 		a.sound = sound.NewPlayer(stelo.Files)
+		theSound = a.sound
+		a.sound.SetMuted(store.Muted())
 	}
 	g.G.Sound = a.sound.Play
 	g.Highscores = store.LoadHighscores()
@@ -67,6 +69,21 @@ func (a *app) Update() error {
 			a.buildTitleMenu(a.title.menu.Sel)
 		}
 		return nil
+	}
+	// The two corner buttons by mouse (no touch layout), and M for the sound.
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !a.touch.seen {
+		pt := image.Pt(ebiten.CursorPosition())
+		switch {
+		case pt.In(a.touch.lay.full):
+			ebiten.SetFullscreen(!ebiten.IsFullscreen())
+			return nil
+		case pt.In(a.touch.lay.snd):
+			toggleSound()
+			return nil
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyM) && !a.edit.on {
+		toggleSound()
 	}
 	// Full screen: F11, or Alt+Enter (the touch controls have a button).
 	if inpututil.IsKeyJustPressed(ebiten.KeyF11) || (inpututil.IsKeyJustPressed(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
@@ -282,10 +299,27 @@ func (a *app) applySkin() {
 // layout the touches are read against.
 func (a *app) frameArea(screen *ebiten.Image) image.Rectangle {
 	b := screen.Bounds()
-	if !a.touch.seen {
-		a.touch.lay = touchLayout{area: b}
+	if !a.touch.seen { // no touch: the whole screen; the two buttons small in the top-left corner
+		d := ebiten.Monitor().DeviceScaleFactor()
+		k := int(28 * max(d, 1))
+		m := k / 4
+		a.touch.lay = touchLayout{area: b, full: image.Rect(m, m, m+k, m+k*2/3), snd: image.Rect(2*m+k, m, 2*m+2*k, m+k*2/3)}
 		return b
 	}
 	a.touch.lay = layoutTouch(b.Dx(), b.Dy())
 	return a.touch.lay.area
 }
+
+// theSound is the program's sound player (made once).
+var theSound *sound.Player
+
+// toggleSound is the sound button and M: all sound off or on, remembered.
+func toggleSound() {
+	if theSound == nil {
+		return
+	}
+	theSound.SetMuted(!theSound.Muted())
+	store.SetMuted(theSound.Muted())
+}
+
+func soundMuted() bool { return theSound != nil && theSound.Muted() }

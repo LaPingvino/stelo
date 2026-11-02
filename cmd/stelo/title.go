@@ -46,6 +46,8 @@ func (a *app) openTitle() {
 	a.buildTitleMenu(0)
 	if a.sound == nil {
 		a.sound = sound.NewPlayer(stelo.Files)
+		theSound = a.sound
+		a.sound.SetMuted(store.Muted())
 	}
 	a.sound.Play("@sound:komenco") // the 2006 title tune
 	ebiten.SetWindowTitle("Stelo")

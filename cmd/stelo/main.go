@@ -31,6 +31,7 @@ type app struct {
 	game   *game.Game
 	room   int
 	frame  *image.RGBA
+	canvas *ebiten.Image // the frame as an image, scaled onto the screen
 	screen *ebiten.Image
 }
 
@@ -111,7 +112,8 @@ func (a *app) Draw(screen *ebiten.Image) {
 		if a.game != nil {
 			a.edit.screen.DrawPrompt(a.frame, a.edit.prompt, a.game.TextFont)
 		}
-		screen.WritePixels(a.frame.Pix)
+		a.canvas.WritePixels(a.frame.Pix)
+		present(screen, a.canvas)
 		return
 	}
 	if a.game == nil {
@@ -126,18 +128,20 @@ func (a *app) Draw(screen *ebiten.Image) {
 		}
 		a.game.DrawPackChoice(a.frame, label)
 	}
-	screen.WritePixels(a.frame.Pix)
-	a.touch.draw(screen)
+	a.canvas.WritePixels(a.frame.Pix)
+	a.touch.draw(a.canvas)
+	present(screen, a.canvas)
 }
 
-func (a *app) Layout(int, int) (int, int) { return game.ScreenW, game.ScreenH }
+// Layout is the screen's real resolution; the frame is scaled onto it (scale.go).
+func (a *app) Layout(outW, outH int) (int, int) { return screenSize(outW, outH) }
 
 func main() {
 	assets, err := game.LoadAssets(stelo.Files)
 	if err != nil {
 		log.Fatal(err)
 	}
-	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH))}
+	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH)), canvas: ebiten.NewImage(game.ScreenW, game.ScreenH)}
 	a.load(0) // the title, then the rules screen
 	a.touch.seen = showPadsFromURL()
 	if o, err := pack.Original(stelo.Files); err == nil {

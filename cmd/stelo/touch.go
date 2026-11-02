@@ -46,7 +46,7 @@ func (t *touchState) update() {
 		t.seen = true
 	}
 	for _, id := range ids {
-		x, y := ebiten.TouchPosition(id)
+		x, y := toFrame(ebiten.TouchPosition(id))
 		for _, p := range pads {
 			if image.Pt(x, y).In(p.r) {
 				t.held[p.key] = true
@@ -54,7 +54,7 @@ func (t *touchState) update() {
 		}
 	}
 	for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
-		x, y := ebiten.TouchPosition(id)
+		x, y := toFrame(ebiten.TouchPosition(id))
 		onPad := false
 		for _, p := range pads {
 			onPad = onPad || image.Pt(x, y).In(p.r)

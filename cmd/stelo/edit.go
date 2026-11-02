@@ -101,11 +101,11 @@ func (a *app) updateEditor() {
 	default:
 	}
 	e := a.edit.screen
-	x, y := ebiten.CursorPosition()
+	x, y := toFrame(ebiten.CursorPosition())
 	left := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	right := ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight)
 	if ids := ebiten.AppendTouchIDs(nil); len(ids) > 0 { // a finger paints
-		x, y = ebiten.TouchPosition(ids[0])
+		x, y = toFrame(ebiten.TouchPosition(ids[0]))
 		left = true
 	}
 	e.MouseX, e.MouseY = x, y

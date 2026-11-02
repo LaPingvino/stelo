@@ -2,6 +2,7 @@ package game
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"io/fs"
@@ -112,12 +113,18 @@ func LoadNovaSkin(fsys fs.FS) (*Skin, error) {
 		"sprite_monsterr": 0.15, "sprite_monsterl": 0.15,
 		"sprite_flyingr": 0.12, "sprite_flyingl": 0.12,
 		"sprite_stelo_poentoj": 0.1, "transirejo_a": 0.1, // the stars twinkle
-		"transirejo_na": 0.1, // the switch sways
-		"sprite_bonus": 0.08, "diamanto": 0.1, // the heart's glow, the diamond's glint
+		"transirejo_na": 0.1,                   // the switch sways
+		"sprite_bonus":  0.08, "diamanto": 0.1, // the heart's glow, the diamond's glint
 	}
 	s.IdleFirst = map[string]bool{"sprite_right": true, "sprite_left": true}
 	return s, nil
 }
+
+// CoinFill and CoinRim colour the star coin.
+var (
+	CoinFill = color.RGBA{0x2b, 0x4c, 0x9a, 0xff}
+	CoinRim  = color.RGBA{0x14, 0x24, 0x52, 0xff}
+)
 
 // defaultRate is the skin's animation speed for sprites Rate doesn't name.
 const defaultRate = 0.15
@@ -141,16 +148,43 @@ func (s *Skin) Frame(sprite string, frames []*image.RGBA, tick int, xStart, ySta
 	return frames[(int(float64(tick)*rate)+phase)%len(frames)]
 }
 
-// starCoin cuts the star off the checkpoint's frames (rows 1–13, columns
-// 10–22) and centres it in a 32×32 cell.
+// starCoin is the star coin: the star from the top of the checkpoint's pole
+// (rows 1–13, columns 10–22; the pole's grey pixels between its legs left
+// out), its frames' shine kept, on a round coin of CoinFill with a CoinRim
+// edge, centred in a 32×32 cell (Joop 2026-11-02: "star-marked coins").
 func starCoin(checkpoint []*image.RGBA) []*image.RGBA {
 	out := make([]*image.RGBA, len(checkpoint))
 	for i, fr := range checkpoint {
 		c := image.NewRGBA(image.Rect(0, 0, 32, 32))
-		draw.Draw(c, image.Rect(10, 10, 23, 23), fr, image.Pt(10, 1), draw.Src)
+		for y := 0; y < 32; y++ { // the coin: radius 10.5 around the cell's centre
+			for x := 0; x < 32; x++ {
+				dx, dy := float64(x)-15.5, float64(y)-15.5
+				switch d := dx*dx + dy*dy; {
+				case d <= 9.5*9.5:
+					c.Set(x, y, CoinFill)
+				case d <= 10.5*10.5:
+					c.Set(x, y, CoinRim)
+				}
+			}
+		}
+		for y := 1; y <= 13; y++ {
+			for x := 10; x <= 22; x++ {
+				p := fr.RGBAAt(x, y)
+				if p.A == 0 || isPoleGrey(p) {
+					continue
+				}
+				c.SetRGBA(x-10+9, y-1+9, p)
+			}
+		}
 		out[i] = c
 	}
 	return out
+}
+
+// isPoleGrey reports the checkpoint pole's blue-greys (the star itself is
+// orange and yellow, white at its brightest).
+func isPoleGrey(p color.RGBA) bool {
+	return p.B > p.R && p.B > p.G
 }
 
 // scale draws src (nearest neighbour) into the w×h area at (x, y) of a new

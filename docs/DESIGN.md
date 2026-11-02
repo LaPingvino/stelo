@@ -54,7 +54,7 @@ ours to choose, Joop 2026-11-01):
 | player (sprite_right / left / climbing) | the protagonist star (its left sheet; climbing: its first frame) |
 | monster, b_monster | the orange villain (mirrored facing left) |
 | flyer | the green villain (it can't be stomped, so it looks meaner) |
-| star coin | the twinkling star cut from the checkpoint's pole (Joop 2026-11-02: the orb on a pole was not a good pick) |
+| star coin | a star-marked coin: the checkpoint's star (its pole left out), twinkling, on a round blue coin — blue stands out on the wooden backgrounds where amber blended in (Joop 2026-11-02) |
 | heart, diamond | heart, diamond |
 | checkpoint unused / used | the orb on a pole (a switch) / the checkpoint's star, shining (Joop 2026-11-02: the star in both states hid the change) |
 | fire | the spikes |

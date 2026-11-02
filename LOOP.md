@@ -60,7 +60,7 @@ rooms/*.json, sprites, sounds).
 U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling + text at real resolution, Noto Sans,
    Pits-like menus (title, pause, settings, level pick of reached levels, resume), new "Kiel ludi" and "Pri"
    texts (drafts to Joop first), slim HUD, proper highscores. Steps: U1 shared UI package (scaler, text, menu
-   widget — U1a the sharp scaler DONE 2026-11-02); U2 title + menus; U3 Kiel ludi / Pri (drafts → Joop); U4 HUD + level start / end; U5 highscores;
+   widget — U1a the sharp scaler DONE 2026-11-02; U1b sharp text DONE 2026-11-02); U2 title + menus; U3 Kiel ludi / Pri (drafts → Joop); U4 HUD + level start / end; U5 highscores;
    U6 settings (language, sound, music, art). Stelo first, then Pacmanio.
 
 ## Decisions (Joop)
@@ -141,3 +141,4 @@ U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling +
 - 2026-11-02 (Joop: 'the little stars still have the top of the pole at the bottom … change its color and put a circle around … star-marked coins') — the pole's blue-grey pixels sat inside the star's lower legs (rows 11–13); now left out. The coin: the twinkling star on a round coin (radius 10.5, CoinFill / CoinRim). Tried blue and amber in level 1: amber blends with the wood, blue stands out — blue. Close-up checked: no pole pixels. skin.go gofmt'd.
 - 2026-11-02 — Joop approved docs/UI.md (new title, fonts as fits, resume like Pits); queued as item U.
 - 2026-11-02 (item U1a) — the blur fixed: Layout gives the real resolution (device scale factor), the 640×480 frame is scaled onto it unsmoothed (FilterNearest), whole steps when they fill ≥ 90% of the room, else the largest fraction (phones); centred on black. Touch pads drawn on the frame before scaling; every pointer position goes through toFrame. TestFit (cmd/stelo, needs a display: xvfb-run). Headless checks: 1366×900 desktop and a 844×390 phone at 3× (the frame fills its height).
+- 2026-11-02 (item U1b) — sharp text: Noto Sans Regular / Bold / Black in fonts/ (OFL 1.1 per the fonts' own name table; fonts/LICENSE-Noto); game.Overlay (internal/game/overlay.go: texts in frame coordinates — size, weight, colour, alignment) filled while drawing, drawn by cmd/stelo/text.go after the frame is on screen at the real resolution (Ebitengine's text package on x/image/font — text/v2 would add go-text/typesetting and rivo/uniseg, new modules; not added). First user: the HUD score. Headless check at 1366×900: 'Poentoj: 0' in Noto Sans Bold, sharp, over the crisp pixel art. Next: U1c the menu widget, then U2 the new title + menus.

@@ -25,14 +25,15 @@ type app struct {
 	edit   editState
 	// packs are the playable packs: the original first, then the ones in
 	// the config folder; pack is the one chosen on the title.
-	packs  []*pack.Pack
-	pack   int
-	sound  *sound.Player
-	game   *game.Game
-	room   int
-	frame  *image.RGBA
-	canvas *ebiten.Image // the frame as an image, scaled onto the screen
-	screen *ebiten.Image
+	packs   []*pack.Pack
+	pack    int
+	sound   *sound.Player
+	game    *game.Game
+	room    int
+	frame   *image.RGBA
+	canvas  *ebiten.Image // the frame as an image, scaled onto the screen
+	overlay game.Overlay  // texts drawn sharp over it (text.go)
+	screen  *ebiten.Image
 }
 
 func (a *app) load(i int) {
@@ -119,6 +120,10 @@ func (a *app) Draw(screen *ebiten.Image) {
 	if a.game == nil {
 		return
 	}
+	a.overlay.Reset()
+	if a.game.World != nil {
+		a.game.World.Overlay = &a.overlay // the HUD's text, drawn sharp after the frame (text.go)
+	}
 	a.game.Draw(a.frame)
 	if a.game.Title && len(a.packs) > 1 {
 		p := a.packs[a.pack]
@@ -131,6 +136,7 @@ func (a *app) Draw(screen *ebiten.Image) {
 	a.canvas.WritePixels(a.frame.Pix)
 	a.touch.draw(a.canvas)
 	present(screen, a.canvas)
+	drawOverlay(screen, &a.overlay)
 }
 
 // Layout is the screen's real resolution; the frame is scaled onto it (scale.go).
@@ -142,6 +148,7 @@ func main() {
 		log.Fatal(err)
 	}
 	a := &app{assets: assets, frame: image.NewRGBA(image.Rect(0, 0, game.ScreenW, game.ScreenH)), canvas: ebiten.NewImage(game.ScreenW, game.ScreenH)}
+	loadNoto(stelo.Files)
 	a.load(0) // the title, then the rules screen
 	a.touch.seen = showPadsFromURL()
 	if o, err := pack.Original(stelo.Files); err == nil {

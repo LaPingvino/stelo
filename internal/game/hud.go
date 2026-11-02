@@ -110,7 +110,9 @@ func (w *World) drawHUD(dst *image.RGBA, score, lives int) {
 		}
 	}
 	// draw_score: caption and score, top-left aligned at (10, 5).
-	if w.Font != nil {
+	if w.Overlay != nil {
+		w.Overlay.Add(Text{S: Tr("Poentoj: ") + strconv.Itoa(score), X: 10, Y: 6, Size: 13, Weight: Bold, Color: color.Black})
+	} else if w.Font != nil {
 		d := font.Drawer{Dst: dst, Src: image.NewUniform(color.Black), Face: w.Font}
 		d.Dot = fixed.P(10, 5+w.Font.Metrics().Ascent.Ceil())
 		d.DrawString(Tr("Poentoj: ") + strconv.Itoa(score))

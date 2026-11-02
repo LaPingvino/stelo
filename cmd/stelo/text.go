@@ -1,0 +1,78 @@
+package main
+
+import (
+	"io/fs"
+	"log"
+	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+
+	"github.com/LaPingvino/stelo/internal/game"
+)
+
+// The overlay's texts (game.Overlay) drawn at the screen's real resolution in
+// Noto Sans (fonts/, SIL Open Font License), placed by the frame's position
+// on the screen (view), so they are sharp however large the window is. Uses
+// Ebitengine's text package on golang.org/x/image/font (already a dependency;
+// text/v2 would bring in new modules).
+
+var noto [3]*opentype.Font
+
+// faces caches a face per weight and pixel size.
+var faces = map[[2]int]font.Face{}
+
+func loadNoto(fsys fs.FS) {
+	for i, name := range []string{"NotoSans-Regular", "NotoSans-Bold", "NotoSans-Black"} {
+		data, err := fs.ReadFile(fsys, "fonts/"+name+".ttf")
+		if err != nil {
+			log.Printf("font %s: %v", name, err)
+			continue
+		}
+		f, err := opentype.Parse(data)
+		if err != nil {
+			log.Printf("font %s: %v", name, err)
+			continue
+		}
+		noto[i] = f
+	}
+}
+
+func face(w game.Weight, px int) font.Face {
+	k := [2]int{int(w), px}
+	if f, ok := faces[k]; ok {
+		return f
+	}
+	if noto[w] == nil {
+		return nil
+	}
+	f, err := opentype.NewFace(noto[w], &opentype.FaceOptions{Size: float64(px), DPI: 72, Hinting: font.HintingFull})
+	if err != nil {
+		return nil
+	}
+	faces[k] = f
+	return f
+}
+
+// drawOverlay draws the frame's texts onto the screen.
+func drawOverlay(screen *ebiten.Image, o *game.Overlay) {
+	for _, t := range o.Texts {
+		f := face(t.Weight, int(math.Round(t.Size*view.scale)))
+		if f == nil {
+			continue
+		}
+		x := view.ox + t.X*view.scale
+		y := view.oy + t.Y*view.scale + float64(f.Metrics().Ascent.Round())
+		if t.Align != game.Left {
+			w := float64(font.MeasureString(f, t.S).Round())
+			if t.Align == game.Centre {
+				x -= w / 2
+			} else {
+				x -= w
+			}
+		}
+		text.Draw(screen, t.S, f, int(math.Round(x)), int(math.Round(y)), t.Color)
+	}
+}

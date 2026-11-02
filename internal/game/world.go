@@ -32,6 +32,9 @@ type World struct {
 	Font, TextFont font.Face
 	// Tick counts the steps (the skin's animation clock).
 	Tick int
+	// Overlay, when set, receives the HUD's text to be drawn sharp at the
+	// screen's resolution (docs/UI.md); nil: drawn into the frame as before.
+	Overlay *Overlay
 }
 
 // Object returns the engine object for an original object (sprite box,

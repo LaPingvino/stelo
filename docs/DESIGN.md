@@ -42,7 +42,7 @@ with its rules and level format written down; an editor on top that makes levels
 
 ## New art (item 11)
 
-Joop's commissioned 32×32 set is in `art/nova/`, a drawing-only skin: collision boxes stay the original's, so the
+Joop's commissioned 32×32 set by @lucasserapiao is in `art/nova/`, a drawing-only skin: collision boxes stay the original's, so the
 rules don't change. It is the default (Joop 2026-11-02: "switch to the commission art first"); F3 switches
 to the 2006 art and back; `?original` on the web (STELO_ART=original on the desktop) starts with the 2006 art.
 It animates at its own, calmer pace (about 3–6 frames a second, each instance offset so rows don't flash

@@ -36,8 +36,7 @@ around play is redesigned; both games get the same UI, each in its own colours.
   - **Kiel ludi**: one screen per game — the goal in two sentences, the controls (keys; the phone pads),
     and a legend of the things in the game, each with its own sprite (coin, heart, diamond, checkpoint,
     exit, monsters / ghosts, power star, fruit).
-  - **Pri**: short and warm — made by Joop in 2006 with Game Maker, remade in 2026; the new art by its artist
-    (name to fill in); music and sound sources; fonts and licences.
+  - **Pri**: short and warm — made by Joop in 2006 with Game Maker, remade in 2026; the new art by @lucasserapiao; music and sound sources; fonts and licences.
 - New texts in Esperanto first, English alongside (the translation system Stelo has, extended to Pacmanio).
   Draft texts come to Joop for a read before they go in.
 
@@ -60,4 +59,4 @@ around play is redesigned; both games get the same UI, each in its own colours.
    or a new title made from the game's own sprites and the font?
 2. A rounder display font for the titles (download), or Noto Sans throughout?
 3. Level picking: only levels already reached (as above), or every level open from the start?
-4. The commissioned art's artist: name for the credits?
+4. (ANSWERED 2026-11-02: @lucasserapiao) The commissioned art's artist: name for the credits?

@@ -35,7 +35,9 @@
   (function () {
     const kbd = document.getElementById("kbd"), typing = document.getElementById("typing"), KEEP = "  ";
     const reset = () => { typing.value = KEEP; typing.setSelectionRange(KEEP.length, KEEP.length); };
-    if (matchMedia("(pointer: coarse)").matches || /[?&](kbd|pads)/.test(location.search)) kbd.hidden = false;
+    // any touch screen (a Chromebook's counts, though its main pointer is the touchpad), or the first touch
+    if (matchMedia("(any-pointer: coarse)").matches || /[?&](kbd|pads)/.test(location.search)) kbd.hidden = false;
+    document.addEventListener("touchstart", function () { kbd.hidden = false; }, { capture: true, passive: true, once: true });
     kbd.addEventListener("click", () => { reset(); typing.focus(); });
     typing.addEventListener("input", () => {
       const v = typing.value;

@@ -44,7 +44,7 @@ rooms/*.json, sprites, sounds).
     Left: a way to switch in the game itself (a key on the title? Joop's call: it adds to the original's
     interface); the editor's labels are English already (open / undo / save / play), an Esperanto set for the
     default would be Joop's call too; the title picture's lettering is an image (stays).
-14. [ ] Later quality of life (Joop: "start how it was … resuming will be really nice"): resume a pack from the
+14. [ ] Quality of life (Joop 2026-11-02: "in the next runs"; the pause fix is done) (Joop: "start how it was … resuming will be really nice"): resume a pack from the
     furthest level reached — after the baseline.
 13b. [ ] In-game language switch (Joop 2026-11-02: "You can add a language change option in Stelo"): a key / tap on
    the title screen toggles Esperanto ↔ English (Esperanto stays the default and the original), kept per browser.

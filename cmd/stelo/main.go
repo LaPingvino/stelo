@@ -319,12 +319,13 @@ func (a *app) applySkin() {
 // layout the touches are read against.
 func (a *app) frameArea(screen *ebiten.Image) image.Rectangle {
 	b := screen.Bounds()
-	if !a.touch.seen { // no touch: the whole screen; the two buttons small in the top-left corner
+	if !a.touch.seen { // no touch: the whole screen; the small buttons in the top-left corner
 		d := ebiten.Monitor().DeviceScaleFactor()
 		k := int(28 * max(d, 1))
 		m := k / 4
-		a.touch.lay = touchLayout{area: b, full: image.Rect(m, m, m+k, m+k*2/3), snd: image.Rect(2*m+k, m, 2*m+2*k, m+k*2/3),
-			paus: image.Rect(3*m+2*k, m, 3*m+3*k, m+k*2/3)}
+		h := k * 2 / 3 // in a column, so they stay in the side margin
+		a.touch.lay = touchLayout{area: b, full: image.Rect(m, m, m+k, m+h), snd: image.Rect(m, 2*m+h, m+k, 2*m+2*h),
+			paus: image.Rect(m, 3*m+2*h, m+k, 3*m+3*h)}
 		return b
 	}
 	a.touch.lay = layoutTouch(b.Dx(), b.Dy())

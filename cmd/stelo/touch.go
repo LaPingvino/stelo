@@ -4,37 +4,79 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/LaPingvino/stelo/internal/game"
 	"github.com/LaPingvino/stelo/internal/gm"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-// Touch controls for phones (LOOP item 12): four arrow pads in the screen's
-// bottom corners, shown once the screen has been touched. A finger on a pad
-// holds that arrow key; a tap elsewhere counts as "any key" (keyboard_wait).
-
-const padSize = 64
+// Touch controls for phones (LOOP item 12, U0): arrow pads and a full-screen
+// button, shown once the screen has been touched — in the room beside the game
+// (a phone on its side: ← → in a column on the left, ↑ ↓ and full screen on
+// the right) or under it (upright), never over the playfield (Joop 2026-11-02).
+// They are laid out in screen pixels each frame; the frame is fitted into what
+// is left. A finger on a pad holds that arrow key; a tap elsewhere counts as
+// "any key" (keyboard_wait).
 
 type pad struct {
-	key  gm.Key
-	r    image.Rectangle
-	text string
+	key gm.Key
+	r   image.Rectangle // screen pixels
 }
 
-// pads in game coordinates (the 640×480 screen): left/right bottom-left,
-// up/down bottom-right.
-var pads = []pad{
-	{gm.KeyLeft, image.Rect(8, 480-8-padSize, 8+padSize, 480-8), "<"},
-	{gm.KeyRight, image.Rect(16+padSize, 480-8-padSize, 16+2*padSize, 480-8), ">"},
-	{gm.KeyUp, image.Rect(640-8-padSize, 480-16-2*padSize, 640-8, 480-16-padSize), "^"},
-	{gm.KeyDown, image.Rect(640-8-padSize, 480-8-padSize, 640-8, 480-8), "v"},
+// touchLayout is where the frame and the controls go on a screen.
+type touchLayout struct {
+	area image.Rectangle // the frame is fitted into this
+	pads []pad
+	full image.Rectangle // the full-screen button
+	size int             // a pad's side
+}
+
+// layoutTouch lays out the controls on a sw×sh screen (device pixels).
+func layoutTouch(sw, sh int) touchLayout {
+	d := ebiten.Monitor().DeviceScaleFactor()
+	if d <= 0 {
+		d = 1
+	}
+	m := int(10 * d)
+	if sw > sh { // on its side: the controls in columns beside the frame
+		p := min(int(64*d), (sh-3*m)/3)
+		left := 2*p + 3*m
+		right := p + 2*m
+		y := sh - m - p
+		return touchLayout{
+			area: image.Rect(left, 0, sw-right, sh),
+			pads: []pad{
+				{gm.KeyLeft, image.Rect(m, y, m+p, y+p)},
+				{gm.KeyRight, image.Rect(2*m+p, y, 2*m+2*p, y+p)},
+				{gm.KeyUp, image.Rect(sw-m-p, y-m-p, sw-m, y-m)},
+				{gm.KeyDown, image.Rect(sw-m-p, y, sw-m, y+p)},
+			},
+			full: image.Rect(m, m, m+p, m+p*2/3), // top left (the page's Klavaro button is top right)
+			size: p,
+		}
+	}
+	p := min(int(64*d), (sw-5*m)/4)
+	fh := sw * game.ScreenH / game.ScreenW // the frame as wide as the screen
+	y := min(sh-m-p, fh+m)                 // the controls right under it
+	return touchLayout{                    // upright: the controls in a row under the frame
+		area: image.Rect(0, 0, sw, y-m),
+		pads: []pad{
+			{gm.KeyLeft, image.Rect(m, y, m+p, y+p)},
+			{gm.KeyRight, image.Rect(2*m+p, y, 2*m+2*p, y+p)},
+			{gm.KeyUp, image.Rect(sw-2*m-2*p, y, sw-2*m-p, y+p)},
+			{gm.KeyDown, image.Rect(sw-m-p, y, sw-m, y+p)},
+		},
+		full: image.Rect(sw/2-p/2, y+p/6, sw/2+p/2, y+p*5/6),
+		size: p,
+	}
 }
 
 type touchState struct {
 	seen   bool
 	held   map[gm.Key]bool
 	tapped bool
+	lay    touchLayout // last frame's layout (the touches are read against it)
 }
 
 // update reads the touches for this frame.
@@ -46,18 +88,22 @@ func (t *touchState) update() {
 		t.seen = true
 	}
 	for _, id := range ids {
-		x, y := toFrame(ebiten.TouchPosition(id))
-		for _, p := range pads {
-			if image.Pt(x, y).In(p.r) {
+		pt := image.Pt(ebiten.TouchPosition(id))
+		for _, p := range t.lay.pads {
+			if pt.In(p.r) {
 				t.held[p.key] = true
 			}
 		}
 	}
 	for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
-		x, y := toFrame(ebiten.TouchPosition(id))
+		pt := image.Pt(ebiten.TouchPosition(id))
+		if pt.In(t.lay.full) {
+			ebiten.SetFullscreen(!ebiten.IsFullscreen())
+			continue
+		}
 		onPad := false
-		for _, p := range pads {
-			onPad = onPad || image.Pt(x, y).In(p.r)
+		for _, p := range t.lay.pads {
+			onPad = onPad || pt.In(p.r)
 		}
 		if !onPad {
 			t.tapped = true
@@ -65,25 +111,36 @@ func (t *touchState) update() {
 	}
 }
 
-// draw draws the pads, translucent, once touch has been used.
+// draw draws the pads and the full-screen button on the screen (outside the
+// frame), once touch has been used.
 func (t *touchState) draw(screen *ebiten.Image) {
 	if !t.seen {
 		return
 	}
-	for _, p := range pads {
+	for _, p := range t.lay.pads {
 		a := uint8(70)
 		if t.held[p.key] {
-			a = 140
+			a = 150
 		}
-		vector.FillRect(screen, float32(p.r.Min.X), float32(p.r.Min.Y), padSize, padSize, color.NRGBA{255, 255, 255, a}, false)
+		vector.FillRect(screen, float32(p.r.Min.X), float32(p.r.Min.Y), float32(p.r.Dx()), float32(p.r.Dy()), color.NRGBA{255, 255, 255, a}, false)
 		drawArrow(screen, p)
+	}
+	f := t.lay.full
+	vector.FillRect(screen, float32(f.Min.X), float32(f.Min.Y), float32(f.Dx()), float32(f.Dy()), color.NRGBA{255, 255, 255, 50}, false)
+	// four corner marks: the full-screen sign
+	c, w := float32(f.Dy())/4, float32(max(2, f.Dy()/16))
+	x0, y0, x1, y1 := float32(f.Min.X)+c, float32(f.Min.Y)+c/1.2, float32(f.Max.X)-c, float32(f.Max.Y)-c/1.2
+	col := color.NRGBA{255, 255, 255, 200}
+	for _, l := range [][4]float32{{x0, y0, x0 + c, y0}, {x0, y0, x0, y0 + c}, {x1, y0, x1 - c, y0}, {x1, y0, x1, y0 + c},
+		{x0, y1, x0 + c, y1}, {x0, y1, x0, y1 - c}, {x1, y1, x1 - c, y1}, {x1, y1, x1, y1 - c}} {
+		vector.StrokeLine(screen, l[0], l[1], l[2], l[3], w, col, false)
 	}
 }
 
 // drawArrow draws a filled triangle pointing the pad's way.
 func drawArrow(screen *ebiten.Image, p pad) {
-	cx, cy := float32(p.r.Min.X+padSize/2), float32(p.r.Min.Y+padSize/2)
-	const s = 18
+	cx, cy := float32(p.r.Min.X+p.r.Dx()/2), float32(p.r.Min.Y+p.r.Dy()/2)
+	s := float32(p.r.Dx()) * 0.28
 	var path vector.Path
 	switch p.key {
 	case gm.KeyLeft:

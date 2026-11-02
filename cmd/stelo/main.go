@@ -68,7 +68,13 @@ func (a *app) Update() error {
 		}
 		return nil
 	}
+	// Full screen: F11, or Alt+Enter (the touch controls have a button).
+	if inpututil.IsKeyJustPressed(ebiten.KeyF11) || (inpututil.IsKeyJustPressed(ebiten.KeyEnter) && ebiten.IsKeyPressed(ebiten.KeyAlt)) {
+		ebiten.SetFullscreen(!ebiten.IsFullscreen())
+		return nil
+	}
 	if a.title.on {
+		a.touch.update() // the controls appear (and full screen works) on the title too
 		a.updateTitle()
 		return nil
 	}
@@ -126,8 +132,9 @@ func (a *app) Draw(screen *ebiten.Image) {
 		a.overlay.Reset()
 		a.drawTitle()
 		a.canvas.WritePixels(a.frame.Pix)
-		present(screen, a.canvas)
+		present(screen, a.canvas, a.frameArea(screen))
 		drawOverlay(screen, &a.overlay)
+		a.touch.draw(screen)
 		return
 	}
 	if a.edit.on {
@@ -136,7 +143,7 @@ func (a *app) Draw(screen *ebiten.Image) {
 			a.edit.screen.DrawPrompt(a.frame, a.edit.prompt, a.game.TextFont)
 		}
 		a.canvas.WritePixels(a.frame.Pix)
-		present(screen, a.canvas)
+		present(screen, a.canvas, a.frameArea(screen))
 		return
 	}
 	if a.game == nil {
@@ -156,9 +163,9 @@ func (a *app) Draw(screen *ebiten.Image) {
 		a.game.DrawPackChoice(a.frame, label)
 	}
 	a.canvas.WritePixels(a.frame.Pix)
-	a.touch.draw(a.canvas)
-	present(screen, a.canvas)
+	present(screen, a.canvas, a.frameArea(screen))
 	drawOverlay(screen, &a.overlay)
+	a.touch.draw(screen)
 }
 
 // Layout is the screen's real resolution; the frame is scaled onto it (scale.go).
@@ -181,7 +188,7 @@ func main() {
 	if !originalArtFromURL() { // the new art by default (Joop 2026-11-02); ?original / STELO_ART=original: the 2006 art
 		a.toggleSkin()
 	}
-	a.openTitle() // the new title (docs/UI.md); the 2006 title picture and rules room are no longer shown
+	a.openTitle()      // the new title (docs/UI.md); the 2006 title picture and rules room are no longer shown
 	if editFromURL() { // ?edit: straight into the editor on level 1
 		a.title.on = false
 		a.openEditor("nivelo1")
@@ -268,4 +275,17 @@ func (a *app) applySkin() {
 	if a.game.World != nil {
 		a.game.World.Skin = a.skin
 	}
+}
+
+// frameArea is where the frame goes on the screen: all of it, or — once touch
+// has been used — what the touch controls leave (touch.go); it also stores the
+// layout the touches are read against.
+func (a *app) frameArea(screen *ebiten.Image) image.Rectangle {
+	b := screen.Bounds()
+	if !a.touch.seen {
+		a.touch.lay = touchLayout{area: b}
+		return b
+	}
+	a.touch.lay = layoutTouch(b.Dx(), b.Dy())
+	return a.touch.lay.area
 }

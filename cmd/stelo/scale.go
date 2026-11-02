@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,6 +25,14 @@ type frameView struct {
 
 var view = frameView{scale: 1}
 
+// fitIn places the frame in an area of the screen.
+func fitIn(r image.Rectangle) frameView {
+	v := fit(r.Dx(), r.Dy())
+	v.ox += float64(r.Min.X)
+	v.oy += float64(r.Min.Y)
+	return v
+}
+
 // fit places the frame on a sw×sh screen.
 func fit(sw, sh int) frameView {
 	k := min(float64(sw)/game.ScreenW, float64(sh)/game.ScreenH)
@@ -38,10 +47,10 @@ func toFrame(x, y int) (int, int) {
 	return int((float64(x) - view.ox) / view.scale), int((float64(y) - view.oy) / view.scale)
 }
 
-// present draws the frame (and what was drawn onto it) onto the screen.
-func present(screen, frame *ebiten.Image) {
-	sw, sh := screen.Bounds().Dx(), screen.Bounds().Dy()
-	view = fit(sw, sh)
+// present draws the frame (and what was drawn onto it) onto the screen, in
+// area (the whole screen, or what the touch controls leave).
+func present(screen, frame *ebiten.Image, area image.Rectangle) {
+	view = fitIn(area)
 	screen.Fill(color.Black)
 	op := &ebiten.DrawImageOptions{Filter: ebiten.FilterNearest}
 	op.GeoM.Scale(view.scale, view.scale)

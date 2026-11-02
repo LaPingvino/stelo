@@ -1,4 +1,4 @@
-# A modern UI for Stelo and Pacmanio — proposal (waiting for Joop's yes)
+# A modern UI for Stelo and Pacmanio — APPROVED (Joop 2026-11-02)
 
 Joop (2026-11-02): "fully modernize the UI of both: replace the lettering etc with modern proper fonts, less
 blurring etc, remove my old cringe texts and put a nicer explanation, nicer and proper menus similar to Pits
@@ -54,7 +54,15 @@ around play is redesigned; both games get the same UI, each in its own colours.
 3. Each step checked by headless screenshots at desktop and phone sizes; the bot playthroughs keep proving
    the rules are untouched.
 
-## Questions for Joop
+## Joop's answers (2026-11-02)
+1. Title: "make it new" — a new title screen from the game's own sprites and the font, not the 2006 picture.
+2. Title font: "whatever looks nice" — Noto Sans Black for titles, Noto Sans for the rest (both installed, OFL;
+   no download).
+3. Levels: "resume wherever you got, like with Pits" — Daŭrigi continues at the furthest level reached; the
+   level picker offers only levels reached.
+4. The new art (Stelo) is by @lucasserapiao.
+
+## Questions for Joop (answered above)
 1. Title pictures: keep the 2006 title art (Stelo's stelo_komenco, Pacmanio's brick logo) behind the new menu,
    or a new title made from the game's own sprites and the font?
 2. A rounder display font for the titles (download), or Noto Sans throughout?

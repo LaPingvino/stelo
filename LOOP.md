@@ -57,6 +57,12 @@ rooms/*.json, sprites, sounds).
    solid put-back, alarms) and note why. Pacmanio can reuse it afterwards.
 16. [ ] Render the 2006 MIDI music with FluidR3_GM.sf2 (installed 2026-11-02) into the baseline's audio.
 
+U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling + text at real resolution, Noto Sans,
+   Pits-like menus (title, pause, settings, level pick of reached levels, resume), new "Kiel ludi" and "Pri"
+   texts (drafts to Joop first), slim HUD, proper highscores. Steps: U1 shared UI package (scaler, text, menu
+   widget); U2 title + menus; U3 Kiel ludi / Pri (drafts → Joop); U4 HUD + level start / end; U5 highscores;
+   U6 settings (language, sound, music, art). Stelo first, then Pacmanio.
+
 ## Decisions (Joop)
 
 - 2026-11-01: true Esperanto letters on screen instead of the x-system (cx → ĉ …): converted when drawn
@@ -133,3 +139,4 @@ rooms/*.json, sprites, sounds).
 - 2026-11-02 — sound and music as Ogg Opus via gopus v0.1.0 (github.com/LaPingvino/gopus, published with Joop's go-ahead); scripts/convert-audio.sh makes audio/ from the 2006 files. Music plays for the first time.
 - 2026-11-02 (Joop: 'the checkpoint doesn't trigger/change. Use the old switch thing for before, the star for triggered') — the logic did switch (transirejo → transirejo_a), but the skin showed the star in both states (first frame / twinkling), too subtle. Now: unused = the orb on a pole (swaying), used = the shining star. Render check of level 1's checkpoint before / after.
 - 2026-11-02 (Joop: 'the little stars still have the top of the pole at the bottom … change its color and put a circle around … star-marked coins') — the pole's blue-grey pixels sat inside the star's lower legs (rows 11–13); now left out. The coin: the twinkling star on a round coin (radius 10.5, CoinFill / CoinRim). Tried blue and amber in level 1: amber blends with the wood, blue stands out — blue. Close-up checked: no pole pixels. skin.go gofmt'd.
+- 2026-11-02 — Joop approved docs/UI.md (new title, fonts as fits, resume like Pits); queued as item U.

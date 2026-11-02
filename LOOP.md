@@ -46,6 +46,16 @@ rooms/*.json, sprites, sounds).
     default would be Joop's call too; the title picture's lettering is an image (stays).
 14. [ ] Later quality of life (Joop: "start how it was … resuming will be really nice"): resume a pack from the
     furthest level reached — after the baseline.
+13b. [ ] In-game language switch (Joop 2026-11-02: "You can add a language change option in Stelo"): a key / tap on
+   the title screen toggles Esperanto ↔ English (Esperanto stays the default and the original), kept per browser.
+15. [ ] GML interpreter trial (Joop 2026-11-02: try it; "if you run into any issues, Go port is fine"): run the
+   original objects' GML (original/objects/*.gml) on internal/gm instead of the hand ports. Steps: (a) a GML 5.3
+   lexer/parser + tree-walking interpreter for what the two games' code uses (expressions, with/other, var,
+   if/repeat/while, the 76 built-ins mapped onto internal/gm); (b) run one object (monster) under it beside the Go
+   port and compare step by step on level 1; (c) if it matches, swap objects over one by one with the bot
+   playthroughs as the check. Keep the Go ports where the fit is poor (engine internals that differ: event order,
+   solid put-back, alarms) and note why. Pacmanio can reuse it afterwards.
+16. [ ] Render the 2006 MIDI music with FluidR3_GM.sf2 (installed 2026-11-02) into the baseline's audio.
 
 ## Decisions (Joop)
 
@@ -55,13 +65,13 @@ rooms/*.json, sprites, sounds).
   with"): queue item 12.
 
 ## Questions for Joop
-- Item 13: switch the language inside the game (e.g. a key on the title screen), or keep ?lang=en / STELO_LANG=en only? And the editor's labels are English (open / undo / save / play): give them Esperanto in the default language?
+- (ANSWERED 2026-11-02, Joop: 'You can add a language change option in Stelo.' → item 13b) Item 13: switch the language inside the game (e.g. a key on the title screen), or keep ?lang=en / STELO_LANG=en only? And the editor's labels are English (open / undo / save / play): give them Esperanto in the default language?
 
 - (ANSWERED 2026-11-02, Joop: 'start how it was, then we'll probably implement those quality of life features later. Resuming for example will be really nice.') Packs: the furthest level reached is now kept per pack and shown on the title. Should a pack (not the original) also let you continue from there, or always start at its level 1 with 3 lives like the original?
 
-- (Joop will run it later 2026-11-02) Install a soundfont for rendering the 2006 MIDI music: `sudo pacman -S soundfont-fluid` (FluidR3, MIT); fluidsynth is already there.
+- (DONE 2026-11-02: soundfont-fluid installed, /usr/share/soundfonts/FluidR3_GM.sf2) Install a soundfont for rendering the 2006 MIDI music: `sudo pacman -S soundfont-fluid` (FluidR3, MIT); fluidsynth is already there.
 
-- 2026-11-01: run the original GML (an embedded GML interpreter + the 76 built-ins the two games use) instead of
+- (ANSWERED 2026-11-02, Joop: 'probably a good idea to port the gml script stuff, but as we have different internals I'm not sure how great the fit would be... If you run into any issues, Go port is fine.' → item 15) 2026-11-01: run the original GML (an embedded GML interpreter + the 76 built-ins the two games use) instead of
   hand-porting the objects? Asked in chat; the engine core (item 4) is needed either way.
 
 - (ANSWERED 2026-11-02 by 'start how it was': the 2006 sounds / MIDI in the baseline) Audio: 2006 sounds/MIDI in the baseline (proposed) or new ones?

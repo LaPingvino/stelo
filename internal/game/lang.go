@@ -58,12 +58,15 @@ var english = map[string]string{
 // MenuWords are the title menu's words (cmd/stelo/title.go), translated in
 // english like the rest.
 var MenuWords = []string{"Ludi", "Daŭrigi", "Niveloj", "Lingvo", "Arto", "nova", "de 2006", "Redaktilo", "Fini",
-	"Esperanto", "Platforma ludo · 2006, refarita 2026", "nivelo"}
+	"Esperanto", "Platforma ludo · 2006, refarita 2026", "nivelo",
+	"Paŭzo", "Rekomenci la nivelon", "Sono", "ŝaltita", "malŝaltita", "Ĉefmenuo"}
 
 func init() {
 	for k, v := range map[string]string{"Ludi": "Play", "Daŭrigi": "Continue", "Niveloj": "Levels", "Lingvo": "Language",
 		"Arto": "Art", "nova": "new", "de 2006": "2006", "Redaktilo": "Level editor", "Fini": "Quit",
-		"Esperanto": "Esperanto", "Platforma ludo · 2006, refarita 2026": "A platform game · 2006, remade 2026", "nivelo": "level"} {
+		"Esperanto": "Esperanto", "Platforma ludo · 2006, refarita 2026": "A platform game · 2006, remade 2026", "nivelo": "level",
+		"Paŭzo": "Paused", "Rekomenci la nivelon": "Restart the level", "Sono": "Sound", "ŝaltita": "on", "malŝaltita": "off",
+		"Ĉefmenuo": "Main menu"} {
 		english[k] = v
 	}
 }

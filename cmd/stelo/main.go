@@ -36,6 +36,7 @@ type app struct {
 	screen  *ebiten.Image
 	skin    *game.Skin // the drawing skin (nil: the 2006 art); F3 / ?original
 	title   titleScreen
+	pause   pauseMenu
 }
 
 func (a *app) load(i int) {
@@ -79,6 +80,13 @@ func (a *app) Update() error {
 			return nil
 		case pt.In(a.touch.lay.snd):
 			toggleSound()
+			return nil
+		case a.touch.showPause && pt.In(a.touch.lay.paus):
+			if a.pause.on {
+				a.pause.on = false
+			} else {
+				a.openPause()
+			}
 			return nil
 		}
 	}
@@ -137,6 +145,15 @@ func (a *app) Update() error {
 	}
 	if a.game != nil {
 		a.touch.update()
+		a.touch.showPause = a.game.Level() > 0
+		if a.pause.on {
+			a.updatePause()
+			return nil
+		}
+		if a.pauseWanted() {
+			a.openPause()
+			return nil
+		}
 		if err := a.game.Step(keys{&a.touch, pollPhoneKeys()}); err != nil {
 			log.Print(err)
 		}
@@ -181,6 +198,9 @@ func (a *app) Draw(screen *ebiten.Image) {
 	}
 	a.canvas.WritePixels(a.frame.Pix)
 	present(screen, a.canvas, a.frameArea(screen))
+	if a.pause.on {
+		a.drawPause()
+	}
 	drawOverlay(screen, &a.overlay)
 	a.touch.draw(screen)
 }
@@ -303,7 +323,8 @@ func (a *app) frameArea(screen *ebiten.Image) image.Rectangle {
 		d := ebiten.Monitor().DeviceScaleFactor()
 		k := int(28 * max(d, 1))
 		m := k / 4
-		a.touch.lay = touchLayout{area: b, full: image.Rect(m, m, m+k, m+k*2/3), snd: image.Rect(2*m+k, m, 2*m+2*k, m+k*2/3)}
+		a.touch.lay = touchLayout{area: b, full: image.Rect(m, m, m+k, m+k*2/3), snd: image.Rect(2*m+k, m, 2*m+2*k, m+k*2/3),
+			paus: image.Rect(3*m+2*k, m, 3*m+3*k, m+k*2/3)}
 		return b
 	}
 	a.touch.lay = layoutTouch(b.Dx(), b.Dy())

@@ -30,6 +30,7 @@ type touchLayout struct {
 	pads []pad
 	full image.Rectangle // the full-screen button
 	snd  image.Rectangle // the sound on / off button
+	paus image.Rectangle // the pause button (during a level)
 	size int             // a pad's side
 }
 
@@ -55,13 +56,16 @@ func layoutTouch(sw, sh int) touchLayout {
 			},
 			full: image.Rect(m, m, m+p, m+p*2/3), // top left (the page's Klavaro button is top right)
 			snd:  image.Rect(m, 2*m+p*2/3, m+p, 2*m+p*4/3),
+			paus: image.Rect(2*m+p, m, 2*m+2*p, m+p*2/3),
 			size: p,
 		}
 	}
 	p := min(int(64*d), (sw-5*m)/4)
 	fh := sw * game.ScreenH / game.ScreenW // the frame as wide as the screen
-	y := min(sh-m-p, fh+m)                 // the controls right under it
-	return touchLayout{                    // upright: the controls in a row under the frame
+	bh := p * 2 / 3                        // the small buttons' row, under the pads
+	y := min(sh-3*m-p-bh, fh+m)            // the controls right under it
+	by := y + p + m
+	return touchLayout{ // upright: the controls in a row under the frame
 		area: image.Rect(0, 0, sw, y-m),
 		pads: []pad{
 			{gm.KeyLeft, image.Rect(m, y, m+p, y+p)},
@@ -69,8 +73,9 @@ func layoutTouch(sw, sh int) touchLayout {
 			{gm.KeyUp, image.Rect(sw-2*m-2*p, y, sw-2*m-p, y+p)},
 			{gm.KeyDown, image.Rect(sw-m-p, y, sw-m, y+p)},
 		},
-		full: image.Rect(sw/2-p-m/2, y+p/6, sw/2-m/2, y+p*5/6),
-		snd:  image.Rect(sw/2+m/2, y+p/6, sw/2+p+m/2, y+p*5/6),
+		full: image.Rect(sw/2-p*3/2-m, by, sw/2-p/2-m, by+bh),
+		snd:  image.Rect(sw/2-p/2, by, sw/2+p/2, by+bh),
+		paus: image.Rect(sw/2+p/2+m, by, sw/2+p*3/2+m, by+bh),
 		size: p,
 	}
 }
@@ -79,13 +84,16 @@ type touchState struct {
 	seen   bool
 	held   map[gm.Key]bool
 	tapped bool
-	lay    touchLayout // last frame's layout (the touches are read against it)
+	// showPause: a level is being played (the pause button shows);
+	// pauseTapped: it was tapped this frame.
+	showPause, pauseTapped bool
+	lay                    touchLayout // last frame's layout (the touches are read against it)
 }
 
 // update reads the touches for this frame.
 func (t *touchState) update() {
 	t.held = map[gm.Key]bool{}
-	t.tapped = false
+	t.tapped, t.pauseTapped = false, false
 	ids := ebiten.AppendTouchIDs(nil)
 	if len(ids) > 0 {
 		t.seen = true
@@ -108,6 +116,10 @@ func (t *touchState) update() {
 			toggleSound()
 			continue
 		}
+		if t.showPause && pt.In(t.lay.paus) {
+			t.pauseTapped = true
+			continue
+		}
 		onPad := false
 		for _, p := range t.lay.pads {
 			onPad = onPad || pt.In(p.r)
@@ -122,6 +134,9 @@ func (t *touchState) update() {
 // frame), once touch has been used.
 func (t *touchState) draw(screen *ebiten.Image) {
 	drawSoundButton(screen, t.lay.snd)
+	if t.showPause {
+		drawPauseButton(screen, t.lay.paus)
+	}
 	if !t.seen {
 		drawFullButton(screen, t.lay.full)
 		return
@@ -224,4 +239,18 @@ func drawSoundButton(screen *ebiten.Image, r image.Rectangle) {
 	}
 	vector.StrokeLine(screen, cx+1.2*u, cy-1.2*u, cx+1.2*u, cy+1.2*u, w, col, true)
 	vector.StrokeLine(screen, cx+2.4*u, cy-2*u, cx+2.4*u, cy+2*u, w, col, true)
+}
+
+// drawPauseButton draws the pause button: two bars.
+func drawPauseButton(screen *ebiten.Image, r image.Rectangle) {
+	if r.Empty() {
+		return
+	}
+	vector.FillRect(screen, float32(r.Min.X), float32(r.Min.Y), float32(r.Dx()), float32(r.Dy()), color.NRGBA{255, 255, 255, 50}, false)
+	h := float32(r.Dy())
+	cx, cy := float32(r.Min.X)+float32(r.Dx())/2, float32(r.Min.Y)+h/2
+	u := h / 8
+	col := color.NRGBA{255, 255, 255, 210}
+	vector.FillRect(screen, cx-2*u, cy-2.4*u, 1.3*u, 4.8*u, col, true)
+	vector.FillRect(screen, cx+0.7*u, cy-2.4*u, 1.3*u, 4.8*u, col, true)
 }

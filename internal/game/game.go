@@ -19,13 +19,14 @@ var RoomOrder = []string{"klarigo", "nivelo1", "nivelo2", "nivelo3", "nivelo4", 
 // them: score, lives, and the level saved while the bonus level is played
 // (the original makes that room persistent and returns to global.ludnivelo).
 type Game struct {
-	FS       fs.FS
-	Assets   *Assets
-	G        *gm.Globals
-	World    *World
-	saved    *World // the persistent level left for the bonus level
-	Font     font.Face
-	TextFont font.Face
+	levelStart levelStart
+	FS         fs.FS
+	Assets     *Assets
+	G          *gm.Globals
+	World      *World
+	saved      *World // the persistent level left for the bonus level
+	Font       font.Face
+	TextFont   font.Face
 	// Title: the title picture is up (game start); waitRoom: klarigo waits for
 	// a key (klarigilo's keyboard_wait).
 	Title    bool
@@ -125,10 +126,13 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 }
 
 func (g *Game) enter(room string) error {
-	if g.OnLevel != nil {
-		if n := g.levelNumber(room); n > 0 {
+	if n := g.levelNumber(room); n > 0 {
+		g.levelStart = levelStart{n: n, score: g.G.Score, lives: g.G.Lives}
+		if g.OnLevel != nil {
 			g.OnLevel(n)
 		}
+	} else {
+		g.levelStart = levelStart{}
 	}
 	var w *World
 	if l := g.Levels[room]; l != nil { // an edited level (the editor's Play)
@@ -342,4 +346,27 @@ func (g *Game) levelNumber(room string) int {
 		return n
 	}
 	return 0
+}
+
+// levelStart is the score and lives a level began with (the pause menu's
+// "Rekomenci la nivelon" puts them back, so a restart can't farm points).
+type levelStart struct{ n, score, lives int }
+
+// Level is the level being played (0: a title, rules or highscore room).
+func (g *Game) Level() int {
+	if g.Waiting() || g.World == nil {
+		return 0
+	}
+	return g.levelStart.n
+}
+
+// RestartLevel starts the current level again with the score and lives it
+// began with (the pause menu; a remake addition, docs/UI.md).
+func (g *Game) RestartLevel() error {
+	ls := g.levelStart
+	if ls.n == 0 {
+		return fmt.Errorf("no level")
+	}
+	g.G.Score, g.G.Lives = ls.score, ls.lives
+	return g.EnterLevel(ls.n)
 }

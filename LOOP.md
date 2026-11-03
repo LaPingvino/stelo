@@ -30,23 +30,23 @@ rooms/*.json, sprites, sounds).
 6. [x] Coins, hearts, fire/spikes, checkpoints, exit, monsters (walker/flyer, stomp), lives, score, HUD. Done: coins, hearts, fire, checkpoints, monsters/flyers/monster_dead, stomp, lives/score (gm.Globals). Room changes done (Game: @next, named, @bonus keeps the level, @saved returns; no more lives → finlisto). HUD done. Next: item 7.
 7. [x] All levels, the diamond → bonus level and back, nivelo5 waves. Play-check: the bot finishes all five levels (1 and 5 in CI; 2–4 by STELO_PLAYCHECK, minutes each). Done: bonus level and back (tick 10), spawners + waves, b_monster. Next: play-check every level start to end (scripted), danklisto (credits scroll following a b_monster).
 8. [x] Title, rules screen, credits, highscores (local storage on web), cheat codes. Done: title + rules (klarigilo), credits (tick 13). Cheat codes, highscore screen and its storage done.
-9. [~] Sounds: the 2006 WAVs; MIDI pre-rendered to OGG. WAV effects done; MIDI waits for a soundfont (Joop: sudo pacman -S soundfont-fluid).
+9. [x] (done 2026-11-02: effects and the MIDI music in audio/*.opus via gopus) Sounds: the 2006 WAVs; MIDI pre-rendered to OGG. WAV effects done; MIDI waits for a soundfont (Joop: sudo pacman -S soundfont-fluid).
 10. [x] Level editor (model, screen, play, save/load, packs; open: continuing a pack — Joop) (in-game mode + its own page) and packs.
 11. [~] New art skin (switchable), roles chosen by trying them (first pass done: art/nova, F3 / ?nova; docs/DESIGN.md 'New art').
 12. [~] Mobile (touch pads, tap = any key, no page zoom/scroll, phone keyboard (Klavaro) done; left: a try on a real phone): fill a phone screen (landscape; fractional scale when whole steps leave it tiny), no page
     scroll/zoom, on-screen left/right/up/down shown on touch screens, the phone keyboard for the highscore
     name, sound from the first tap.
 
-13. [~] English translation (Joop 2026-11-02: "Translating is ok!"): every text the game draws, Esperanto stays the
+13. [x] (done; the in-game switch is the title's Lingvo setting, 13b) English translation (Joop 2026-11-02: "Translating is ok!"): every text the game draws, Esperanto stays the
     default. Done tick (2026-11-02): internal/game/lang.go (Lang, Tr, the table — the rules screen, the credits,
     nivelo5's sign, the HUD's "Poentoj:", both highscore prompts), ?lang=en on the web page / STELO_LANG=en on the
     desktop; the web page's own text (loading, Keyboard button, its label, errors, html lang) follows ?lang=en.
     Left: a way to switch in the game itself (a key on the title? Joop's call: it adds to the original's
     interface); the editor's labels are English already (open / undo / save / play), an Esperanto set for the
     default would be Joop's call too; the title picture's lettering is an image (stays).
-14. [ ] Quality of life (Joop 2026-11-02: "in the next runs"; the pause fix is done) (Joop: "start how it was … resuming will be really nice"): resume a pack from the
+14. [x] (DONE through item U: resume = the title's Daŭrigi; pause menu; sound settings; level banner) Quality of life (Joop 2026-11-02: "in the next runs"; the pause fix is done) (Joop: "start how it was … resuming will be really nice"): resume a pack from the
     furthest level reached — after the baseline.
-13b. [ ] In-game language switch (Joop 2026-11-02: "You can add a language change option in Stelo"): a key / tap on
+13b. [x] (DONE 2026-11-02: the title menu's Lingvo ‹Esperanto / English›) In-game language switch (Joop 2026-11-02: "You can add a language change option in Stelo"): a key / tap on
    the title screen toggles Esperanto ↔ English (Esperanto stays the default and the original), kept per browser.
 15. [→] MOVED to ~/Projects/gameviber (GameViber) (Joop 2026-11-02: a GameMaker clone in Go as its own low-priority project; Stelo keeps its Go port). Was: GML interpreter trial (Joop 2026-11-02: try it; "if you run into any issues, Go port is fine"): run the
    original objects' GML (original/objects/*.gml) on internal/gm instead of the hand ports. Steps: (a) a GML 5.3
@@ -55,7 +55,7 @@ rooms/*.json, sprites, sounds).
    port and compare step by step on level 1; (c) if it matches, swap objects over one by one with the bot
    playthroughs as the check. Keep the Go ports where the fit is poor (engine internals that differ: event order,
    solid put-back, alarms) and note why. Pacmanio can reuse it afterwards.
-16. [ ] Render the 2006 MIDI music with FluidR3_GM.sf2 (installed 2026-11-02) into the baseline's audio.
+16. [x] (DONE 2026-11-02: scripts/convert-audio.sh, FluidR3 → Opus) Render the 2006 MIDI music with FluidR3_GM.sf2 (installed 2026-11-02) into the baseline's audio.
 
 U0. [x] (DONE 2026-11-02 for Stelo; a real phone to confirm) **Touch controls off the playfield, and full screen** (Joop 2026-11-02: "stelo and pacmanio onscreen controls
    cover play space, and no fullscreen present") — NEXT. Now that the frame is centred with margins, the pads go into
@@ -170,3 +170,4 @@ U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling +
 - 2026-11-03 (item U, step U4b) — 'Nivelo finita!' (en: Level complete!) large during the exit's 1 s pause (World.LevelDone: paused with Goto @next; timing unchanged). TestLevelDone: the player on the exit → the pause → the overlay holds the message. NEXT U5: highscores.
 - 2026-11-03 (item U, step U5) — the highscore screen with the overlay (drawHighscoresUI; the 2006 drawing kept for the plain path): the 2006 texts (Tr'd, hats) on a panel in Noto Sans; the name in a cream text field with a blinking caret after 'Via nomo:' (Your name:); then the table 'Plej bonaj' with ranks, the best in gold. TestHighscoresUI checks both screens' overlay content (no headless screenshot: Stelo has no start-in-room switch).
 - 2026-11-03 (item U, step U6) — settings on the title menu with Lingvo and Arto: Sono ‹ŝaltita / malŝaltita› (the master mute) and Muziko ‹…› (the music alone, sound.Player.SetMusicOff from Pacmanio; store 'music-off'); ← → or a click; the menu's lines 26 px so nine fit. TestMusicOff; headless: the title with all settings.
+- 2026-11-03 — bookkeeping: items 9, 13, 13b, 14, 16 checked off (done by earlier ticks / item U). Left, all with Joop: U3 texts (docs/TEXTS.md questions), a real-phone try (12), the new art's roles (11, by his taste).

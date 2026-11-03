@@ -85,3 +85,16 @@ func TestProgress(t *testing.T) {
 		t.Errorf("%d %d", Progress("Testo"), Progress("Stelo"))
 	}
 }
+
+// The saved levels are listed, sorted.
+func TestSavedLevels(t *testing.T) {
+	old := Dir
+	d := t.TempDir()
+	Dir = func() string { return d }
+	defer func() { Dir = old }()
+	SaveLevel("nova2", "x")
+	SaveLevel("nova1", "y")
+	if got := SavedLevels(); len(got) != 2 || got[0] != "nova1" || got[1] != "nova2" {
+		t.Fatalf("SavedLevels() = %v", got)
+	}
+}

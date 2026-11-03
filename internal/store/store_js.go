@@ -3,6 +3,7 @@
 package store
 
 import (
+	"strings"
 	"syscall/js"
 
 	"github.com/LaPingvino/stelo/internal/pack"
@@ -46,6 +47,24 @@ func readLevel(name string) (string, bool) {
 		return "", false
 	}
 	return v.String(), true
+}
+
+// listLevels names the levels saved in this browser.
+func listLevels() []string {
+	s := storage()
+	if s.IsUndefined() || s.IsNull() {
+		return nil
+	}
+	var names []string
+	func() {
+		defer func() { recover() }()
+		for i := range s.Get("length").Int() {
+			if k := s.Call("key", i).String(); strings.HasPrefix(k, levelPrefix) {
+				names = append(names, strings.TrimPrefix(k, levelPrefix))
+			}
+		}
+	}()
+	return names
 }
 
 func writeLevel(name, text string) {

@@ -56,6 +56,22 @@ func readLevel(name string) (string, bool) {
 	return string(data), err == nil
 }
 
+// listLevels names the levels saved in the config folder.
+func listLevels() []string {
+	d := Dir()
+	if d == "" {
+		return nil
+	}
+	ents, _ := os.ReadDir(filepath.Join(d, "levels"))
+	var names []string
+	for _, e := range ents {
+		if n, ok := strings.CutSuffix(e.Name(), ".txt"); ok && !e.IsDir() {
+			names = append(names, n)
+		}
+	}
+	return names
+}
+
 func writeLevel(name, text string) {
 	p := levelPath(name)
 	if p == "" || os.MkdirAll(filepath.Dir(p), 0o755) != nil {

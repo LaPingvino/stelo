@@ -178,6 +178,11 @@ func (a *app) Draw(screen *ebiten.Image) {
 		}
 		a.canvas.WritePixels(a.frame.Pix)
 		present(screen, a.canvas, a.frameArea(screen))
+		a.overlay.Reset()
+		if a.edit.menu.on {
+			a.drawEditMenu()
+		}
+		drawOverlay(screen, &a.overlay)
 		return
 	}
 	if a.game == nil {

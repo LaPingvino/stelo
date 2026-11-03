@@ -57,14 +57,14 @@ func (e *EditScreen) toolSprite(tool string) *Sprite {
 
 // Actions are the strip's buttons after the tools (for touch screens; the
 // keys do the same: Ctrl+Z, Ctrl+S, P).
-var Actions = []string{"open", "undo", "save", "play"}
+var Actions = []string{"menu", "undo", "save", "play"}
 
 // actionX is where the action buttons start: the strip's right end.
 const actionX = ScreenW - 4*editor.Cell
 
 // Press is a mouse press or a touch at screen (x, y): on the strip it picks
 // a tool or returns an action ("undo" is done here; "save" and "play" are
-// for the caller, as is "open"); on the level it starts painting (right =
+// for the caller, as is "menu"); on the level it starts painting (right =
 // erase).
 func (e *EditScreen) Press(x, y int, erase bool) (action string) {
 	e.painted = map[[2]int]bool{}
@@ -174,22 +174,13 @@ func (e *EditScreen) Draw(dst *image.RGBA) {
 		x0, y0 := actionX+i*editor.Cell, paletteY
 		outline(dst, image.Rect(x0+1, y0+1, x0+editor.Cell-1, ScreenH-1), color.RGBA{90, 90, 100, 255})
 		switch a {
-		case "open": // a folder: an outline with a tab
-			for d := 0; d < 18; d++ {
-				dst.Set(x0+7+d, y0+11, white)
-				dst.Set(x0+7+d, y0+24, white)
+		case "menu": // three bars
+			for _, yy := range []int{10, 16, 22} {
+				for d := 0; d < 16; d++ {
+					dst.Set(x0+8+d, y0+yy, white)
+					dst.Set(x0+8+d, y0+yy+1, white)
+				}
 			}
-			for d := 0; d < 13; d++ {
-				dst.Set(x0+7, y0+11+d, white)
-				dst.Set(x0+24, y0+11+d, white)
-			}
-			for d := 0; d < 7; d++ {
-				dst.Set(x0+7+d, y0+8, white)
-			}
-			dst.Set(x0+7, y0+9, white)
-			dst.Set(x0+7, y0+10, white)
-			dst.Set(x0+14, y0+9, white)
-			dst.Set(x0+15, y0+10, white)
 		case "undo":
 			for d := 0; d < 12; d++ { // the arc's top and right side, then the arrowhead
 				dst.Set(x0+10+d, y0+10, white)

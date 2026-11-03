@@ -19,7 +19,7 @@ import (
 // The level editor (LOOP item 10): F2 opens it on the room being played (the
 // level as its file has it), P plays the edited level from its start, F2
 // goes back to editing. The mouse (right button erases) or a finger paints;
-// the arrow keys scroll; Ctrl+Z undoes; Ctrl+S saves (the web also downloads
+// the arrow keys scroll; Esc or the strip's menu button opens the editor menu (editmenu.go); Ctrl+Z undoes; Ctrl+S saves (the web also downloads
 // the level file); a level file dropped on the window opens in the editor, a
 // dropped pack folder plays; Ctrl+Shift+S saves the levels edited this session
 // as a pack.
@@ -37,6 +37,7 @@ type editState struct {
 	// saving the pack (Enter goes on, Esc cancels).
 	prompt   *game.Prompt
 	packName string
+	menu     editMenu
 }
 
 // openEditor edits the named level (keeping earlier edits of it).
@@ -83,8 +84,8 @@ func (a *app) playEdited() {
 		log.Printf("editor play: %v", err)
 		return
 	}
-	g.G.Sound = a.game.G.Sound
-	g.Highscores, g.SaveHighscores = a.game.Highscores, a.game.SaveHighscores
+	g.G.Sound = a.sound.Play // (a.game may be nil: the editor opened from the title)
+	g.Highscores, g.SaveHighscores = store.LoadHighscores(), store.SaveHighscores
 	a.game = g
 	a.edit.on = false
 }
@@ -93,6 +94,14 @@ func (a *app) playEdited() {
 func (a *app) updateEditor() {
 	if a.edit.prompt != nil {
 		a.updatePrompt()
+		return
+	}
+	if a.edit.menu.on {
+		a.updateEditMenu()
+		return
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		a.openEditMenu()
 		return
 	}
 	select {
@@ -113,13 +122,9 @@ func (a *app) updateEditor() {
 	case (left || right) && !a.edit.down:
 		a.edit.down = true
 		switch e.Press(x, y, right) {
-		case "open":
-			store.OpenFile(func(name, text string) {
-				select { // never block the browser's callback
-				case a.edit.picked <- text:
-				default:
-				}
-			})
+		case "menu":
+			a.openEditMenu()
+			return
 		case "save":
 			a.saveEdited()
 		case "play":
@@ -286,4 +291,14 @@ func (a *app) updatePrompt() {
 	}
 	a.edit.prompt = nil
 	a.savePack(a.edit.packName, name)
+}
+
+// pickLevelFile opens a level file from the browser's file picker.
+func (a *app) pickLevelFile() {
+	store.OpenFile(func(name, text string) {
+		select { // never block the browser's callback
+		case a.edit.picked <- text:
+		default:
+		}
+	})
 }

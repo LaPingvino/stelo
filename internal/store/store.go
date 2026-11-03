@@ -5,6 +5,7 @@ package store
 
 import (
 	"encoding/json"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -36,6 +37,13 @@ func SaveHighscores(h game.Highscores) {
 // LoadLevel gives it back. The editor saves with Ctrl+S and opens a level's
 // saved version when there is one.
 func SaveLevel(name, text string) { writeLevel(name, text) }
+
+// SavedLevels names the levels saved (Ctrl+S / Konservi), sorted.
+func SavedLevels() []string {
+	n := listLevels()
+	sort.Strings(n)
+	return n
+}
 
 // LoadLevel returns a saved level's text.
 func LoadLevel(name string) (string, bool) { return readLevel(name) }

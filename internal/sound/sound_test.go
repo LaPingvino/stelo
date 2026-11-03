@@ -87,3 +87,12 @@ func TestMute(t *testing.T) {
 		t.Fatal("still muted")
 	}
 }
+
+// The music setting: only the tune's volume, the effects stay.
+func TestMusicOff(t *testing.T) {
+	p := &Player{fsys: stelo.Files}
+	p.SetMusicOff(true)
+	if !p.MusicOff() || p.musicVolume() != 0 || p.volume() != 1 {
+		t.Fatal("music off: wrong volumes")
+	}
+}

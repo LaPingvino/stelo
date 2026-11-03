@@ -48,6 +48,7 @@ func (a *app) openTitle() {
 		a.sound = sound.NewPlayer(stelo.Files)
 		theSound = a.sound
 		a.sound.SetMuted(store.Muted())
+		a.sound.SetMusicOff(store.MusicOff())
 	}
 	a.sound.Play("@sound:komenco") // the 2006 title tune
 	ebiten.SetWindowTitle("Stelo")
@@ -79,12 +80,20 @@ func (a *app) buildTitleMenu(sel int) {
 		art = game.Tr("de 2006")
 	}
 	add("art", "Arto", art)
+	onOff := func(off bool) string {
+		if off {
+			return game.Tr("malŝaltita")
+		}
+		return game.Tr("ŝaltita")
+	}
+	add("sound", "Sono", onOff(soundMuted()))
+	add("music", "Muziko", onOff(theSound != nil && theSound.MusicOff()))
 	add("edit", "Redaktilo", "")
 	if runtime.GOOS != "js" {
 		add("quit", "Fini", "")
 	}
 	a.title.ids = ids
-	a.title.menu = game.Menu{Items: items, Sel: min(sel, len(items)-1), X: game.ScreenW / 2, Y: 236, LineH: 30, W: 330, Size: 17}
+	a.title.menu = game.Menu{Items: items, Sel: min(sel, len(items)-1), X: game.ScreenW / 2, Y: 218, LineH: 26, W: 330, Size: 17}
 }
 
 func (a *app) updateTitle() {
@@ -119,6 +128,10 @@ func (a *app) updateTitle() {
 			}
 		case "art":
 			a.toggleSkin()
+		case "sound":
+			toggleSound()
+		case "music":
+			toggleMusic()
 		}
 		a.buildTitleMenu(sel)
 		return
@@ -127,6 +140,13 @@ func (a *app) updateTitle() {
 		return
 	}
 	switch a.title.ids[res.Chosen] {
+	case "sound", "music": // a click or Enter changes the setting too
+		if a.title.ids[res.Chosen] == "sound" {
+			toggleSound()
+		} else {
+			toggleMusic()
+		}
+		a.buildTitleMenu(res.Chosen)
 	case "play":
 		a.startFromTitle(1)
 	case "continue":

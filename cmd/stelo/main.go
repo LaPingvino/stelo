@@ -50,6 +50,7 @@ func (a *app) load(i int) {
 		a.sound = sound.NewPlayer(stelo.Files)
 		theSound = a.sound
 		a.sound.SetMuted(store.Muted())
+		a.sound.SetMusicOff(store.MusicOff())
 	}
 	g.G.Sound = a.sound.Play
 	g.Highscores = store.LoadHighscores()
@@ -351,3 +352,12 @@ func toggleSound() {
 }
 
 func soundMuted() bool { return theSound != nil && theSound.Muted() }
+
+// toggleMusic is the music setting: the tune alone off or on, remembered.
+func toggleMusic() {
+	if theSound == nil {
+		return
+	}
+	theSound.SetMusicOff(!theSound.MusicOff())
+	store.SetMusicOff(theSound.MusicOff())
+}

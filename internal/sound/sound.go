@@ -59,6 +59,26 @@ type Player struct {
 	music     *audio.Player
 	musicName string
 	muted     bool
+	musicOff  bool // the music setting (Agordoj): only the tune silenced
+}
+
+// SetMusicOff turns the music alone off or on (the tune keeps going
+// silently, so turning it on picks it up).
+func (p *Player) SetMusicOff(off bool) {
+	p.musicOff = off
+	if p.music != nil {
+		p.music.SetVolume(p.musicVolume())
+	}
+}
+
+// MusicOff reports whether the music is off.
+func (p *Player) MusicOff() bool { return p.musicOff }
+
+func (p *Player) musicVolume() float64 {
+	if p.musicOff {
+		return 0
+	}
+	return p.volume()
 }
 
 // SetMuted turns all sound off or on (the sound button, M): effects are not
@@ -66,7 +86,7 @@ type Player struct {
 func (p *Player) SetMuted(m bool) {
 	p.muted = m
 	if p.music != nil {
-		p.music.SetVolume(p.volume())
+		p.music.SetVolume(p.musicVolume())
 	}
 }
 
@@ -158,7 +178,7 @@ func (p *Player) playMusic(name string, loop bool) {
 		return
 	}
 	p.music, p.musicName = pl, name
-	pl.SetVolume(p.volume())
+	pl.SetVolume(p.musicVolume())
 	pl.Play()
 }
 

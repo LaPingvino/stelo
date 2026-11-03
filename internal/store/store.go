@@ -79,3 +79,18 @@ func SetMuted(m bool) {
 	}
 	writeKey("muted", []byte(v))
 }
+
+// MusicOff is the music setting (on: false).
+func MusicOff() bool {
+	data, ok := readKey("music-off")
+	return ok && strings.TrimSpace(string(data)) == "1"
+}
+
+// SetMusicOff keeps the music setting.
+func SetMusicOff(off bool) {
+	v := "0"
+	if off {
+		v = "1"
+	}
+	writeKey("music-off", []byte(v))
+}

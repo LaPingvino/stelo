@@ -100,7 +100,7 @@ func TestEditScreenActions(t *testing.T) {
 	if e.Doc.Text() == orig {
 		t.Fatal("nothing painted")
 	}
-	if got := e.Press(actionX+3, paletteY+3, false); got != "open" {
+	if got := e.Press(actionX+3, paletteY+3, false); got != "menu" {
 		t.Errorf("open button: %q", got)
 	}
 	if got := e.Press(actionX+editor.Cell+3, paletteY+3, false); got != "undo" || e.Doc.Text() != orig {

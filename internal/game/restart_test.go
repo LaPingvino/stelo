@@ -2,6 +2,7 @@ package game
 
 import (
 	"image"
+	"strings"
 	"testing"
 
 	"github.com/LaPingvino/stelo"
@@ -63,5 +64,34 @@ func TestLevelDone(t *testing.T) {
 	}
 	if !found {
 		t.Error("no 'Nivelo finita!' in the overlay")
+	}
+}
+
+// The new highscore screen: the name field, then the table.
+func TestHighscoresUI(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.World.Overlay = &Overlay{}
+	g.hs, g.G.KeyboardString = hsName, "Joop"
+	g.drawHighscores(image.NewRGBA(image.Rect(0, 0, ScreenW, ScreenH)))
+	var texts []string
+	for _, tx := range g.World.Overlay.Texts {
+		texts = append(texts, tx.S)
+	}
+	if got := strings.Join(texts, "|"); !strings.Contains(got, "plej bonaj ludantoj!") || !strings.Contains(got, "|Joop") {
+		t.Errorf("name screen: %s", got)
+	}
+	g.World.Overlay = &Overlay{}
+	g.Highscores.Add("Joop", 900)
+	g.hs = hsTable
+	g.drawHighscores(image.NewRGBA(image.Rect(0, 0, ScreenW, ScreenH)))
+	if tx := g.World.Overlay.Texts; tx[1].S != "1." || tx[2].S != "Joop" || tx[3].S != "900" {
+		t.Errorf("first row: %q %q %q", tx[1].S, tx[2].S, tx[3].S)
 	}
 }

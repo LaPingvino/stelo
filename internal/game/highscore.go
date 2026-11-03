@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"sort"
 	"strconv"
+	"strings"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -141,6 +142,10 @@ func drawGMText(dst *image.RGBA, f font.Face, x, y int, s string) {
 
 // drawHighscores draws the highscore screen over the room.
 func (g *Game) drawHighscores(dst *image.RGBA) {
+	if g.hs != hsNone && g.World != nil && g.World.Overlay != nil {
+		g.drawHighscoresUI()
+		return
+	}
 	f := g.HSFont
 	if f == nil {
 		return
@@ -169,6 +174,50 @@ func (g *Game) drawHighscores(dst *image.RGBA) {
 			w := font.MeasureString(f, s).Ceil()
 			d = font.Drawer{Dst: dst, Src: hsGreen, Face: f, Dot: fixed.P(x2-w, y)}
 			d.DrawString(s)
+		}
+	}
+}
+
+// drawHighscoresUI is the new UI's highscore screen (docs/UI.md §5, step U5):
+// the 2006 texts on a panel in Noto Sans, the name in a text field with a
+// blinking caret, then the table with ranks.
+func (g *Game) drawHighscoresUI() {
+	o := g.World.Overlay
+	panel, cream, gold := color.RGBA{0x2a, 0x1c, 0x12, 235}, color.RGBA{0xff, 0xf4, 0xd8, 255}, color.RGBA{0xff, 0xd0, 0x3a, 255}
+	cx := float64(ScreenW) / 2
+	switch g.hs {
+	case hsName, hsSorry:
+		o.AddRect(Rect{X: 0, Y: 0, W: ScreenW, H: ScreenH, Color: color.RGBA{0, 0, 0, 110}})
+		o.AddRect(Rect{X: cx - 270, Y: 120, W: 540, H: 220, Color: panel})
+		lines := strings.Split(hats(Tr(hsSorry_)), "#")
+		if g.hs == hsName { // the 2006 text without its last line ("Via nomo: "), which the field takes
+			lines = strings.Split(hats(Tr(hsGood)), "#")
+			lines = lines[:len(lines)-2]
+		}
+		for i, line := range lines {
+			o.Add(Text{S: line, X: cx, Y: 140 + float64(i)*28, Size: 18, Weight: Bold, Color: cream, Align: Centre})
+		}
+		if g.hs == hsName {
+			o.Add(Text{S: hats(Tr("Via nomo:")), X: cx - 220, Y: 262, Size: 18, Weight: Bold, Color: gold})
+			o.AddRect(Rect{X: cx - 110, Y: 254, W: 330, H: 40, Color: cream})
+			caret := ""
+			if g.World.Steps/15%2 == 0 {
+				caret = "|"
+			}
+			o.Add(Text{S: g.G.KeyboardString + caret, X: cx - 100, Y: 262, Size: 18, Weight: Bold, Color: panel})
+		}
+	case hsTable:
+		o.AddRect(Rect{X: cx - 210, Y: 40, W: 420, H: 400, Color: panel})
+		o.Add(Text{S: Tr("Plej bonaj"), X: cx, Y: 54, Size: 30, Weight: Black, Color: gold, Align: Centre})
+		for i, e := range g.Highscores {
+			y := 112 + float64(i)*30
+			col := cream
+			if i == 0 {
+				col = gold
+			}
+			o.Add(Text{S: strconv.Itoa(i+1) + ".", X: cx - 170, Y: y, Size: 18, Weight: Bold, Color: col, Align: Right})
+			o.Add(Text{S: e.Name, X: cx - 155, Y: y, Size: 18, Weight: Bold, Color: col})
+			o.Add(Text{S: strconv.Itoa(e.Score), X: cx + 180, Y: y, Size: 18, Weight: Bold, Color: col, Align: Right})
 		}
 	}
 }

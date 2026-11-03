@@ -29,7 +29,8 @@ type titleScreen struct {
 	tick     int
 	px, py   int // the pointer, frame coordinates
 	langs    []string
-	progress int // the chosen pack's furthest level
+	progress int    // the chosen pack's furthest level
+	info     string // an open info page: "help" (Kiel ludi), "about" (Pri), "" none
 }
 
 func (a *app) packName() string {
@@ -88,6 +89,8 @@ func (a *app) buildTitleMenu(sel int) {
 	}
 	add("sound", "Sono", onOff(soundMuted()))
 	add("music", "Muziko", onOff(theSound != nil && theSound.MusicOff()))
+	add("help", "Kiel ludi", "")
+	add("about", "Pri", "")
 	add("edit", "Redaktilo", "")
 	if runtime.GOOS != "js" {
 		add("quit", "Fini", "")
@@ -113,6 +116,12 @@ func (a *app) updateTitle() {
 	if ids := inpututil.AppendJustPressedTouchIDs(nil); len(ids) > 0 {
 		in.PX, in.PY = toFrame(ebiten.TouchPosition(ids[0]))
 		in.Clicked = true
+	}
+	if a.title.info != "" { // an info page: Enter, Esc or a click goes back
+		if in.Enter || in.Clicked || inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+			a.title.info = ""
+		}
+		return
 	}
 	res := a.title.menu.Update(in)
 	sel := a.title.menu.Sel
@@ -151,6 +160,8 @@ func (a *app) updateTitle() {
 		a.startFromTitle(1)
 	case "continue":
 		a.startFromTitle(a.title.progress)
+	case "help", "about":
+		a.title.info = a.title.ids[res.Chosen]
 	case "edit":
 		a.title.on = false
 		a.openEditor("nivelo1")
@@ -223,6 +234,10 @@ func (a *app) drawTitle() {
 	}
 	o := &a.overlay
 	o.AddRect(game.Rect{X: 0, Y: 0, W: game.ScreenW, H: game.ScreenH, Color: color.RGBA{0, 0, 0, 70}})
+	if a.title.info != "" { // an info page instead of the title's texts (the overlay draws texts over every rect)
+		a.drawInfo(o, a.title.info)
+		return
+	}
 	shadow := color.RGBA{0x3b, 0x22, 0x0c, 255}
 	o.Add(game.Text{S: "Stelo", X: game.ScreenW/2 + 4, Y: 54, Size: 96, Weight: game.Black, Color: shadow, Align: game.Centre})
 	o.Add(game.Text{S: "Stelo", X: game.ScreenW / 2, Y: 50, Size: 96, Weight: game.Black, Color: color.RGBA{0xff, 0xd0, 0x3a, 255}, Align: game.Centre})

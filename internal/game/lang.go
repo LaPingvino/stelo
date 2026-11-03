@@ -59,11 +59,12 @@ var english = map[string]string{
 // english like the rest.
 var MenuWords = []string{"Ludi", "Daŭrigi", "Niveloj", "Lingvo", "Arto", "nova", "de 2006", "Redaktilo", "Fini",
 	"Esperanto", "Platforma ludo · 2006, refarita 2026", "nivelo",
-	"Paŭzo", "Muziko", "Plej bonaj", "Via nomo:", "Nivelo finita!", "Nova nivelo", "Malfermi", "El dosiero…", "Konservi", "Daŭrigi redakti", "Nivelo", "Bonusnivelo", "Poentoj", "Rekomenci la nivelon", "Sono", "ŝaltita", "malŝaltita", "Ĉefmenuo"}
+	"Paŭzo", "Muziko", "Plej bonaj", "Via nomo:", "Nivelo finita!", "Nova nivelo", "Malfermi", "El dosiero…", "Konservi", "Daŭrigi redakti", "Nivelo", "Bonusnivelo", "Poentoj", "Rekomenci la nivelon", "Sono", "ŝaltita", "malŝaltita", "Ĉefmenuo", "Kiel ludi", "Pri", "Enter / Esc: reen"}
 
 func init() {
 	for k, v := range map[string]string{"Ludi": "Play", "Daŭrigi": "Continue", "Niveloj": "Levels", "Lingvo": "Language",
 		"Arto": "Art", "nova": "new", "de 2006": "2006", "Redaktilo": "Level editor", "Fini": "Quit",
+		"Kiel ludi": "How to play", "Pri": "About", "Enter / Esc: reen": "Enter / Esc: back",
 		"Esperanto": "Esperanto", "Platforma ludo · 2006, refarita 2026": "A platform game · 2006, remade 2026", "nivelo": "level",
 		"Paŭzo": "Paused", "Muziko": "Music", "Plej bonaj": "Best players", "Via nomo:": "Your name:", "Nivelo finita!": "Level complete!", "Nova nivelo": "New level", "Malfermi": "Open", "El dosiero…": "From a file…",
 		"Konservi": "Save", "Daŭrigi redakti": "Back to editing", "Nivelo": "Level", "Bonusnivelo": "Bonus level", "Poentoj": "Score", "Rekomenci la nivelon": "Restart the level", "Sono": "Sound", "ŝaltita": "on", "malŝaltita": "off",

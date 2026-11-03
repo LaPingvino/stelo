@@ -1,4 +1,4 @@
-# Stelo — new texts (DRAFT, waiting for Joop's read; UI step U3)
+# Stelo — new texts (IN THE GAME since 2026-11-04 as drafts — Joop: "we can correct things later"; UI step U3)
 
 Replace the 2006 rules room (klarigo) and thanks room (danklisto) — docs/UI.md §4. Esperanto first, English
 alongside. Every line is from docs/STELO-RULES.md (what the game really does); nothing invented.
@@ -56,7 +56,11 @@ alongside. Every line is from docs/STELO-RULES.md (what the game really does); n
 > Font: Noto Sans (SIL OFL). Sound decoded with gopus.
 > Source: github.com/LaPingvino/stelo
 
-## Questions for Joop
+## Questions for Joop (taken as below for now; say otherwise and it changes)
+Choices in the game (2026-11-04): "figuro" for the player; the music and sounds credited as "from the 2006
+game" until their source is known; Claude credited in the repository, not in Pri; Lucas as @lucasserapiao.
+The arrow keys are written in words ("la sagoj — flanken …"): Noto Sans has no arrow glyphs.
+
 1. "Figuro" for the player — or does the character have a name?
 2. The music and sounds of 2006: where did they come from (your own, Game Maker's examples, elsewhere)? Credit
    them properly in Pri.

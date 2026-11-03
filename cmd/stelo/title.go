@@ -117,6 +117,7 @@ func (a *app) buildTitleMenu(sel int) {
 		add("continue", "Daŭrigi", game.Tr("nivelo")+" "+itoa(a.title.progress))
 	}
 	add("help", "Kiel ludi", "")
+	add("scores", "Plej bonaj", "")
 	add("about", "Pri", "")
 	add("settings", "Agordoj", "")
 	add("edit", "Redaktilo", "")
@@ -206,6 +207,17 @@ func (a *app) updateTitle() {
 		a.startFromTitle(res.Chosen + 1)
 	case "settings":
 		a.openPage("settings", 0)
+	case "scores": // the highscore table; a key brings the title back
+		a.load(0)
+		if a.game == nil {
+			return
+		}
+		if err := a.game.ShowHighscores(); err != nil {
+			log.Printf("highscores: %v", err)
+			return
+		}
+		a.game.OnRestart = func() { a.game = nil; a.openTitle() }
+		a.title.on = false
 	case "back": // to the main page, Agordoj chosen
 		a.openPage("", 0)
 		for i, id := range a.title.ids {

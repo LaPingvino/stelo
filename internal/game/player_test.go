@@ -418,3 +418,21 @@ func TestWorldClone(t *testing.T) {
 		t.Error("the copy and the original went different ways with the same keys")
 	}
 }
+
+// The title's Plej bonaj: the highscore room on its table, no name asked.
+func TestShowHighscores(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := g.ShowHighscores(); err != nil {
+		t.Fatal(err)
+	}
+	if g.World.Level.Name != "finlisto" || g.hs != hsTable || g.Waiting() {
+		t.Errorf("room %s, state %d, waiting %v", g.World.Level.Name, g.hs, g.Waiting())
+	}
+}

@@ -221,3 +221,14 @@ func (g *Game) drawHighscoresUI() {
 		}
 	}
 }
+
+// ShowHighscores opens the highscore room on its table (the title's Plej
+// bonaj, docs/UI.md §3): no name to enter, a key goes back.
+func (g *Game) ShowHighscores() error {
+	g.Title, g.waitRoom = false, false // as EnterLevel: past the 2006 title picture
+	if err := g.enter("finlisto"); err != nil {
+		return err
+	}
+	g.hs = hsTable
+	return nil
+}

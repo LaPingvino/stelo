@@ -13,7 +13,7 @@ var infoPages = map[string]map[string][]string{
 	"help": {
 		"eo": {
 			"# Kiel ludi",
-			"Konduku vian figuron tra ĉiu nivelo ĝis la elirejo. Kolektu stelojn",
+			"Konduku Stelon tra ĉiu nivelo ĝis la elirejo. Kolektu stelojn",
 			"por poentoj, evitu fajron kaj flugantojn, kaj saltu sur monstrojn.",
 			"",
 			"* Klavoj: la sagoj — flanken iri, supren salti aŭ grimpi,",
@@ -29,7 +29,7 @@ var infoPages = map[string]map[string][]string{
 		},
 		"en": {
 			"# How to play",
-			"Lead your figure through each level to the exit. Collect stars",
+			"Lead Stelo through each level to the exit. Collect stars",
 			"for points, avoid fire and flyers, and jump on monsters.",
 			"",
 			"* Keys: the arrows — left / right walk, up jump or climb,",

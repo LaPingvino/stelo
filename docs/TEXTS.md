@@ -6,7 +6,7 @@ alongside. Every line is from docs/STELO-RULES.md (what the game really does); n
 ## Kiel ludi — How to play
 
 **Eo**
-> Konduku vian figuron tra ĉiu nivelo ĝis la elirejo. Kolektu stelojn por poentoj, evitu fajron kaj
+> Konduku Stelon tra ĉiu nivelo ĝis la elirejo. Kolektu stelojn por poentoj, evitu fajron kaj
 > flugantojn, kaj saltu sur monstrojn por venki ilin.
 >
 > **Klavoj:** ← → iri · ↑ salti, aŭ grimpi ŝtupetaron · ↓ malsupreniri ŝtupetaron · Esc aŭ P paŭzo ·
@@ -27,7 +27,7 @@ alongside. Every line is from docs/STELO-RULES.md (what the game really does); n
 > Fali el la nivelo ne kostas vivon: vi rekomencas ĉe la lasta transirejo.
 
 **En**
-> Lead your figure through each level to the exit. Collect stars for points, avoid fire and flyers, and jump
+> Lead Stelo through each level to the exit. Collect stars for points, avoid fire and flyers, and jump
 > on monsters to beat them.
 >
 > **Keys:** ← → walk · ↑ jump, or climb a ladder · ↓ climb down · Esc or P pause · M sound · F11 full screen
@@ -57,11 +57,11 @@ alongside. Every line is from docs/STELO-RULES.md (what the game really does); n
 > Source: github.com/LaPingvino/stelo
 
 ## Questions for Joop (taken as below for now; say otherwise and it changes)
-Choices in the game (2026-11-04): "figuro" for the player; the music and sounds credited as "from the 2006
+Choices in the game (2026-11-04): the player is Stelo (Joop, 2026-11-04); the music and sounds credited as "from the 2006
 game" until their source is known; Claude credited in the repository, not in Pri; Lucas as @lucasserapiao.
 The arrow keys are written in words ("la sagoj — flanken …"): Noto Sans has no arrow glyphs.
 
-1. "Figuro" for the player — or does the character have a name?
+1. (ANSWERED: Stelo) "Figuro" for the player — or does the character have a name?
 2. The music and sounds of 2006: where did they come from (your own, Game Maker's examples, elsewhere)? Credit
    them properly in Pri.
 3. Mention Claude in Pri ("refarita kun Claude"), or leave it to the repo?

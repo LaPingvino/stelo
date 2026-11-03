@@ -65,6 +65,13 @@ U0. [x] (DONE 2026-11-02 for Stelo; a real phone to confirm) **Touch controls of
 U0b. [x] (DONE 2026-11-02) **Sound on / off button** beside the full-screen one (Joop 2026-11-02: "maybe add a sound on/off button
    alongside the fullscreen one"): mutes effects and music (the player's master volume), M on the keyboard,
    remembered (store); shown with the touch controls, and as a small button for mouse users too.
+UE. [ ] NEXT (before U4b) **Editor: a way out and a level picker** (Joop 2026-11-03: "the editor doesn't seem to have an
+   exit or existing level picker? or in-memory stuff for web?"). Today: no exit (F2 only back to a running game; Esc
+   only cancels the name prompt), "open" = a file picker only, saved levels go to localStorage (+ a download) but
+   nothing lists them. Do: an editor menu (Esc, or a menu button on screen — touch too) with the game.Menu widget:
+   Nova nivelo · Malfermi → a list of the original levels 1–5 + bonusnivelo, the levels saved in this browser /
+   config (store: list the saved keys), and "el dosiero…" (the file picker) · Konservi · Ludi · Ĉefmenuo (back to
+   the title). Desktop and web alike.
 U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling + text at real resolution, Noto Sans,
    Pits-like menus (title, pause, settings, level pick of reached levels, resume), new "Kiel ludi" and "Pri"
    texts (drafts to Joop first), slim HUD, proper highscores. Steps: U1 shared UI package (scaler, text, menu

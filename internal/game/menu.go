@@ -17,6 +17,9 @@ type Menu struct {
 
 // MenuItem is a menu line.
 type MenuItem struct {
+	// Action: a valued item that Enter or a click chooses (← → still change
+	// its value) — Continue with its level pick.
+	Action   bool
 	Label    string
 	Value    string // shown after the label when set
 	Disabled bool
@@ -55,7 +58,7 @@ func (m *Menu) Update(in MenuInput) MenuResult {
 	if line := m.lineAt(in.PX, in.PY); line >= 0 && (in.Moved || in.Clicked) && !m.Items[line].Disabled {
 		m.Sel = line
 		if in.Clicked {
-			if m.Items[line].Value != "" {
+			if m.Items[line].Value != "" && !m.Items[line].Action {
 				res.Step = 1 // a click on a setting steps it on
 			} else {
 				res.Chosen = line
@@ -67,7 +70,7 @@ func (m *Menu) Update(in MenuInput) MenuResult {
 		res.Step = map[bool]int{true: -1, false: 1}[in.Left]
 	}
 	if in.Enter {
-		if m.Items[m.Sel].Value != "" {
+		if m.Items[m.Sel].Value != "" && !m.Items[m.Sel].Action {
 			res.Step = 1
 		} else {
 			res.Chosen = m.Sel

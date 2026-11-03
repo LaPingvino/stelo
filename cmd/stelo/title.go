@@ -31,6 +31,7 @@ type titleScreen struct {
 	langs    []string
 	progress int    // the chosen pack's furthest level
 	info     string // an open info page: "help" (Kiel ludi), "about" (Pri), "" none
+	pick     int    // the level Continue starts (1 … progress; the furthest by default)
 }
 
 func (a *app) packName() string {
@@ -64,8 +65,11 @@ func (a *app) buildTitleMenu(sel int) {
 		ids = append(ids, id)
 	}
 	add("play", "Ludi", "")
-	if a.title.progress > 1 {
-		items = append(items, game.MenuItem{Label: game.Tr("Daŭrigi") + " — " + game.Tr("nivelo") + " " + itoa(a.title.progress)})
+	if a.title.progress > 1 { // Continue at a reached level: the furthest, or ← → for an earlier one
+		if a.title.pick < 1 || a.title.pick > a.title.progress {
+			a.title.pick = a.title.progress
+		}
+		items = append(items, game.MenuItem{Label: game.Tr("Daŭrigi"), Value: game.Tr("nivelo") + " " + itoa(a.title.pick), Action: true})
 		ids = append(ids, "continue")
 	}
 	if len(a.packs) > 1 {
@@ -127,8 +131,11 @@ func (a *app) updateTitle() {
 	sel := a.title.menu.Sel
 	if res.Step != 0 {
 		switch a.title.ids[sel] {
+		case "continue": // the level pick: 1 … the furthest reached, round
+			a.title.pick = (a.title.pick-1+res.Step+a.title.progress)%a.title.progress + 1
 		case "pack":
 			a.pack = (a.pack + res.Step + len(a.packs)) % len(a.packs)
+			a.title.pick = 0 // the new pack's furthest level
 		case "lang":
 			if game.Lang == "en" {
 				game.Lang = "eo"
@@ -159,7 +166,7 @@ func (a *app) updateTitle() {
 	case "play":
 		a.startFromTitle(1)
 	case "continue":
-		a.startFromTitle(a.title.progress)
+		a.startFromTitle(a.title.pick)
 	case "help", "about":
 		a.title.info = a.title.ids[res.Chosen]
 	case "edit":

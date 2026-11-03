@@ -65,3 +65,14 @@ func TestMenuDraw(t *testing.T) {
 		t.Fatalf("%d rects, texts %+v", len(o.Rects), o.Texts)
 	}
 }
+
+// An Action item with a value: ← → step it, Enter chooses it.
+func TestMenuActionItem(t *testing.T) {
+	m := Menu{Items: []MenuItem{{Label: "Play"}, {Label: "Continue", Value: "level 3", Action: true}}, Sel: 1}
+	if r := m.Update(MenuInput{Left: true}); r.Step != -1 || r.Chosen >= 0 {
+		t.Errorf("left: %+v", r)
+	}
+	if r := m.Update(MenuInput{Enter: true}); r.Chosen != 1 || r.Step != 0 {
+		t.Errorf("enter: %+v", r)
+	}
+}

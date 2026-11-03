@@ -72,6 +72,10 @@ UE. [x] (DONE 2026-11-03) **Editor: a way out and a level picker** (Joop 2026-11
    Nova nivelo · Malfermi → a list of the original levels 1–5 + bonusnivelo, the levels saved in this browser /
    config (store: list the saved keys), and "el dosiero…" (the file picker) · Konservi · Ludi · Ĉefmenuo (back to
    the title). Desktop and web alike.
+U7. [ ] **Title as block buttons** (Joop 2026-11-04: "it's getting busy on screen. maybe pivot to square/rectangle
+   block buttons?"): the main actions (Ludi, Daŭrigi ‹nivelo›, Kiel ludi, Pri, Redaktilo, Fini) as large
+   rectangular buttons in a grid; the settings (Lingvo, Arto, Sono, Muziko, Niveloj) behind one "Agordoj" block,
+   on their own page. Keys, mouse and touch as now. Then Pacmanio the same.
 U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling + text at real resolution, Noto Sans,
    Pits-like menus (title, pause, settings, level pick of reached levels, resume), new "Kiel ludi" and "Pri"
    texts (drafts to Joop first), slim HUD, proper highscores. Steps: U1 shared UI package (scaler, text, menu
@@ -174,3 +178,4 @@ U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling +
 - 2026-11-04 (item U, step U3) — Joop (2026-11-04): don't wait overnight, put the drafts in and correct the done work. The title menu has 'Kiel ludi' (How to play) and 'Pri' (About) — cmd/stelo/info.go: the docs/TEXTS.md texts in Esperanto and English on a panel over the title (Enter / Esc / a click back); the four open questions taken as: 'figuro', music 'from the 2006 game', Claude in the repo only, @lucasserapiao (TEXTS.md says so). Arrows written in words (Noto Sans has no arrow glyphs). Checked in headless Chromium (web build): both pages, Esperanto. NEXT U3b: the legend with each thing's sprite.
 - 2026-11-04 (U3, Joop) — the player is Stelo, not 'figuro': 'Konduku Stelon …' / 'Lead Stelo …' in Kiel ludi and TEXTS.md.
 - 2026-11-04 (item U, step U3b) — Kiel ludi's legend with each thing's sprite (UI.md §4): star, monster, flyer, fire, heart, checkpoint, diamond, exit in two columns — the sprite (in the chosen art: new or 2006) with its line, then the falling-out line; the panel now drawn into the frame (overlay rects would cover the sprites). Checked in headless Chromium, Esperanto and English. U3 done (texts as drafts — Joop corrects in place).
+- 2026-11-04 (item U, the level pick) — UI.md's 'level pick of reached levels': the title's Daŭrigi now shows ‹nivelo N› — ← → choose any reached level (1 … the furthest, round; a pack change resets it), Enter / a click starts it. game.MenuItem.Action: a valued item that Enter or a click chooses instead of stepping (TestMenuActionItem). Checked in headless Chromium with progress 4 seeded: ← ← → 'nivelo 2', Enter → level 2. Joop then: the title is getting busy → U7 block buttons, next.

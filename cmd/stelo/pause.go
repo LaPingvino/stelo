@@ -18,6 +18,7 @@ type pauseMenu struct {
 	menu   game.Menu
 	ids    []string
 	px, py int
+	page   string // "" the pause menu, "settings" its Agordoj
 }
 
 // pauseWanted: Esc or P pressed during a level.
@@ -29,28 +30,48 @@ func (a *app) pauseWanted() bool {
 }
 
 func (a *app) openPause() {
-	a.pause.on = true
+	a.pause.on, a.pause.page = true, ""
 	a.buildPauseMenu(0)
 }
 
 func (a *app) buildPauseMenu(sel int) {
-	snd := "ŝaltita"
-	if soundMuted() {
-		snd = "malŝaltita"
+	onOff := func(off bool) string {
+		if off {
+			return game.Tr("malŝaltita")
+		}
+		return game.Tr("ŝaltita")
 	}
-	items := []game.MenuItem{
+	items := []game.MenuItem{ // docs/UI.md §3: Daŭrigi · Rekomenci la nivelon · Agordoj · Ĉefmenuo
 		{Label: game.Tr("Daŭrigi")},
 		{Label: game.Tr("Rekomenci la nivelon")},
-		{Label: game.Tr("Sono"), Value: game.Tr(snd)},
+		{Label: game.Tr("Agordoj")},
 		{Label: game.Tr("Ĉefmenuo")},
 	}
-	a.pause.ids = []string{"resume", "restart", "sound", "title"}
+	a.pause.ids = []string{"resume", "restart", "settings", "title"}
+	if a.pause.page == "settings" { // the title's settings, but the level pack (not mid-game)
+		lang, art := "Esperanto", game.Tr("nova")
+		if game.Lang == "en" {
+			lang = "English"
+		}
+		if a.skin == nil {
+			art = game.Tr("de 2006")
+		}
+		items = []game.MenuItem{{Label: game.Tr("Lingvo"), Value: lang}, {Label: game.Tr("Arto"), Value: art},
+			{Label: game.Tr("Sono"), Value: onOff(soundMuted())}, {Label: game.Tr("Muziko"), Value: onOff(theSound != nil && theSound.MusicOff())},
+			{Label: game.Tr("Reen")}}
+		a.pause.ids = []string{"lang", "art", "sound", "music", "back"}
+	}
 	a.pause.menu = game.Menu{Items: items, Sel: min(sel, len(items)-1), X: game.ScreenW / 2, Y: 190, LineH: 30, W: 330, Size: 17}
 }
 
 // updatePause runs the open pause menu.
 func (a *app) updatePause() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyP) || a.touch.pauseTapped {
+		if a.pause.page != "" { // Agordoj: back to the pause menu
+			a.pause.page = ""
+			a.buildPauseMenu(2)
+			return
+		}
 		a.pause.on = false
 		return
 	}
@@ -70,8 +91,8 @@ func (a *app) updatePause() {
 	}
 	res := a.pause.menu.Update(in)
 	sel := a.pause.menu.Sel
-	if res.Step != 0 && a.pause.ids[sel] == "sound" {
-		toggleSound()
+	if id := a.pause.ids[sel]; res.Step != 0 && (id == "sound" || id == "music" || id == "lang" || id == "art") {
+		a.pauseSetting(id)
 		a.buildPauseMenu(sel)
 		return
 	}
@@ -86,9 +107,15 @@ func (a *app) updatePause() {
 		if err := a.game.RestartLevel(); err != nil {
 			log.Print(err)
 		}
-	case "sound":
-		toggleSound()
+	case "sound", "music", "lang", "art":
+		a.pauseSetting(a.pause.ids[res.Chosen])
 		a.buildPauseMenu(sel)
+	case "settings":
+		a.pause.page = "settings"
+		a.buildPauseMenu(0)
+	case "back":
+		a.pause.page = ""
+		a.buildPauseMenu(2)
 	case "title":
 		a.pause.on = false
 		a.sound.StopMusic()
@@ -102,7 +129,29 @@ func (a *app) drawPause() {
 	o := &a.overlay
 	o.AddRect(game.Rect{X: 0, Y: 0, W: game.ScreenW, H: game.ScreenH, Color: color.RGBA{0, 0, 0, 140}})
 	o.AddRect(game.Rect{X: game.ScreenW/2 - 200, Y: 72, W: 400, H: 250, Color: color.RGBA{0x2a, 0x1c, 0x12, 225}}) // a panel behind the menu
-	o.Add(game.Text{S: game.Tr("Paŭzo"), X: game.ScreenW / 2, Y: 110, Size: 44, Weight: game.Black, Color: color.RGBA{0xff, 0xd0, 0x3a, 255}, Align: game.Centre})
+	title := game.Tr("Paŭzo")
+	if a.pause.page == "settings" {
+		title = game.Tr("Agordoj")
+	}
+	o.Add(game.Text{S: title, X: game.ScreenW / 2, Y: 110, Size: 44, Weight: game.Black, Color: color.RGBA{0xff, 0xd0, 0x3a, 255}, Align: game.Centre})
 	a.pause.menu.Draw(o, game.MenuColors{Text: color.RGBA{0xff, 0xf4, 0xd8, 255}, Disabled: color.RGBA{0xb0, 0xa0, 0x80, 255},
 		Selected: color.RGBA{0x2a, 0x1c, 0x12, 255}, Highlight: color.RGBA{0xff, 0xd0, 0x3a, 230}})
+}
+
+// pauseSetting changes one of the pause menu's settings.
+func (a *app) pauseSetting(id string) {
+	switch id {
+	case "sound":
+		toggleSound()
+	case "music":
+		toggleMusic()
+	case "lang":
+		if game.Lang == "en" {
+			game.Lang = "eo"
+		} else {
+			game.Lang = "en"
+		}
+	case "art":
+		a.toggleSkin()
+	}
 }

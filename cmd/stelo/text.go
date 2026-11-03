@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"io/fs"
 	"log"
 	"math"
@@ -58,10 +59,25 @@ func face(w game.Weight, px int) font.Face {
 }
 
 // drawOverlay draws the frame's rectangles, then its texts, onto the screen.
+// pics are the overlay's pictures as GPU images (made once each).
+var pics = map[*image.RGBA]*ebiten.Image{}
+
 func drawOverlay(screen *ebiten.Image, o *game.Overlay) {
 	for _, r := range o.Rects {
 		vector.FillRect(screen, float32(view.ox+r.X*view.scale), float32(view.oy+r.Y*view.scale),
 			float32(r.W*view.scale), float32(r.H*view.scale), r.Color, false)
+	}
+	for _, p := range o.Pics {
+		img := pics[p.Img]
+		if img == nil {
+			img = ebiten.NewImageFromImage(p.Img)
+			pics[p.Img] = img
+		}
+		op := &ebiten.DrawImageOptions{Filter: ebiten.FilterNearest}
+		b := p.Img.Bounds()
+		op.GeoM.Scale(p.W*view.scale/float64(b.Dx()), p.H*view.scale/float64(b.Dy()))
+		op.GeoM.Translate(view.ox+p.X*view.scale, view.oy+p.Y*view.scale)
+		screen.DrawImage(img, op)
 	}
 	for _, t := range o.Texts {
 		f := face(t.Weight, int(math.Round(t.Size*view.scale)))

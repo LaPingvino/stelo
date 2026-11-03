@@ -19,6 +19,7 @@ type Menu struct {
 	// block's Value is a second, smaller line; Enter or a click takes it.
 	Cols              int
 	CellW, CellH, Gap float64
+	LabelBottom       bool // the label at the block's foot (a picture above it)
 }
 
 // MenuItem is a menu line.
@@ -135,6 +136,9 @@ func (m *Menu) updateGrid(in MenuInput, res MenuResult) MenuResult {
 	return res
 }
 
+// Cell is block i's top-left (frame coordinates).
+func (m *Menu) Cell(i int) (x, y float64) { return m.cell(i) }
+
 // cell is block i's rectangle (frame coordinates).
 func (m *Menu) cell(i int) (x, y float64) {
 	cols := min(m.Cols, len(m.Items))
@@ -194,6 +198,9 @@ func (m *Menu) drawGrid(o *Overlay, c MenuColors) {
 		}
 		o.AddRect(Rect{X: x, Y: y, W: m.CellW, H: m.CellH, Color: fill})
 		ty := y + (m.CellH-m.Size*1.36)/2
+		if m.LabelBottom {
+			ty = y + m.CellH - m.Size*1.36 - 3
+		}
 		if it.Value != "" {
 			ty -= m.Size * 0.55
 			o.Add(Text{S: it.Value, X: x + m.CellW/2, Y: ty + m.Size*1.3, Size: m.Size * 0.72, Weight: Bold, Color: col, Align: Centre})

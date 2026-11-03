@@ -29,9 +29,10 @@ type titleScreen struct {
 	tick     int
 	px, py   int // the pointer, frame coordinates
 	langs    []string
-	progress int    // the chosen pack's furthest level
-	info     string // an open info page: "help" (Kiel ludi), "about" (Pri), "" none
-	page     string // the open page: "" the blocks, "settings", "levels" (Daŭrigi's level pick)
+	progress int           // the chosen pack's furthest level
+	info     string        // an open info page: "help" (Kiel ludi), "about" (Pri), "" none
+	thumbs   []*image.RGBA // the levels page's pictures
+	page     string        // the open page: "" the blocks, "settings", "levels" (Daŭrigi's level pick)
 }
 
 func (a *app) packName() string {
@@ -104,7 +105,11 @@ func (a *app) buildTitleMenu(sel int) {
 			sel = len(items) - 1 // the furthest
 		}
 		a.title.ids = ids
-		a.title.menu = game.Menu{Items: items, Sel: sel, X: game.ScreenW / 2, Y: 230, Size: 22, Cols: 5, CellW: 72, CellH: 52, Gap: 10}
+		a.title.menu = game.Menu{Items: items, Sel: sel, X: game.ScreenW / 2, Y: 216, Size: 16, Cols: 5, CellW: 108, CellH: 92, Gap: 10, LabelBottom: true}
+		a.title.thumbs = a.title.thumbs[:0]
+		for n := 1; n <= len(items); n++ { // each level's picture (made once a page)
+			a.title.thumbs = append(a.title.thumbs, levelThumb(a.levelFor(n), 96, 64))
+		}
 		return
 	}
 	add("play", "Ludi", "")
@@ -290,6 +295,12 @@ func (a *app) drawTitle() {
 	o.Add(game.Text{S: "Stelo", X: game.ScreenW/2 + 4, Y: 54, Size: 96, Weight: game.Black, Color: shadow, Align: game.Centre})
 	o.Add(game.Text{S: "Stelo", X: game.ScreenW / 2, Y: 50, Size: 96, Weight: game.Black, Color: color.RGBA{0xff, 0xd0, 0x3a, 255}, Align: game.Centre})
 	o.Add(game.Text{S: game.Tr("Platforma ludo · 2006, refarita 2026"), X: game.ScreenW / 2, Y: 186, Size: 15, Weight: game.Bold, Color: color.RGBA{0xff, 0xf4, 0xd8, 255}, Align: game.Centre})
+	if a.title.page == "levels" { // the levels' pictures, in their blocks
+		for i, img := range a.title.thumbs {
+			x, y := a.title.menu.Cell(i)
+			o.Pics = append(o.Pics, game.Pic{Img: img, X: x + 6, Y: y + 6, W: 96, H: 64})
+		}
+	}
 	a.title.menu.Draw(o, game.MenuColors{Text: color.RGBA{0xff, 0xf4, 0xd8, 255}, Disabled: color.RGBA{0xb0, 0xa0, 0x80, 255},
 		Selected: color.RGBA{0x2a, 0x1c, 0x12, 255}, Highlight: color.RGBA{0xff, 0xd0, 0x3a, 230}})
 }

@@ -154,6 +154,11 @@ func (w *World) drawBar(dst *image.RGBA, score, lives int) {
 			draw.Draw(dst, img.Bounds().Add(image.Pt(x+i*(iw+3), (h-ih)/2)), img, image.Point{}, draw.Over)
 		}
 	}
+	if w.LevelDone() && !w.HideBanner { // within the 2006 exit pause (1 s), so the timing doesn't change
+		w.Overlay.Add(Text{S: Tr("Nivelo finita!"), X: ScreenW/2 + 3, Y: ScreenH/2 - 37, Size: 48, Weight: Black, Color: color.NRGBA{0x3b, 0x22, 0x0c, 255}, Align: Centre})
+		w.Overlay.Add(Text{S: Tr("Nivelo finita!"), X: ScreenW / 2, Y: ScreenH/2 - 40, Size: 48, Weight: Black, Color: color.NRGBA{0xff, 0xd0, 0x3a, 255}, Align: Centre})
+		return
+	}
 	if st := w.Steps; w.Label != "" && st < 60 && !w.HideBanner { // two seconds at 30 steps a second
 		a := uint8(255)
 		if st > 45 { // fading out over the last half second
@@ -162,4 +167,10 @@ func (w *World) drawBar(dst *image.RGBA, score, lives int) {
 		w.Overlay.Add(Text{S: w.Label, X: ScreenW/2 + 3, Y: ScreenH/2 - 37, Size: 48, Weight: Black, Color: color.NRGBA{0x3b, 0x22, 0x0c, a}, Align: Centre})
 		w.Overlay.Add(Text{S: w.Label, X: ScreenW / 2, Y: ScreenH/2 - 40, Size: 48, Weight: Black, Color: color.NRGBA{0xff, 0xd0, 0x3a, a}, Align: Centre})
 	}
+}
+
+// LevelDone reports the pause at a level's exit (the levelexit collision: a
+// 1 s pause, then the next room).
+func (w *World) LevelDone() bool {
+	return w.Label != "" && w.Room.Paused != nil && w.Room.Goto == "@next"
 }

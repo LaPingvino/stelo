@@ -235,7 +235,7 @@ func (a *app) drawTitle() {
 	o := &a.overlay
 	o.AddRect(game.Rect{X: 0, Y: 0, W: game.ScreenW, H: game.ScreenH, Color: color.RGBA{0, 0, 0, 70}})
 	if a.title.info != "" { // an info page instead of the title's texts (the overlay draws texts over every rect)
-		a.drawInfo(o, a.title.info)
+		a.drawInfo(o, a.title.info, frame)
 		return
 	}
 	shadow := color.RGBA{0x3b, 0x22, 0x0c, 255}

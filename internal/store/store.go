@@ -94,3 +94,12 @@ func SetMusicOff(off bool) {
 	}
 	writeKey("music-off", []byte(v))
 }
+
+// FoundBonus records that the pack's bonus level was reached (the title's
+// level pick shows it from then on); BonusFound tells.
+func FoundBonus(pack string) { writeKey("bonus-"+pack, []byte("1")) }
+
+func BonusFound(pack string) bool {
+	data, ok := readKey("bonus-" + pack)
+	return ok && strings.TrimSpace(string(data)) == "1"
+}

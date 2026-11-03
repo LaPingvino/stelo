@@ -64,7 +64,12 @@ func (a *app) levelFor(n int) *level.Level {
 		}
 		return nil
 	}
-	data, err := stelo.Files.ReadFile(fmt.Sprintf("levels/nivelo%d.txt", n))
+	return a.levelNamed(fmt.Sprintf("nivelo%d", n))
+}
+
+// levelNamed is the original's level of that room name (nil when it can't be read).
+func (a *app) levelNamed(name string) *level.Level {
+	data, err := stelo.Files.ReadFile("levels/" + name + ".txt")
 	if err != nil {
 		return nil
 	}

@@ -56,6 +56,11 @@ func (a *app) load(i int) {
 	g.Highscores = store.LoadHighscores()
 	g.SaveHighscores = store.SaveHighscores
 	g.OnLevel = func(n int) { store.Reached("Stelo", n) } // the original pack's progress
+	g.OnRoom = func(room string) {
+		if room == "bonusnivelo" {
+			store.FoundBonus("Stelo")
+		}
+	}
 	a.game = g
 	a.applySkin()
 	ebiten.SetWindowTitle("Stelo")

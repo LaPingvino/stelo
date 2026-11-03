@@ -45,6 +45,9 @@ type Game struct {
 	// OnLevel, if set, is told the pack level (1-based) entered when playing
 	// a pack or the original's levels (progress per pack).
 	OnLevel func(n int)
+	// OnRoom, if set, is told every room entered (the title's level pick
+	// shows the bonus level once it was found).
+	OnRoom func(room string)
 	// OnRestart, when set, replaces game_restart: the program goes back to
 	// its title screen.
 	OnRestart func()
@@ -127,6 +130,9 @@ func NewGame(fsys fs.FS, a *Assets, room string) (*Game, error) {
 }
 
 func (g *Game) enter(room string) error {
+	if g.OnRoom != nil {
+		g.OnRoom(room)
+	}
 	if n := g.levelNumber(room); n > 0 {
 		g.levelStart = levelStart{n: n, score: g.G.Score, lives: g.G.Lives}
 		if g.OnLevel != nil {
@@ -379,4 +385,15 @@ func (g *Game) RestartLevel() error {
 	}
 	g.G.Score, g.G.Lives = ls.score, ls.lives
 	return g.EnterLevel(ls.n)
+}
+
+// EnterBonusFrom starts level n and goes to the bonus level from it, as the
+// diamond does (the level kept; dying in the bonus level returns to it) —
+// the title's level pick, once the bonus level was found.
+func (g *Game) EnterBonusFrom(n int) error {
+	if err := g.EnterLevel(n); err != nil {
+		return err
+	}
+	g.saved = g.World
+	return g.enter("bonusnivelo")
 }

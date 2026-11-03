@@ -436,3 +436,27 @@ func TestShowHighscores(t *testing.T) {
 		t.Errorf("room %s, state %d, waiting %v", g.World.Level.Name, g.hs, g.Waiting())
 	}
 }
+
+// The bonus level from the title's level pick: level 2 started and kept, the
+// bonus level entered as the diamond does; OnRoom is told.
+func TestEnterBonusFrom(t *testing.T) {
+	a, err := LoadAssets(stelo.Files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := NewGame(stelo.Files, a, "nivelo1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rooms []string
+	g.OnRoom = func(r string) { rooms = append(rooms, r) }
+	if err := g.EnterBonusFrom(2); err != nil {
+		t.Fatal(err)
+	}
+	if g.World.Level.Name != "bonusnivelo" || g.saved == nil || g.saved.Level.Name != "nivelo2" {
+		t.Errorf("in %s, saved %v", g.World.Level.Name, g.saved != nil)
+	}
+	if len(rooms) < 2 || rooms[len(rooms)-1] != "bonusnivelo" {
+		t.Errorf("rooms told: %v", rooms)
+	}
+}

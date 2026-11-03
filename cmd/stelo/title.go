@@ -104,11 +104,19 @@ func (a *app) buildTitleMenu(sel int) {
 		if sel < 0 || sel >= len(items) {
 			sel = len(items) - 1 // the furthest
 		}
+		if a.pack == 0 && store.BonusFound("Stelo") { // the bonus level, once found (UI.md §3)
+			items = append(items, game.MenuItem{Label: game.Tr("Bonusnivelo")})
+			ids = append(ids, "bonus")
+		}
 		a.title.ids = ids
 		a.title.menu = game.Menu{Items: items, Sel: sel, X: game.ScreenW / 2, Y: 216, Size: 16, Cols: 5, CellW: 108, CellH: 92, Gap: 10, LabelBottom: true}
 		a.title.thumbs = a.title.thumbs[:0]
-		for n := 1; n <= len(items); n++ { // each level's picture (made once a page)
-			a.title.thumbs = append(a.title.thumbs, levelThumb(a.levelFor(n), 96, 64))
+		for i, id := range ids { // each level's picture (made once a page)
+			l := a.levelFor(i + 1)
+			if id == "bonus" {
+				l = a.levelNamed("bonusnivelo")
+			}
+			a.title.thumbs = append(a.title.thumbs, levelThumb(l, 96, 64))
 		}
 		return
 	}
@@ -205,6 +213,18 @@ func (a *app) updateTitle() {
 		a.openPage("levels", -1)
 	case "level":
 		a.startFromTitle(res.Chosen + 1)
+	case "bonus": // from the furthest level, as the diamond takes you
+		a.load(0)
+		if a.game == nil {
+			return
+		}
+		if err := a.game.EnterBonusFrom(a.title.progress); err != nil {
+			log.Printf("bonus level: %v", err)
+			return
+		}
+		a.game.OnRestart = func() { a.game = nil; a.openTitle() }
+		a.title.on = false
+		a.sound.Play("@music:bonussono")
 	case "settings":
 		a.openPage("settings", 0)
 	case "scores": // the highscore table; a key brings the title back

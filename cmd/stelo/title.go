@@ -31,7 +31,7 @@ type titleScreen struct {
 	langs    []string
 	progress int    // the chosen pack's furthest level
 	info     string // an open info page: "help" (Kiel ludi), "about" (Pri), "" none
-	pick     int    // the level Continue starts (1 … progress; the furthest by default)
+	page     string // the open page: "" the blocks, "settings", "levels" (Daŭrigi's level pick)
 }
 
 func (a *app) packName() string {
@@ -56,6 +56,10 @@ func (a *app) openTitle() {
 	ebiten.SetWindowTitle("Stelo")
 }
 
+// buildTitleMenu builds the open page of the title (U7, Joop 2026-11-04: "it's
+// getting busy … block buttons?"): the main page as blocks — Ludi, Daŭrigi,
+// Kiel ludi, Pri, Agordoj, Redaktilo (Fini on the desktop); Agordoj the
+// settings as a list; Daŭrigi the reached levels as numbered blocks.
 func (a *app) buildTitleMenu(sel int) {
 	a.title.progress = store.Progress(a.packName())
 	var items []game.MenuItem
@@ -64,43 +68,68 @@ func (a *app) buildTitleMenu(sel int) {
 		items = append(items, game.MenuItem{Label: game.Tr(label), Value: value})
 		ids = append(ids, id)
 	}
+	switch a.title.page {
+	case "settings":
+		if len(a.packs) > 1 {
+			add("pack", "Niveloj", a.packName())
+		}
+		lang := "Esperanto"
+		if game.Lang == "en" {
+			lang = "English"
+		}
+		add("lang", "Lingvo", lang)
+		art := game.Tr("nova")
+		if a.skin == nil {
+			art = game.Tr("de 2006")
+		}
+		add("art", "Arto", art)
+		onOff := func(off bool) string {
+			if off {
+				return game.Tr("malŝaltita")
+			}
+			return game.Tr("ŝaltita")
+		}
+		add("sound", "Sono", onOff(soundMuted()))
+		add("music", "Muziko", onOff(theSound != nil && theSound.MusicOff()))
+		add("back", "Reen", "")
+		a.title.ids = ids
+		a.title.menu = game.Menu{Items: items, Sel: min(sel, len(items)-1), X: game.ScreenW / 2, Y: 214, LineH: 30, W: 360, Size: 18}
+		return
+	case "levels":
+		for n := 1; n <= a.title.progress; n++ {
+			items = append(items, game.MenuItem{Label: itoa(n)})
+			ids = append(ids, "level")
+		}
+		if sel < 0 || sel >= len(items) {
+			sel = len(items) - 1 // the furthest
+		}
+		a.title.ids = ids
+		a.title.menu = game.Menu{Items: items, Sel: sel, X: game.ScreenW / 2, Y: 230, Size: 22, Cols: 5, CellW: 72, CellH: 52, Gap: 10}
+		return
+	}
 	add("play", "Ludi", "")
-	if a.title.progress > 1 { // Continue at a reached level: the furthest, or ← → for an earlier one
-		if a.title.pick < 1 || a.title.pick > a.title.progress {
-			a.title.pick = a.title.progress
-		}
-		items = append(items, game.MenuItem{Label: game.Tr("Daŭrigi"), Value: game.Tr("nivelo") + " " + itoa(a.title.pick), Action: true})
-		ids = append(ids, "continue")
+	if a.title.progress > 1 {
+		add("continue", "Daŭrigi", game.Tr("nivelo")+" "+itoa(a.title.progress))
 	}
-	if len(a.packs) > 1 {
-		add("pack", "Niveloj", a.packName())
-	}
-	lang := "Esperanto"
-	if game.Lang == "en" {
-		lang = "English"
-	}
-	add("lang", "Lingvo", lang)
-	art := game.Tr("nova")
-	if a.skin == nil {
-		art = game.Tr("de 2006")
-	}
-	add("art", "Arto", art)
-	onOff := func(off bool) string {
-		if off {
-			return game.Tr("malŝaltita")
-		}
-		return game.Tr("ŝaltita")
-	}
-	add("sound", "Sono", onOff(soundMuted()))
-	add("music", "Muziko", onOff(theSound != nil && theSound.MusicOff()))
 	add("help", "Kiel ludi", "")
 	add("about", "Pri", "")
+	add("settings", "Agordoj", "")
 	add("edit", "Redaktilo", "")
 	if runtime.GOOS != "js" {
 		add("quit", "Fini", "")
 	}
+	cols, w := 3, 168.0
+	if len(items) > 6 {
+		cols, w = 4, 140
+	}
 	a.title.ids = ids
-	a.title.menu = game.Menu{Items: items, Sel: min(sel, len(items)-1), X: game.ScreenW / 2, Y: 218, LineH: 26, W: 330, Size: 17}
+	a.title.menu = game.Menu{Items: items, Sel: min(sel, len(items)-1), X: game.ScreenW / 2, Y: 214, Size: 19, Cols: cols, CellW: w, CellH: 62, Gap: 12}
+}
+
+// openPage shows a page of the title ("" the main one).
+func (a *app) openPage(page string, sel int) {
+	a.title.page = page
+	a.buildTitleMenu(sel)
 }
 
 func (a *app) updateTitle() {
@@ -127,15 +156,16 @@ func (a *app) updateTitle() {
 		}
 		return
 	}
+	if a.title.page != "" && inpututil.IsKeyJustPressed(ebiten.KeyEscape) { // a page: Esc goes back
+		a.openPage("", 0)
+		return
+	}
 	res := a.title.menu.Update(in)
 	sel := a.title.menu.Sel
 	if res.Step != 0 {
 		switch a.title.ids[sel] {
-		case "continue": // the level pick: 1 … the furthest reached, round
-			a.title.pick = (a.title.pick-1+res.Step+a.title.progress)%a.title.progress + 1
 		case "pack":
 			a.pack = (a.pack + res.Step + len(a.packs)) % len(a.packs)
-			a.title.pick = 0 // the new pack's furthest level
 		case "lang":
 			if game.Lang == "en" {
 				game.Lang = "eo"
@@ -166,7 +196,18 @@ func (a *app) updateTitle() {
 	case "play":
 		a.startFromTitle(1)
 	case "continue":
-		a.startFromTitle(a.title.pick)
+		a.openPage("levels", -1)
+	case "level":
+		a.startFromTitle(res.Chosen + 1)
+	case "settings":
+		a.openPage("settings", 0)
+	case "back": // to the main page, Agordoj chosen
+		a.openPage("", 0)
+		for i, id := range a.title.ids {
+			if id == "settings" {
+				a.title.menu.Sel = i
+			}
+		}
 	case "help", "about":
 		a.title.info = a.title.ids[res.Chosen]
 	case "edit":

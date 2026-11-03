@@ -72,7 +72,7 @@ UE. [x] (DONE 2026-11-03) **Editor: a way out and a level picker** (Joop 2026-11
    Nova nivelo · Malfermi → a list of the original levels 1–5 + bonusnivelo, the levels saved in this browser /
    config (store: list the saved keys), and "el dosiero…" (the file picker) · Konservi · Ludi · Ĉefmenuo (back to
    the title). Desktop and web alike.
-U7. [ ] **Title as block buttons** (Joop 2026-11-04: "it's getting busy on screen. maybe pivot to square/rectangle
+U7. [x] (DONE 2026-11-04; Pacmanio next) **Title as block buttons** (Joop 2026-11-04: "it's getting busy on screen. maybe pivot to square/rectangle
    block buttons?"): the main actions (Ludi, Daŭrigi ‹nivelo›, Kiel ludi, Pri, Redaktilo, Fini) as large
    rectangular buttons in a grid; the settings (Lingvo, Arto, Sono, Muziko, Niveloj) behind one "Agordoj" block,
    on their own page. Keys, mouse and touch as now. Then Pacmanio the same.
@@ -179,3 +179,4 @@ U. [ ] **Modern UI** (Joop 2026-11-02, docs/UI.md — APPROVED): sharp scaling +
 - 2026-11-04 (U3, Joop) — the player is Stelo, not 'figuro': 'Konduku Stelon …' / 'Lead Stelo …' in Kiel ludi and TEXTS.md.
 - 2026-11-04 (item U, step U3b) — Kiel ludi's legend with each thing's sprite (UI.md §4): star, monster, flyer, fire, heart, checkpoint, diamond, exit in two columns — the sprite (in the chosen art: new or 2006) with its line, then the falling-out line; the panel now drawn into the frame (overlay rects would cover the sprites). Checked in headless Chromium, Esperanto and English. U3 done (texts as drafts — Joop corrects in place).
 - 2026-11-04 (item U, the level pick) — UI.md's 'level pick of reached levels': the title's Daŭrigi now shows ‹nivelo N› — ← → choose any reached level (1 … the furthest, round; a pack change resets it), Enter / a click starts it. game.MenuItem.Action: a valued item that Enter or a click chooses instead of stepping (TestMenuActionItem). Checked in headless Chromium with progress 4 seeded: ← ← → 'nivelo 2', Enter → level 2. Joop then: the title is getting busy → U7 block buttons, next.
+- 2026-11-04 (U7, Joop: 'getting busy … block buttons?') — the title's main page is blocks: Ludi, Daŭrigi (‹nivelo N› as a second line), Kiel ludi, Pri, Agordoj, Redaktilo (Fini on the desktop: 4 across) — game.Menu grid mode (Cols, CellW / CellH / Gap; arrows between blocks, a shorter last row centred; TestMenuGrid). Daŭrigi opens the reached levels as numbered blocks (the furthest chosen); Agordoj opens the settings list (Lingvo, Arto, Sono, Muziko, Niveloj) with Reen; Esc goes back. Headless Chromium (progress 4): the six blocks, the level blocks 1–4, the settings page.

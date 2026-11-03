@@ -76,3 +76,22 @@ func TestMenuActionItem(t *testing.T) {
 		t.Errorf("enter: %+v", r)
 	}
 }
+
+// Blocks: ← → along, ↓ a row (to the last block of a shorter last row),
+// a click on a block takes it.
+func TestMenuGrid(t *testing.T) {
+	m := Menu{Items: make([]MenuItem, 5), Cols: 3, X: 320, Y: 200, CellW: 100, CellH: 50, Gap: 10}
+	m.Update(MenuInput{Right: true})
+	m.Update(MenuInput{Right: true})
+	if m.Sel != 2 {
+		t.Fatalf("right twice: %d", m.Sel)
+	}
+	m.Update(MenuInput{Down: true}) // row 2 has blocks 3, 4: from column 2 to the last
+	if m.Sel != 4 {
+		t.Fatalf("down: %d", m.Sel)
+	}
+	x, y := m.cell(0)
+	if r := m.Update(MenuInput{PX: int(x) + 5, PY: int(y) + 5, Clicked: true}); r.Chosen != 0 {
+		t.Errorf("click on block 0: %+v", r)
+	}
+}

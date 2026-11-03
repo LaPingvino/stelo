@@ -13,6 +13,12 @@ type Menu struct {
 	// X, Y is the top-centre of the first line, LineH the line height, W the
 	// highlight's width (frame coordinates); Size the font size.
 	X, Y, LineH, W, Size float64
+	// Cols > 0 lays the items out as blocks (Joop 2026-11-04: "square /
+	// rectangle block buttons"): Cols across, each CellW × CellH, Gap apart,
+	// the grid centred on X with its top at Y. Arrows move between blocks; a
+	// block's Value is a second, smaller line; Enter or a click takes it.
+	Cols              int
+	CellW, CellH, Gap float64
 }
 
 // MenuItem is a menu line.
@@ -48,6 +54,9 @@ func (m *Menu) Update(in MenuInput) MenuResult {
 	}
 	if m.Items[m.Sel].Disabled {
 		m.move(1)
+	}
+	if m.Cols > 0 {
+		return m.updateGrid(in, res)
 	}
 	if in.Up {
 		m.move(-1)
@@ -88,6 +97,67 @@ func (m *Menu) move(d int) {
 	}
 }
 
+// updateGrid is Update for blocks: ← → step along, ↑ ↓ a row; the pointer
+// selects, a click or Enter takes.
+func (m *Menu) updateGrid(in MenuInput, res MenuResult) MenuResult {
+	n := len(m.Items)
+	step := func(d int) {
+		if j := m.Sel + d; j >= 0 && j < n && !m.Items[j].Disabled {
+			m.Sel = j
+		}
+	}
+	if in.Left {
+		step(-1)
+	}
+	if in.Right {
+		step(1)
+	}
+	if in.Up {
+		step(-m.Cols)
+	}
+	if in.Down {
+		if m.Sel+m.Cols < n {
+			step(m.Cols)
+		} else if (m.Sel/m.Cols+1)*m.Cols < n { // a shorter last row: its last block
+			step(n - 1 - m.Sel)
+		}
+	}
+	if i := m.cellAt(in.PX, in.PY); i >= 0 && (in.Moved || in.Clicked) && !m.Items[i].Disabled {
+		m.Sel = i
+		if in.Clicked {
+			res.Chosen = i
+			return res
+		}
+	}
+	if in.Enter {
+		res.Chosen = m.Sel
+	}
+	return res
+}
+
+// cell is block i's rectangle (frame coordinates).
+func (m *Menu) cell(i int) (x, y float64) {
+	cols := min(m.Cols, len(m.Items))
+	total := float64(cols)*m.CellW + float64(cols-1)*m.Gap
+	row, col := i/m.Cols, i%m.Cols
+	if last := len(m.Items) / m.Cols; row == last && len(m.Items)%m.Cols != 0 { // the last row centred
+		k := len(m.Items) % m.Cols
+		total = float64(k)*m.CellW + float64(k-1)*m.Gap
+	}
+	return m.X - total/2 + float64(col)*(m.CellW+m.Gap), m.Y + float64(row)*(m.CellH+m.Gap)
+}
+
+func (m *Menu) cellAt(px, py int) int {
+	fx, fy := float64(px), float64(py)
+	for i := range m.Items {
+		x, y := m.cell(i)
+		if fx >= x && fx < x+m.CellW && fy >= y && fy < y+m.CellH {
+			return i
+		}
+	}
+	return -1
+}
+
 // lineAt is the line under (x, y), or −1.
 func (m *Menu) lineAt(x, y int) int {
 	fx, fy := float64(x), float64(y)
@@ -101,14 +171,44 @@ func (m *Menu) lineAt(x, y int) int {
 	return i
 }
 
-// MenuColors are the menu's colours.
+// MenuColors are the menu's colours; Block the blocks' fill (grid mode).
 type MenuColors struct {
-	Text, Disabled, Selected, Highlight color.Color
+	Text, Disabled, Selected, Highlight, Block color.Color
+}
+
+// drawGrid draws the blocks: each filled, the chosen one highlighted, the
+// label centred and its value under it.
+func (m *Menu) drawGrid(o *Overlay, c MenuColors) {
+	block := c.Block
+	if block == nil {
+		block = color.RGBA{0, 0, 0, 120}
+	}
+	for i, it := range m.Items {
+		x, y := m.cell(i)
+		fill, col := block, c.Text
+		if i == m.Sel {
+			fill, col = c.Highlight, c.Selected
+		}
+		if it.Disabled {
+			col = c.Disabled
+		}
+		o.AddRect(Rect{X: x, Y: y, W: m.CellW, H: m.CellH, Color: fill})
+		ty := y + (m.CellH-m.Size*1.36)/2
+		if it.Value != "" {
+			ty -= m.Size * 0.55
+			o.Add(Text{S: it.Value, X: x + m.CellW/2, Y: ty + m.Size*1.3, Size: m.Size * 0.72, Weight: Bold, Color: col, Align: Centre})
+		}
+		o.Add(Text{S: it.Label, X: x + m.CellW/2, Y: ty, Size: m.Size, Weight: Black, Color: col, Align: Centre})
+	}
 }
 
 // Draw puts the menu into the overlay: the highlight under the chosen line,
 // each line centred.
 func (m *Menu) Draw(o *Overlay, c MenuColors) {
+	if m.Cols > 0 {
+		m.drawGrid(o, c)
+		return
+	}
 	for i, it := range m.Items {
 		y := m.Y + float64(i)*m.LineH
 		col, w := c.Text, Bold

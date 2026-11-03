@@ -56,7 +56,7 @@ func layoutTouch(sw, sh int) touchLayout {
 			},
 			full: image.Rect(m, m, m+p, m+p*2/3), // top left (the page's Klavaro button is top right)
 			snd:  image.Rect(m, 2*m+p*2/3, m+p, 2*m+p*4/3),
-			paus: image.Rect(2*m+p, m, 2*m+2*p, m+p*2/3),
+			paus: image.Rect(sw-m-p, y-2*m-p-p*2/3, sw-m, y-2*m-p), // above ↑, under the right thumb (Joop: the corner one wasn't obvious)
 			size: p,
 		}
 	}
@@ -246,11 +246,12 @@ func drawPauseButton(screen *ebiten.Image, r image.Rectangle) {
 	if r.Empty() {
 		return
 	}
-	vector.FillRect(screen, float32(r.Min.X), float32(r.Min.Y), float32(r.Dx()), float32(r.Dy()), color.NRGBA{255, 255, 255, 50}, false)
+	// The game's yellow, so it stands out from the grey utility buttons.
+	vector.FillRect(screen, float32(r.Min.X), float32(r.Min.Y), float32(r.Dx()), float32(r.Dy()), color.NRGBA{255, 208, 58, 200}, false)
 	h := float32(r.Dy())
 	cx, cy := float32(r.Min.X)+float32(r.Dx())/2, float32(r.Min.Y)+h/2
 	u := h / 8
-	col := color.NRGBA{255, 255, 255, 210}
+	col := color.NRGBA{0x2a, 0x1c, 0x12, 235}
 	vector.FillRect(screen, cx-2*u, cy-2.4*u, 1.3*u, 4.8*u, col, true)
 	vector.FillRect(screen, cx+0.7*u, cy-2.4*u, 1.3*u, 4.8*u, col, true)
 }

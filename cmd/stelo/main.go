@@ -186,6 +186,7 @@ func (a *app) Draw(screen *ebiten.Image) {
 	a.overlay.Reset()
 	if a.game.World != nil {
 		a.game.World.Overlay = &a.overlay // the HUD's text, drawn sharp after the frame (text.go)
+		a.game.World.HideBanner = a.pause.on
 	}
 	a.game.Draw(a.frame)
 	if a.game.Title && len(a.packs) > 1 {

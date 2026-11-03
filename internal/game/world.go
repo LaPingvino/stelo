@@ -39,6 +39,9 @@ type World struct {
 	// shown large for its first 60 steps; Steps counts the room's steps.
 	Label string
 	Steps int
+	// HideBanner hides the level's name (the pause menu is open: the steps
+	// stand still, so it would stay).
+	HideBanner bool
 }
 
 // Object returns the engine object for an original object (sprite box,

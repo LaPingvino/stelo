@@ -154,7 +154,7 @@ func (w *World) drawBar(dst *image.RGBA, score, lives int) {
 			draw.Draw(dst, img.Bounds().Add(image.Pt(x+i*(iw+3), (h-ih)/2)), img, image.Point{}, draw.Over)
 		}
 	}
-	if st := w.Steps; w.Label != "" && st < 60 { // two seconds at 30 steps a second
+	if st := w.Steps; w.Label != "" && st < 60 && !w.HideBanner { // two seconds at 30 steps a second
 		a := uint8(255)
 		if st > 45 { // fading out over the last half second
 			a = uint8(255 * (60 - st) / 15)
